@@ -69,12 +69,6 @@ const DashboardPage = {
         const waterPct = Math.min(Math.round((water / waterGoal) * 100), 100);
 
         // Weight data for mini widget
-        const weightLog = Storage.getWeightLog();
-        const currentWeight = Storage.getProfile().weight || 0;
-        const lastWeight = weightLog.length >= 2 ? weightLog[weightLog.length - 2].weight : currentWeight;
-        const weightDiff = currentWeight - lastWeight;
-        const weightTrend = weightDiff > 0 ? '+' : '';
-        const hasWeightData = weightLog.length > 0;
 
         // Separate meals with items from empty meals
         const mealsWithItems = Object.entries(log.meals).filter(([, items]) => items.length > 0);
@@ -186,15 +180,18 @@ const DashboardPage = {
                     </div>
                 </div>
 
-                <!-- QUICK ACTIONS — only Salle & Compléments (Photo IA, Vocal, Recherche are in + tab) -->
-                <div class="quick-actions compact" style="margin:0 16px 8px;display:flex;gap:8px">
-                    <button class="quick-action-btn" onclick="${hasAccess ? "App.navigate('gym')" : "TrialService.showFeatureLockedPrompt('gym')"}" style="flex:1">
+                <!-- QUICK ACTIONS -->
+                <div class="quick-actions compact" style="margin:0 16px 8px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                    <button class="quick-action-btn" onclick="DashboardPage.addWater()" style="display:flex;align-items:center;gap:6px;justify-content:center">
+                        <span class="icon">💧</span>Eau <span style="font-size:11px;color:var(--text-secondary)">${(water * 0.25).toFixed(water % 4 === 0 ? 0 : 1)}L</span>
+                    </button>
+                    <button class="quick-action-btn" onclick="${hasAccess ? "App.navigate('gym')" : "TrialService.showFeatureLockedPrompt('gym')"}" style="display:flex;align-items:center;gap:6px;justify-content:center">
                         <span class="icon">🏋️</span>Salle${!hasAccess ? ' 🔒' : ''}
                     </button>
-                    <button class="quick-action-btn" onclick="${hasAccess ? "App.navigate('supplements')" : "TrialService.showFeatureLockedPrompt('supplements')"}" style="flex:1">
+                    <button class="quick-action-btn" onclick="${hasAccess ? "App.navigate('supplements')" : "TrialService.showFeatureLockedPrompt('supplements')"}" style="display:flex;align-items:center;gap:6px;justify-content:center">
                         <span class="icon">💊</span>Compléments${!hasAccess ? ' 🔒' : ''}
                     </button>
-                    <button class="quick-action-btn" onclick="${hasAccess ? "App.navigate('weight')" : "TrialService.showFeatureLockedPrompt('weight')"}" style="flex:1">
+                    <button class="quick-action-btn" onclick="${hasAccess ? "App.navigate('weight')" : "TrialService.showFeatureLockedPrompt('weight')"}" style="display:flex;align-items:center;gap:6px;justify-content:center">
                         <span class="icon">⚖️</span>Poids${!hasAccess ? ' 🔒' : ''}
                     </button>
                 </div>
@@ -221,30 +218,6 @@ const DashboardPage = {
                     ${water >= waterGoal ? '<div style="text-align:center;font-size:13px;color:var(--success);margin-top:8px;font-weight:600">Objectif atteint ! 🎉</div>' : ''}
                 </div>
 
-                <!-- WEIGHT MINI WIDGET -->
-                <div class="card weight-mini-card" onclick="App.navigate('weight')" style="padding:10px 16px;margin:0 16px 8px;cursor:pointer">
-                    <div style="display:flex;align-items:center;justify-content:space-between">
-                        <div style="display:flex;align-items:center;gap:8px">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3a4.5 4.5 0 00-9 0"/><rect x="4" y="7" width="16" height="14" rx="2"/><path d="M12 12v3"/><circle cx="12" cy="12" r="1"/></svg>
-                            <span style="font-size:13px;font-weight:600">Poids</span>
-                        </div>
-                        <div style="display:flex;align-items:baseline;gap:6px">
-                            <span style="font-size:20px;font-weight:800;color:var(--text)">${currentWeight}<span style="font-size:12px;font-weight:500"> kg</span></span>
-                            ${hasWeightData && weightLog.length >= 2 ? `
-                                <span style="font-size:11px;font-weight:600;color:${weightDiff <= 0 ? 'var(--success)' : 'var(--danger)'}">${weightTrend}${weightDiff.toFixed(1)}</span>
-                            ` : ''}
-                        </div>
-                    </div>
-                    ${hasWeightData && weightLog.length >= 2 ? `
-                        <div style="margin-top:6px;height:30px">
-                            <canvas id="weight-mini-chart" height="30"></canvas>
-                        </div>
-                    ` : `
-                        <div style="text-align:center;font-size:11px;color:var(--text-secondary);margin-top:4px">
-                            Enregistre ton poids →
-                        </div>
-                    `}
-                </div>
 
                 <!-- MICRO-NUTRIMENTS compact (top 4 lowest, clickable) -->
                 ${microSummary}
@@ -275,10 +248,6 @@ const DashboardPage = {
             fat: totals.fat || 0
         });
 
-        // Render weight mini chart
-        if (weightLog.length >= 2) {
-            this._renderWeightMiniChart(weightLog.slice(-7));
-        }
 
         // Ensure FCM notifications are registered
         if (typeof NotificationService !== 'undefined') {
@@ -289,46 +258,6 @@ const DashboardPage = {
         Creature.checkAndAwardXP();
     },
 
-    _renderWeightMiniChart(data) {
-        const canvas = document.getElementById('weight-mini-chart');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        const w = canvas.parentElement.offsetWidth;
-        const h = 30;
-        canvas.width = w * (window.devicePixelRatio || 1);
-        canvas.height = h * (window.devicePixelRatio || 1);
-        canvas.style.width = w + 'px';
-        canvas.style.height = h + 'px';
-        ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
-
-        const weights = data.map(d => d.weight);
-        const min = Math.min(...weights) - 0.5;
-        const max = Math.max(...weights) + 0.5;
-        const range = max - min || 1;
-
-        ctx.beginPath();
-        ctx.strokeStyle = 'var(--primary)';
-        const computedStyle = getComputedStyle(document.documentElement);
-        ctx.strokeStyle = computedStyle.getPropertyValue('--primary').trim() || '#E64A19';
-        ctx.lineWidth = 2;
-        ctx.lineJoin = 'round';
-
-        weights.forEach((weight, i) => {
-            const x = (i / (weights.length - 1)) * w;
-            const y = h - ((weight - min) / range) * (h - 4) - 2;
-            if (i === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
-        });
-        ctx.stroke();
-
-        // Draw last point
-        const lastX = w;
-        const lastY = h - ((weights[weights.length - 1] - min) / range) * (h - 4) - 2;
-        ctx.beginPath();
-        ctx.arc(lastX, lastY, 3, 0, Math.PI * 2);
-        ctx.fillStyle = ctx.strokeStyle;
-        ctx.fill();
-    },
 
     // Daily motivations used by FCM notifications (daily-notification.js)
     _dailyMotivations: [
@@ -385,29 +314,19 @@ const DashboardPage = {
             this._checkWaterBonus(capped);
         }
         this.render();
-        // Animate the filled glass
-        setTimeout(() => {
-            const glasses = document.querySelectorAll('.water-glass.filled');
-            const lastGlass = glasses[glasses.length - 1];
-            if (lastGlass) {
-                lastGlass.classList.add('just-filled');
-                setTimeout(() => lastGlass.classList.remove('just-filled'), 400);
-            }
-        }, 50);
     },
 
     _checkWaterBonus(waterCount) {
-        const goal = Storage.getGoals().water || 12; // 12 glasses of 250ml = 3L (consistent with render)
+        const goal = Storage.getGoals().water || 12;
         if (waterCount >= goal && !Storage.hasDailyWaterBonus()) {
             Storage.addCoins(10);
             Storage.setDailyWaterBonus();
             App.showToast('Objectif eau atteint ! +10 🪙');
-            // R2: Confetti animation on water goal
             setTimeout(() => {
-                const waterCard = document.querySelector('.water-glasses');
-                if (waterCard) {
-                    waterCard.closest('.card')?.classList.add('water-goal-reached');
-                    setTimeout(() => waterCard.closest('.card')?.classList.remove('water-goal-reached'), 1500);
+                const tank = document.querySelector('.water-tank');
+                if (tank) {
+                    tank.closest('.card')?.classList.add('water-goal-reached');
+                    setTimeout(() => tank.closest('.card')?.classList.remove('water-goal-reached'), 1500);
                 }
             }, 100);
         }
