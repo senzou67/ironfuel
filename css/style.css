@@ -135,6 +135,7 @@ body::before {
     animation: meshFloat 20s ease-in-out infinite;
     z-index: -1;
     pointer-events: none;
+    will-change: transform;
 }
 
 @keyframes meshFloat {
