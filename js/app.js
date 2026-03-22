@@ -103,6 +103,13 @@ const App = {
         });
     },
 
+    // Haptic feedback helper for mobile interactions
+    haptic(type) {
+        if (!navigator.vibrate) return;
+        const patterns = { light: [10], medium: [30], success: [30, 50, 30], error: [50, 30, 50, 30, 50] };
+        navigator.vibrate(patterns[type] || patterns.light);
+    },
+
     showLoginScreen() {
         AuthService.showLoginScreen();
     },
@@ -129,7 +136,7 @@ const App = {
 
         // Check premium feature access (freemium model)
         // avatar page shows its own locked state — don't block navigation to it
-        const premiumPages = { camera: 'camera', voice: 'voice', barcode: 'barcode', shop: 'creature' };
+        const premiumPages = { camera: 'camera', voice: 'voice', barcode: 'barcode', shop: 'shop', gym: 'gym', weight: 'weight', supplements: 'supplements' };
         if (premiumPages[page] && TrialService.isFeatureLocked(premiumPages[page])) {
             TrialService.showFeatureLockedPrompt(premiumPages[page]);
             return;
@@ -239,6 +246,11 @@ const App = {
         // Check server-side trial (IP block)
         await TrialService.checkServerTrial();
 
+        // Schedule local notifications for today
+        if (typeof LocalNotificationScheduler !== 'undefined') {
+            LocalNotificationScheduler.rescheduleAll();
+        }
+
         // Check onboarding or go to dashboard
         const profile = Storage.getProfile();
         if (!profile.weight || profile.weight === 0) {
@@ -345,13 +357,17 @@ const App = {
     // R3: Post-onboarding tutorial
     _showTutorialIfNeeded() {
         try {
-            if (localStorage.getItem('nutritrack_tutorial_done')) return;
+            if (localStorage.getItem('nutritrack_tutorial_v2_done')) return;
         } catch(e) { return; }
 
         const steps = [
-            { icon: '🍽️', title: 'Ajoute tes repas', desc: 'Utilise Photo IA, Vocal ou Recherche pour tracker tout ce que tu manges en quelques secondes.' },
-            { icon: '💧', title: 'Suis ton hydratation', desc: 'Clique sur les gouttes d\'eau pour compter tes verres. Un bonus t\'attend quand tu atteins ton objectif !' },
-            { icon: '🐣', title: 'Fais évoluer ta créature', desc: 'Plus tu es régulier, plus ta créature gagne d\'XP et évolue. Débloque des vêtements et accessoires !' }
+            { icon: '🍽️', title: 'Ajoute tes repas', desc: 'Utilise Photo IA, Vocal ou Recherche pour tracker tout ce que tu manges.' },
+            { icon: '💧', title: 'Hydratation', desc: 'Clique sur le réservoir d\'eau pour ajouter 250ml. Un bonus t\'attend à l\'objectif !' },
+            { icon: '💊', title: 'Compléments', desc: 'Configure ton plan de suppléments et coche-les chaque jour. (Premium)' },
+            { icon: '🏋️', title: 'Salle de sport', desc: 'Planifie tes séances Push/Pull/Legs et suis ton calendrier. (Premium)' },
+            { icon: '⚖️', title: 'Suivi du poids', desc: 'Note ton poids régulièrement pour voir ta courbe de progression. (Premium)' },
+            { icon: '🐣', title: 'Ta créature', desc: 'Plus tu es régulier, plus elle gagne d\'XP et évolue. Débloque des cosmétiques ! (Premium)' },
+            { icon: '⭐', title: 'IronFuel Premium', desc: 'Débloque la créature, les compléments, la salle, le poids et bien plus !' }
         ];
 
         let currentStep = 0;
@@ -394,7 +410,7 @@ const App = {
         this._closeTutorial = () => {
             const overlay = document.getElementById('tutorial-overlay');
             if (overlay) overlay.remove();
-            try { localStorage.setItem('nutritrack_tutorial_done', '1'); } catch(e) {}
+            try { localStorage.setItem('nutritrack_tutorial_v2_done', '1'); } catch(e) {}
         };
 
         // Delay to let dashboard render first
@@ -407,7 +423,7 @@ const App = {
         el.className = 'success-check';
         el.innerHTML = '<svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>';
         document.body.appendChild(el);
-        // Vibrate if supported
+        this.haptic('success');
         if (navigator.vibrate) navigator.vibrate(50);
         setTimeout(() => el.remove(), 700);
     }

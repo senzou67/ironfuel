@@ -187,7 +187,7 @@ const Creature = {
         const hasWings = equipped.some(i => i.type === 'wings');
         const hasAura = equipped.some(i => i.type === 'aura');
         const vb = (hasWings || hasAura) ? '-15 -10 130 120' : '0 0 100 100';
-        let svg = `<svg viewBox="${vb}" width="${size}" height="${size}" class="creature-svg ${mood === 'celebrating' ? 'creature-bounce' : mood === 'happy' ? 'creature-sway' : ''}" style="overflow:visible">`;
+        let svg = `<svg viewBox="${vb}" width="${size}" height="${size}" class="creature-svg ${mood === 'celebrating' ? 'creature-bounce' : ''}" style="overflow:visible">`;
 
         // Premium check for brilliance/aura effects (always shown in shop preview)
         const isPremium = options.previewItems || typeof TrialService === 'undefined' || TrialService.hasFullAccess();

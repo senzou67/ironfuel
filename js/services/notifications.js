@@ -180,3 +180,74 @@ const NotificationService = {
         return Notification.permission; // 'granted', 'denied', 'default'
     }
 };
+
+// === LOCAL NOTIFICATION SCHEDULER ===
+// Schedules per-feature notifications locally (no server needed)
+const LocalNotificationScheduler = {
+    _timers: [],
+
+    getPreferences() {
+        return Storage._get('notification_prefs', {
+            motivation: { enabled: true, time: '08:00' },
+            supplements: { enabled: false, time: '08:30' },
+            gym: { enabled: false, time: '17:00' },
+            weight: { enabled: false, time: '07:30' }
+        });
+    },
+
+    setPreference(category, enabled, time) {
+        const prefs = this.getPreferences();
+        prefs[category] = { enabled, time: time || prefs[category]?.time || '08:00' };
+        Storage._set('notification_prefs', prefs);
+        this.rescheduleAll();
+    },
+
+    rescheduleAll() {
+        // Clear existing timers
+        this._timers.forEach(t => clearTimeout(t));
+        this._timers = [];
+
+        if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+
+        const prefs = this.getPreferences();
+        const now = new Date();
+
+        Object.entries(prefs).forEach(([cat, pref]) => {
+            if (!pref.enabled) return;
+            const [h, m] = pref.time.split(':').map(Number);
+            const target = new Date(now);
+            target.setHours(h, m, 0, 0);
+            if (target <= now) return; // Already past for today
+
+            const delay = target - now;
+            const timer = setTimeout(() => this._fire(cat), delay);
+            this._timers.push(timer);
+        });
+    },
+
+    _fire(category) {
+        if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+        const messages = {
+            supplements: { title: 'IronFuel 💊', body: 'N\'oublie pas tes compléments !' },
+            gym: { title: 'IronFuel 🏋️', body: 'C\'est l\'heure de ta séance !' },
+            weight: { title: 'IronFuel ⚖️', body: 'Pense à noter ton poids !' },
+            motivation: { title: 'IronFuel 💪', body: 'Chaque repas compte. Allez, on track ! 🔥' }
+        };
+        const msg = messages[category] || messages.motivation;
+        try {
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.ready.then(reg => {
+                    reg.showNotification(msg.title, {
+                        body: msg.body,
+                        icon: '/assets/icons/icon-192.png',
+                        badge: '/assets/icons/icon-96.svg',
+                        tag: 'ironfuel-' + category,
+                        vibrate: [200, 100, 200]
+                    });
+                });
+            } else {
+                new Notification(msg.title, { body: msg.body, icon: '/assets/icons/icon-192.png', tag: 'ironfuel-' + category });
+            }
+        } catch(e) {}
+    }
+};

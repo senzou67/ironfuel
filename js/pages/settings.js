@@ -21,11 +21,35 @@ const SettingsPage = {
                 <div class="settings-group">
                     <div class="settings-group-title">Notifications</div>
                     <button class="settings-item" onclick="SettingsPage.toggleNotifications()">
-                        <span>🔔 Notifications quotidiennes</span>
+                        <span>🔔 Notifications push</span>
                         <span style="font-size:12px;color:${settings.notifications !== false && typeof Notification !== 'undefined' && Notification.permission === 'granted' ? 'var(--success)' : 'var(--text-secondary)'}">
                             ${settings.notifications !== false && typeof Notification !== 'undefined' && Notification.permission === 'granted' ? '✓ Activées — Désactiver' : 'Activer'}
                         </span>
                     </button>
+                    ${settings.notifications !== false && typeof Notification !== 'undefined' && Notification.permission === 'granted' ? (() => {
+                        const prefs = typeof LocalNotificationScheduler !== 'undefined' ? LocalNotificationScheduler.getPreferences() : {};
+                        const cats = [
+                            { key: 'motivation', label: '💪 Motivation' },
+                            { key: 'supplements', label: '💊 Compléments' },
+                            { key: 'gym', label: '🏋️ Salle' },
+                            { key: 'weight', label: '⚖️ Poids' }
+                        ];
+                        return cats.map(c => {
+                            const pref = prefs[c.key] || { enabled: false, time: '08:00' };
+                            return `
+                                <div class="settings-item" style="flex-direction:column;align-items:stretch;gap:6px;padding:10px 16px">
+                                    <div style="display:flex;align-items:center;justify-content:space-between">
+                                        <span style="font-size:13px;font-weight:600">${c.label}</span>
+                                        <button class="btn ${pref.enabled ? 'btn-primary' : 'btn-outline'}" style="padding:4px 14px;font-size:12px;border-radius:20px" onclick="LocalNotificationScheduler.setPreference('${c.key}',${!pref.enabled},'${pref.time}');SettingsPage.render()">${pref.enabled ? 'ON' : 'OFF'}</button>
+                                    </div>
+                                    <div style="display:flex;align-items:center;gap:8px">
+                                        <span style="font-size:12px;color:var(--text-secondary)">Heure :</span>
+                                        <input type="time" value="${pref.time}" style="padding:4px 8px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:13px" onchange="LocalNotificationScheduler.setPreference('${c.key}',${pref.enabled},this.value)">
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    })() : ''}
                 </div>
 
                 <div class="settings-group">

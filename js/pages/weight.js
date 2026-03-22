@@ -17,26 +17,24 @@ const WeightPage = {
         const minWeight = hasData ? Math.min(...weightLog.map(w => w.weight)) : 0;
         const maxWeight = hasData ? Math.max(...weightLog.map(w => w.weight)) : 0;
 
+        const weekChangeHTML = hasData && weightLog.length >= 2 ? `
+            <div style="font-size:12px;color:${weekChange <= 0 ? 'var(--success)' : 'var(--danger)'};font-weight:600;margin-top:2px">
+                ${weekChange > 0 ? '+' : ''}${weekChange.toFixed(1)} kg cette semaine
+            </div>` : '';
+
         const content = document.getElementById('page-content');
         content.innerHTML = `
             <div class="weight-container fade-in" style="padding:0 16px 16px">
                 <!-- Current Weight Card -->
-                <div class="card" style="padding:20px 16px;margin-bottom:12px;text-align:center">
-                    <div style="font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Poids actuel</div>
-                    <div style="font-size:44px;font-weight:900;color:var(--text);line-height:1">${latestWeight}<span style="font-size:18px;font-weight:500;color:var(--text-secondary)"> kg</span></div>
-                    ${hasData && weightLog.length >= 2 ? `
-                        <div style="margin-top:8px;display:flex;justify-content:center;gap:16px">
-                            <span style="font-size:12px;color:${weekChange <= 0 ? 'var(--success)' : 'var(--danger)'};font-weight:600">
-                                ${weekChange > 0 ? '+' : ''}${weekChange.toFixed(1)} kg cette semaine
-                            </span>
-                            <span style="font-size:12px;color:${totalChange <= 0 ? 'var(--success)' : 'var(--danger)'};font-weight:600">
-                                ${totalChange > 0 ? '+' : ''}${totalChange.toFixed(1)} kg au total
-                            </span>
+                <div class="card" style="padding:14px 16px;margin-bottom:12px">
+                    <div style="display:flex;align-items:center;justify-content:space-between">
+                        <div>
+                            <div style="font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px">Poids actuel</div>
+                            <div style="font-size:32px;font-weight:900;color:var(--text);line-height:1.2">${latestWeight}<span style="font-size:14px;font-weight:500;color:var(--text-secondary)"> kg</span></div>
+                            ${weekChangeHTML}
                         </div>
-                    ` : ''}
-                    <button class="btn btn-primary" onclick="WeightPage._showAddWeight()" style="margin-top:12px;padding:10px 28px;font-size:14px">
-                        ⚖️ Enregistrer mon poids
-                    </button>
+                        <button class="btn btn-primary" onclick="WeightPage._showAddWeight()" style="border-radius:50%;width:48px;height:48px;display:flex;align-items:center;justify-content:center;padding:0;font-size:22px">+</button>
+                    </div>
                 </div>
 
                 <!-- Quick Stats -->

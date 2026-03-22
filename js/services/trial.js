@@ -8,13 +8,20 @@ const TrialService = {
     _serverChecked: false,
 
     // === PREMIUM FEATURES (locked after trial for free users) ===
-    PREMIUM_FEATURES: ['creature', 'custom_macros', 'camera', 'voice', 'barcode'],
+    PREMIUM_FEATURES: ['creature', 'custom_macros', 'camera', 'voice', 'barcode', 'gym', 'weight', 'supplements', 'shop'],
 
     init() {
         const data = this._getData();
         if (!data.startDate) {
             data.startDate = new Date().toISOString();
             this._setData(data);
+        }
+        // Recover pending payment if verify-payment failed last time
+        const pending = Storage._get('pending_payment', null);
+        if (pending && pending.sessionId && (Date.now() - pending.ts) < 86400000) {
+            this._verifyAndUnlock(pending.sessionId, pending.plan);
+        } else if (pending) {
+            Storage._set('pending_payment', null); // expired, clear
         }
     },
 
@@ -36,6 +43,8 @@ const TrialService = {
     isPaid() {
         const data = this._getData();
         if (!data.paid) return false;
+        // If paid but no date recorded, treat as valid (defensive)
+        if (!data.paidDate) return true;
         if (data.paidDate) {
             const paidDate = new Date(data.paidDate);
             const now = new Date();
@@ -235,7 +244,11 @@ const TrialService = {
             custom_macros: 'Personnalisation des objectifs',
             camera: 'Photo IA',
             voice: 'Saisie vocale',
-            barcode: 'Scan code-barres'
+            barcode: 'Scan code-barres',
+            gym: 'Suivi Salle de Sport',
+            weight: 'Suivi du Poids',
+            supplements: 'Compléments Alimentaires',
+            shop: 'Boutique & Cosmétiques'
         };
         const label = featureLabels[featureName] || featureName;
 
@@ -271,6 +284,9 @@ const TrialService = {
                         <div class="paywall-feature">✅ Photo IA & reconnaissance vocale</div>
                         <div class="paywall-feature">✅ Scan code-barres</div>
                         <div class="paywall-feature">✅ Boutique & cosmétiques</div>
+                        <div class="paywall-feature">✅ Suivi salle de sport</div>
+                        <div class="paywall-feature">✅ Suivi du poids & graphiques</div>
+                        <div class="paywall-feature">✅ Compléments alimentaires</div>
                     </div>
 
                     <div class="paywall-free-features">
@@ -424,6 +440,8 @@ const TrialService = {
     },
 
     async _verifyAndUnlock(sessionId, plan) {
+        // Save pending flag in case verification fails (will retry on next init)
+        if (sessionId) Storage._set('pending_payment', { sessionId, plan, ts: Date.now() });
         if (sessionId) {
             try {
                 const reqHeaders = { 'Content-Type': 'application/json' };
@@ -452,6 +470,7 @@ const TrialService = {
         this.markCardRegistered();
         this.markPaid(sessionId || 'stripe', plan || 'annual');
         await this._serverAction('paid');
+        Storage._set('pending_payment', null); // Clear pending — payment confirmed
         App.showToast('Bienvenue Premium ! Toutes les fonctionnalités sont débloquées 🎉');
     },
 

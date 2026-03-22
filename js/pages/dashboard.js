@@ -53,7 +53,9 @@ const DashboardPage = {
         const streak = Storage.getStreak();
         const water = Storage.getWater();
         const waterGoal = goals.water || 12;
-        const isPremium = TrialService.isPaid();
+        const trialData = Storage._get('trial', {});
+        const isPremium = TrialService.isPaid() || (trialData.paid === true && trialData.paymentId);
+        const hasAccess = isPremium || TrialService.isTrialActive();
         const isOnSite = !window.matchMedia('(display-mode: standalone)').matches && !navigator.standalone && !window.matchMedia('(display-mode: fullscreen)').matches;
 
         const pctCal = Math.min(Math.round((totals.calories / goals.calories) * 100), 150);
@@ -186,43 +188,37 @@ const DashboardPage = {
 
                 <!-- QUICK ACTIONS — only Salle & Compléments (Photo IA, Vocal, Recherche are in + tab) -->
                 <div class="quick-actions compact" style="margin:0 16px 8px;display:flex;gap:8px">
-                    <button class="quick-action-btn" onclick="App.navigate('gym')" style="flex:1">
-                        <span class="icon">🏋️</span>Salle
+                    <button class="quick-action-btn" onclick="${hasAccess ? "App.navigate('gym')" : "TrialService.showFeatureLockedPrompt('gym')"}" style="flex:1">
+                        <span class="icon">🏋️</span>Salle${!hasAccess ? ' 🔒' : ''}
                     </button>
-                    <button class="quick-action-btn" onclick="App.navigate('supplements')" style="flex:1">
-                        <span class="icon">💊</span>Compléments
+                    <button class="quick-action-btn" onclick="${hasAccess ? "App.navigate('supplements')" : "TrialService.showFeatureLockedPrompt('supplements')"}" style="flex:1">
+                        <span class="icon">💊</span>Compléments${!hasAccess ? ' 🔒' : ''}
                     </button>
-                    <button class="quick-action-btn" onclick="App.navigate('weight')" style="flex:1">
-                        <span class="icon">⚖️</span>Poids
+                    <button class="quick-action-btn" onclick="${hasAccess ? "App.navigate('weight')" : "TrialService.showFeatureLockedPrompt('weight')"}" style="flex:1">
+                        <span class="icon">⚖️</span>Poids${!hasAccess ? ' 🔒' : ''}
                     </button>
                 </div>
 
                 <!-- HYDRATATION -->
-                <div class="card water-tracker-card" style="padding:12px 16px;margin:0 16px 8px">
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-                        <span style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:4px">
-                            <svg width="16" height="16" viewBox="0 0 24 24" style="flex-shrink:0"><defs><linearGradient id="glassHdr" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4FC3F7"/><stop offset="100%" stop-color="#0288D1"/></linearGradient></defs><path d="M6 3h12l-1.5 15a3 3 0 01-3 2.5h-3A3 3 0 017.5 18L6 3z" fill="url(#glassHdr)" opacity="0.85"/><path d="M7 5h10" stroke="white" stroke-width="1" opacity="0.4"/></svg>
-                            Hydratation
-                        </span>
-                        <span style="font-size:13px;font-weight:700;color:var(--primary)">${(water * 0.25).toFixed(water * 0.25 % 1 === 0 ? 0 : 1)}L / ${(waterGoal * 0.25).toFixed(waterGoal * 0.25 % 1 === 0 ? 0 : 1)}L</span>
+                <div class="card" style="padding:16px;margin:0 16px 8px">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                        <span style="font-size:14px;font-weight:700">💧 Hydratation</span>
+                        <span style="font-size:14px;font-weight:700;color:var(--info, #0288D1)">${(water * 0.25).toFixed(water % 4 === 0 ? 0 : 1)}L / ${(waterGoal * 0.25).toFixed(waterGoal % 4 === 0 ? 0 : 1)}L</span>
                     </div>
-                    <div class="water-progress-bar">
-                        <div class="water-progress-fill" style="width:${waterPct}%"></div>
+                    <div class="water-tank" onclick="DashboardPage.addWater()" style="position:relative;width:100%;height:120px;border-radius:16px;background:var(--surface-alt, #f0f4f8);border:2px solid var(--border);overflow:hidden;cursor:pointer;transition:transform 0.1s">
+                        <div class="water-tank-fill" style="position:absolute;bottom:0;left:0;width:100%;height:${waterPct}%;background:linear-gradient(180deg,#4FC3F7 0%,#0288D1 100%);transition:height 0.5s cubic-bezier(0.4,0,0.2,1);border-radius:0 0 14px 14px">
+                            <svg class="water-wave" style="position:absolute;top:-6px;left:0;width:200%;height:12px;animation:waveMove 2s linear infinite" viewBox="0 0 1200 12" preserveAspectRatio="none"><path d="M0 6C200 0 400 12 600 6C800 0 1000 12 1200 6V12H0Z" fill="#4FC3F7" opacity="0.6"/></svg>
+                        </div>
+                        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px">
+                            <span style="font-size:28px;font-weight:900;color:${waterPct > 40 ? 'white' : 'var(--primary)'};text-shadow:${waterPct > 40 ? '0 2px 8px rgba(0,0,0,0.3)' : 'none'}">💧</span>
+                            <span style="font-size:13px;font-weight:700;color:${waterPct > 40 ? 'white' : 'var(--text-secondary)'};text-shadow:${waterPct > 40 ? '0 1px 4px rgba(0,0,0,0.3)' : 'none'}">+ 250ml</span>
+                        </div>
                     </div>
-                    <div class="water-glasses">
-                        ${Array.from({length: waterGoal}, (_, i) => `
-                            <button class="water-glass ${i < water ? 'filled' : ''}" onclick="DashboardPage.setWater(${i + 1})" title="${((i + 1) * 0.25).toFixed(2).replace(/\.?0+$/, '')}L" aria-label="Verre ${i + 1} sur ${waterGoal}${i < water ? ', bu' : ', vide'}" role="checkbox" aria-checked="${i < water}">
-                                <svg width="20" height="26" viewBox="0 0 20 26" class="glass-svg">
-                                    <path d="M4 2h12l-1.2 18a2.5 2.5 0 01-2.5 2.2H7.7A2.5 2.5 0 015.2 20L4 2z" fill="${i < water ? 'none' : 'var(--surface-alt, #2a2a2a)'}" stroke="${i < water ? '#0288D1' : 'var(--border)'}" stroke-width="1"/>
-                                    ${i < water ? `<defs><linearGradient id="wfill${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4FC3F7"/><stop offset="100%" stop-color="#0288D1"/></linearGradient></defs><path d="M5.2 8h9.6l-0.8 12a2 2 0 01-2 1.8H8A2 2 0 016 20L5.2 8z" fill="url(#wfill${i})"/><path d="M5.8 10h8.4" stroke="white" stroke-width="0.6" opacity="0.35"/>` : ''}
-                                </svg>
-                            </button>
-                        `).join('')}
-                        <button class="water-add-btn" onclick="DashboardPage.addWater()" aria-label="Ajouter un verre d'eau">
-                            <svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" fill="var(--primary)" opacity="0.15" stroke="var(--primary)" stroke-width="1.5"/><line x1="10" y1="5" x2="10" y2="15" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"/><line x1="5" y1="10" x2="15" y2="10" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"/></svg>
-                        </button>
+                    <div style="display:flex;justify-content:space-between;margin-top:8px;gap:8px">
+                        <button onclick="DashboardPage.setWater(Math.max(0,${water}-1))" class="btn" style="flex:1;padding:8px;font-size:13px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text-secondary)">- 250ml</button>
+                        <button onclick="DashboardPage.addWater()" class="btn btn-primary" style="flex:1;padding:8px;font-size:13px;border-radius:10px">+ 250ml</button>
                     </div>
-                    ${water >= waterGoal ? '<div style="text-align:center;font-size:11px;color:var(--success);margin-top:4px">Objectif atteint ! 🎉</div>' : ''}
+                    ${water >= waterGoal ? '<div style="text-align:center;font-size:13px;color:var(--success);margin-top:8px;font-weight:600">Objectif atteint ! 🎉</div>' : ''}
                 </div>
 
                 <!-- WEIGHT MINI WIDGET -->
@@ -371,6 +367,7 @@ const DashboardPage = {
         const newCount = current + 1;
         Storage.setWater(newCount);
         this._checkWaterBonus(newCount);
+        App.haptic('light');
         App.showToast(`+250ml 💧 (${(newCount * 0.25).toFixed(newCount * 0.25 % 1 === 0 ? 0 : 1)}L)`);
         this.render();
     },

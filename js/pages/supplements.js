@@ -1,6 +1,7 @@
 // ===== SUPPLEMENTS PAGE =====
 // Track daily supplements — similar to Gym page
 const SupplementsPage = {
+    _esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; },
     // Common supplements database
     SUPPLEMENTS: [
         { id: 'whey', name: 'Whey Protéine', icon: '🥛', category: 'protéines', unit: 'scoop' },
@@ -42,7 +43,7 @@ const SupplementsPage = {
                                 return `
                                     <div style="display:flex;align-items:center;gap:4px;padding:6px 10px;border-radius:10px;background:var(--primary-light);font-size:12px;font-weight:600;color:var(--primary)">
                                         <span>${info.icon || '💊'}</span>
-                                        <span>${info.name || s.name}</span>
+                                        <span>${this._esc(info.name || s.name)}</span>
                                         <button onclick="SupplementsPage._removeTaken('${s.id}')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:14px;padding:0 2px">✕</button>
                                     </div>
                                 `;
@@ -70,7 +71,7 @@ const SupplementsPage = {
                                     <button onclick="SupplementsPage.toggleTaken('${s.id}')"
                                         style="padding:12px 10px;border:2px solid ${taken ? 'var(--primary)' : 'var(--border)'};border-radius:12px;background:${taken ? 'var(--primary-light)' : 'var(--surface)'};cursor:pointer;text-align:center;transition:all 0.2s">
                                         <div style="font-size:24px;margin-bottom:4px">${info.icon || '💊'}</div>
-                                        <div style="font-size:12px;font-weight:600;color:${taken ? 'var(--primary)' : 'var(--text)'}">${info.name || s.name}</div>
+                                        <div style="font-size:12px;font-weight:600;color:${taken ? 'var(--primary)' : 'var(--text)'}">${this._esc(info.name || s.name)}</div>
                                         <div style="font-size:10px;color:var(--text-secondary);margin-top:2px">${s.dose || info.defaultDose || 1} ${info.unit || s.unit || ''}</div>
                                         ${taken ? '<div style="font-size:10px;color:var(--primary);margin-top:2px">✓ Pris</div>' : ''}
                                     </button>
@@ -102,10 +103,14 @@ const SupplementsPage = {
 
                 <!-- Custom supplement add -->
                 <div class="card" style="padding:14px 16px;margin-top:12px">
-                    <div style="font-size:14px;font-weight:700;margin-bottom:10px">Ajouter un complément libre</div>
-                    <div style="display:flex;gap:8px;align-items:center">
-                        <input type="text" id="custom-suppl-name" placeholder="Nom du complément (ex: Spiruline)" class="form-input" style="flex:1;font-size:15px;padding:12px 14px;min-height:44px">
-                        <button class="btn btn-primary" onclick="SupplementsPage._addCustom()" style="padding:12px 20px;font-size:15px;min-height:44px">+</button>
+                    <div style="font-size:14px;font-weight:700;margin-bottom:10px">Ajouter un complément</div>
+                    <div style="display:flex;gap:8px;align-items:stretch">
+                        <input type="text" id="custom-suppl-name"
+                               placeholder="Ex: Spiruline, Collagène..."
+                               class="form-input"
+                               style="flex:1;font-size:16px;padding:14px 16px;min-height:52px;border-radius:12px">
+                        <button class="btn btn-primary" onclick="SupplementsPage._addCustom()"
+                                style="padding:14px 24px;font-size:18px;min-height:52px;border-radius:12px;font-weight:700">+</button>
                     </div>
                 </div>
 
