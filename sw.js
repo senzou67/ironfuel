@@ -36,7 +36,8 @@ if (FCM_CONFIG.messagingSenderId && FCM_CONFIG.appId) {
     console.log('[SW] FCM not configured — set messagingSenderId & appId in sw.js');
 }
 
-const CACHE_NAME = 'ironfuel-v58';
+const CACHE_NAME = 'ironfuel-v59';
+const SW_VERSION = 59;
 const ASSETS = [
     '/',
     '/index.html',
@@ -105,20 +106,38 @@ self.addEventListener('install', (e) => {
     self.skipWaiting();
 });
 
-// Activate — clean old caches
+// Activate — clean old caches + force-refresh clients if outdated
 self.addEventListener('activate', (e) => {
     e.waitUntil(
         caches.keys().then(keys =>
             Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-        )
+        ).then(() => self.clients.claim())
+         .then(() => {
+            // Check server version and refresh all clients if they're outdated
+            return fetch('/version.json?_=' + Date.now(), { cache: 'no-store' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.v && data.v > SW_VERSION) {
+                        // Server is ahead — tell all clients to reload
+                        return self.clients.matchAll({ type: 'window' }).then(clients => {
+                            clients.forEach(client => client.postMessage({ type: 'FORCE_RELOAD' }));
+                        });
+                    }
+                }).catch(() => { /* offline, ignore */ });
+        })
     );
-    self.clients.claim();
 });
 
 // Fetch — cache-first for versioned assets, network-first for HTML/API
 self.addEventListener('fetch', (e) => {
     if (e.request.method !== 'GET') return;
     const url = new URL(e.request.url);
+
+    // NEVER cache version.json — always go to network
+    if (url.pathname === '/version.json') {
+        e.respondWith(fetch(e.request));
+        return;
+    }
 
     // Network-first for CDN assets
     if (url.hostname !== location.hostname) {
@@ -128,7 +147,7 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
-    // Cache-first for versioned assets (?v=55) — immutable until version bump
+    // Cache-first for versioned assets (?v=XX) — immutable until version bump
     if (url.search && /[?&]v=\d+/.test(url.search)) {
         e.respondWith(
             caches.match(e.request).then(cached => {

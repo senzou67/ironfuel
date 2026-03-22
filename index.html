@@ -46,51 +46,101 @@
         #bottom-nav { padding-bottom: env(safe-area-inset-bottom); }
     </style>
 
-    <!-- Force cache bust for major updates -->
+    <!-- Force cache bust — fetches /version.json DIRECTLY from server bypassing SW -->
     <script>
         (function(){
-            var V = 58;
-            var stored = 0;
+            var LOCAL_V = 59; // Must match version.json
             var lsWorks = true;
             try {
-                stored = parseInt(localStorage.getItem('nutritrack_app_version') || '0');
-                localStorage.setItem('nutritrack_app_version_test', '1');
-                localStorage.removeItem('nutritrack_app_version_test');
+                localStorage.setItem('_test', '1');
+                localStorage.removeItem('_test');
             } catch(e) { lsWorks = false; }
 
-            if (stored < V && lsWorks) {
-                try { localStorage.setItem('nutritrack_app_version', V); } catch(e) {}
+            function nukeAndReload() {
+                // Save version AFTER nuke succeeds
+                var done = false;
                 // 1. Nuke ALL caches
-                if ('caches' in window) {
-                    caches.keys().then(function(keys) {
-                        return Promise.all(keys.map(function(k) { return caches.delete(k); }));
-                    });
-                }
-                // 2. Unregister all SWs, then re-register + reload
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.getRegistrations().then(function(regs) {
-                        return Promise.all(regs.map(function(r) { return r.unregister(); }));
-                    }).then(function() {
-                        navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).then(function() {
+                var p1 = ('caches' in window)
+                    ? caches.keys().then(function(k){ return Promise.all(k.map(function(c){ return caches.delete(c); })); })
+                    : Promise.resolve();
+                // 2. Unregister ALL service workers
+                var p2 = ('serviceWorker' in navigator)
+                    ? navigator.serviceWorker.getRegistrations().then(function(r){ return Promise.all(r.map(function(sw){ return sw.unregister(); })); })
+                    : Promise.resolve();
+
+                Promise.all([p1, p2]).then(function(){
+                    // Only mark version AFTER caches are actually nuked
+                    if (lsWorks) try { localStorage.setItem('nutritrack_app_version', LOCAL_V); } catch(e){}
+                    // Re-register SW then hard reload
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).then(function(){
                             window.location.reload(true);
-                        });
-                    });
-                } else {
+                        }).catch(function(){ window.location.reload(true); });
+                    } else {
+                        window.location.reload(true);
+                    }
+                }).catch(function(){ window.location.reload(true); });
+            }
+
+            // Strategy 1: Check localStorage version (works when THIS html is already fresh)
+            var stored = 0;
+            if (lsWorks) try { stored = parseInt(localStorage.getItem('nutritrack_app_version') || '0'); } catch(e){}
+            if (stored < LOCAL_V) {
+                nukeAndReload();
+                return;
+            }
+
+            // Strategy 2: Fetch /version.json from server with cache bypass
+            // This catches the case where OLD cached index.html is served but server has newer version
+            fetch('/version.json?_=' + Date.now(), { cache: 'no-store' })
+                .then(function(r){ return r.json(); })
+                .then(function(data){
+                    var serverV = data.v || 0;
+                    if (serverV > LOCAL_V || serverV > stored) {
+                        // Server has a newer version than what this HTML knows about
+                        if (lsWorks) try { localStorage.setItem('nutritrack_app_version', '0'); } catch(e){}
+                        nukeAndReload();
+                    } else {
+                        // All good — register SW normally + check for update
+                        if ('serviceWorker' in navigator) {
+                            navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).then(function(reg){
+                                reg.update();
+                                // Listen for new SW waiting — auto-activate it
+                                reg.addEventListener('updatefound', function(){
+                                    var nw = reg.installing;
+                                    if (nw) nw.addEventListener('statechange', function(){
+                                        if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+                                            nw.postMessage({ type: 'SKIP_WAITING' });
+                                            window.location.reload();
+                                        }
+                                    });
+                                });
+                            });
+                        }
+                    }
+                })
+                .catch(function(){
+                    // Offline or fetch failed — just register SW normally
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).then(function(reg){ reg.update(); });
+                    }
+                });
+        })();
+
+        // Listen for FORCE_RELOAD from SW
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', function(e) {
+                if (e.data && e.data.type === 'FORCE_RELOAD') {
                     window.location.reload(true);
                 }
-            } else if ('serviceWorker' in navigator) {
-                // Normal visit or private browsing: register SW + trigger update
-                navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).then(function(reg) {
-                    reg.update();
-                });
-            }
-        })();
+            });
+        }
     </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=58">
+    <link rel="stylesheet" href="css/style.css?v=59">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" defer></script>
     <!-- Firebase Auth + Firestore + Messaging -->
@@ -164,42 +214,42 @@
 
     <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
-    <script defer src="js/db.js?v=58"></script>
-    <script defer src="js/storage.js?v=58"></script>
-    <script defer src="js/services/nutrition.js?v=58"></script>
-    <script defer src="js/services/vision.js?v=58"></script>
-    <script defer src="js/services/speech.js?v=58"></script>
-    <script defer src="js/services/openfoodfacts.js?v=58"></script>
-    <script defer src="js/services/foodimages.js?v=58"></script>
-    <script defer src="js/services/analytics.js?v=58"></script>
-    <script defer src="js/services/auth.js?v=58"></script>
-    <script defer src="js/services/trial.js?v=58"></script>
-    <script defer src="js/services/sync.js?v=58"></script>
-    <script defer src="js/services/notifications.js?v=58"></script>
-    <script defer src="js/services/paypal.js?v=58"></script>
-    <script defer src="js/services/micronutrients.js?v=58"></script>
-    <script defer src="js/components/navbar.js?v=58"></script>
-    <script defer src="js/components/modal.js?v=58"></script>
-    <script defer src="js/components/charts.js?v=58"></script>
-    <script defer src="js/components/mealcard.js?v=58"></script>
-    <script defer src="js/components/fooditem.js?v=58"></script>
-    <script defer src="js/components/avatar.js?v=58"></script>
-    <script defer src="js/pages/dashboard.js?v=58"></script>
-    <script defer src="js/pages/diary.js?v=58"></script>
-    <script defer src="js/pages/search.js?v=58"></script>
-    <script defer src="js/pages/camera.js?v=58"></script>
-    <script defer src="js/pages/voice.js?v=58"></script>
-    <script defer src="js/pages/barcode.js?v=58"></script>
-    <script defer src="js/pages/history.js?v=58"></script>
-    <script defer src="js/pages/profile.js?v=58"></script>
-    <script defer src="js/pages/settings.js?v=58"></script>
-    <script defer src="js/pages/customfood.js?v=58"></script>
-    <script defer src="js/pages/gym.js?v=58"></script>
-    <script defer src="js/pages/supplements.js?v=58"></script>
-    <script defer src="js/pages/weight.js?v=58"></script>
-    <script defer src="js/pages/shop.js?v=58"></script>
-    <script defer src="js/pages/avatar.js?v=58"></script>
-    <script defer src="js/app.js?v=58"></script>
+    <script defer src="js/db.js?v=59"></script>
+    <script defer src="js/storage.js?v=59"></script>
+    <script defer src="js/services/nutrition.js?v=59"></script>
+    <script defer src="js/services/vision.js?v=59"></script>
+    <script defer src="js/services/speech.js?v=59"></script>
+    <script defer src="js/services/openfoodfacts.js?v=59"></script>
+    <script defer src="js/services/foodimages.js?v=59"></script>
+    <script defer src="js/services/analytics.js?v=59"></script>
+    <script defer src="js/services/auth.js?v=59"></script>
+    <script defer src="js/services/trial.js?v=59"></script>
+    <script defer src="js/services/sync.js?v=59"></script>
+    <script defer src="js/services/notifications.js?v=59"></script>
+    <script defer src="js/services/paypal.js?v=59"></script>
+    <script defer src="js/services/micronutrients.js?v=59"></script>
+    <script defer src="js/components/navbar.js?v=59"></script>
+    <script defer src="js/components/modal.js?v=59"></script>
+    <script defer src="js/components/charts.js?v=59"></script>
+    <script defer src="js/components/mealcard.js?v=59"></script>
+    <script defer src="js/components/fooditem.js?v=59"></script>
+    <script defer src="js/components/avatar.js?v=59"></script>
+    <script defer src="js/pages/dashboard.js?v=59"></script>
+    <script defer src="js/pages/diary.js?v=59"></script>
+    <script defer src="js/pages/search.js?v=59"></script>
+    <script defer src="js/pages/camera.js?v=59"></script>
+    <script defer src="js/pages/voice.js?v=59"></script>
+    <script defer src="js/pages/barcode.js?v=59"></script>
+    <script defer src="js/pages/history.js?v=59"></script>
+    <script defer src="js/pages/profile.js?v=59"></script>
+    <script defer src="js/pages/settings.js?v=59"></script>
+    <script defer src="js/pages/customfood.js?v=59"></script>
+    <script defer src="js/pages/gym.js?v=59"></script>
+    <script defer src="js/pages/supplements.js?v=59"></script>
+    <script defer src="js/pages/weight.js?v=59"></script>
+    <script defer src="js/pages/shop.js?v=59"></script>
+    <script defer src="js/pages/avatar.js?v=59"></script>
+    <script defer src="js/app.js?v=59"></script>
 
     <!-- SW registration handled in <head> cache-bust script -->
 </body>
