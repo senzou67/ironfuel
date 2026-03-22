@@ -11,17 +11,56 @@ const TrialService = {
     PREMIUM_FEATURES: ['creature', 'custom_macros', 'camera', 'voice', 'barcode', 'gym', 'weight', 'supplements', 'shop'],
 
     init() {
+        // Admin force-premium via URL (for owner/dev only)
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('admin_premium') === 'true') {
+            this.markPaid('admin-force', 'annual');
+            App.showToast('Premium activé manuellement ✅');
+            window.history.replaceState({}, '', window.location.pathname + window.location.hash);
+        }
+
         const data = this._getData();
         if (!data.startDate) {
             data.startDate = new Date().toISOString();
             this._setData(data);
         }
+
+        // Restore premium from Firebase user if logged in and local data lost
+        this._restorePremiumFromAuth();
+
         // Recover pending payment if verify-payment failed last time
         const pending = Storage._get('pending_payment', null);
         if (pending && pending.sessionId && (Date.now() - pending.ts) < 86400000) {
             this._verifyAndUnlock(pending.sessionId, pending.plan);
         } else if (pending) {
             Storage._set('pending_payment', null); // expired, clear
+        }
+    },
+
+    async _restorePremiumFromAuth() {
+        // If logged in but local trial data says not paid, check server
+        if (this.isPaid()) return;
+        try {
+            if (typeof AuthService === 'undefined' || !AuthService.isLoggedIn()) return;
+            const user = AuthService.getCurrentUser();
+            if (!user) return;
+            // Check Firestore for payment record via REST
+            const token = await user.getIdToken();
+            const projectId = 'ironfuel-422fe';
+            const res = await fetch(
+                `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${user.uid}`,
+                { headers: { 'Authorization': 'Bearer ' + token } }
+            );
+            if (!res.ok) return;
+            const doc = await res.json();
+            const fields = doc.fields || {};
+            if (fields.paid && (fields.paid.booleanValue === true || fields.paid.stringValue === 'true')) {
+                const plan = (fields.plan && fields.plan.stringValue) || 'annual';
+                this.markPaid('restored-from-firestore', plan);
+                console.log('[Trial] Premium restored from Firestore');
+            }
+        } catch(e) {
+            // Silently fail — not critical
         }
     },
 
@@ -122,10 +161,35 @@ const TrialService = {
         data.paid = true;
         data.hasCard = true;
         data.paymentId = paymentId || 'manual';
-        data.paidDate = new Date().toISOString();
+        data.paidDate = data.paidDate || new Date().toISOString();
         data.plan = plan || 'annual';
         this._setData(data);
         this._serverAction('paid');
+        this._savePremiumToFirestore(plan || 'annual');
+    },
+
+    async _savePremiumToFirestore(plan) {
+        try {
+            if (typeof AuthService === 'undefined' || !AuthService.isLoggedIn()) return;
+            const user = AuthService.getCurrentUser();
+            if (!user) return;
+            const token = await user.getIdToken();
+            const projectId = 'ironfuel-422fe';
+            await fetch(
+                `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${user.uid}?updateMask.fieldPaths=paid&updateMask.fieldPaths=plan&updateMask.fieldPaths=paidDate`,
+                {
+                    method: 'PATCH',
+                    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fields: {
+                            paid: { booleanValue: true },
+                            plan: { stringValue: plan },
+                            paidDate: { stringValue: new Date().toISOString() }
+                        }
+                    })
+                }
+            );
+        } catch(e) { /* silent */ }
     },
 
     markCardRegistered() {

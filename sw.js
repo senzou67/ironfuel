@@ -36,8 +36,8 @@ if (FCM_CONFIG.messagingSenderId && FCM_CONFIG.appId) {
     console.log('[SW] FCM not configured — set messagingSenderId & appId in sw.js');
 }
 
-const CACHE_NAME = 'ironfuel-v60';
-const SW_VERSION = 60;
+const CACHE_NAME = 'ironfuel-v61';
+const SW_VERSION = 61;
 const ASSETS = [
     '/',
     '/index.html',
