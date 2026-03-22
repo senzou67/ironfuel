@@ -56,6 +56,7 @@ const DashboardPage = {
         const trialData = Storage._get('trial', {});
         const isPremium = TrialService.isPaid() || (trialData.paid === true && trialData.paymentId);
         const hasAccess = isPremium || TrialService.isTrialActive();
+        const premiumStillChecking = !isPremium && !TrialService._premiumVerified;
         const isOnSite = !window.matchMedia('(display-mode: standalone)').matches && !navigator.standalone && !window.matchMedia('(display-mode: fullscreen)').matches;
 
         const pctCal = Math.min(Math.round((totals.calories / goals.calories) * 100), 150);
@@ -79,8 +80,10 @@ const DashboardPage = {
 
         const content = document.getElementById('page-content');
 
-        // Non-premium: subtle ad banner at top
-        const adBanner = !isPremium && !TrialService.isTrialActive() ? `
+        // Non-premium banner — NEVER show while premium check is still in progress
+        // This prevents false "Essai gratuit" banners for paying users
+        const adBanner = premiumStillChecking ? '' :
+            !isPremium && !TrialService.isTrialActive() ? `
             <div class="trial-banner" onclick="App.navigate('settings')" style="background:linear-gradient(135deg,var(--primary),#FF6D3A);color:white;padding:10px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">
                 <span style="font-size:13px;font-weight:600">⭐ Passe Premium — Photo IA, créature, micro-nutriments</span>
                 <span style="font-size:12px;opacity:0.9">Voir →</span>

@@ -243,6 +243,10 @@ const App = {
         SyncService.init();
         await SyncService.onLogin();
 
+        // Wait for all premium checks (cookie, IndexedDB, Firestore) BEFORE dashboard
+        // This prevents the trial banner from flashing for paying users
+        await TrialService.waitForPremiumCheck();
+
         // Check server-side trial (IP block)
         await TrialService.checkServerTrial();
 

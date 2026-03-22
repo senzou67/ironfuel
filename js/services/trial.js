@@ -1,11 +1,14 @@
 // ===== TRIAL & PAYMENT SERVICE =====
-// Foodvisor-style: 2 weeks free full access, then limited (freemium)
+// Bulletproof premium: 4-layer persistence (localStorage + cookie + IndexedDB + Firestore)
+// Premium status must NEVER be lost — brand reputation depends on it.
 const TrialService = {
     TRIAL_DAYS: 14,
     SUBSCRIPTION_DAYS: 365,
     PRICE_ANNUAL: '14,99€',
     PRICE_MONTHLY: '1,25€',
     _serverChecked: false,
+    _premiumVerified: false,   // true once async checks finish
+    _premiumPromise: null,     // resolves when all premium checks done
 
     // === PREMIUM FEATURES (locked after trial for free users) ===
     PREMIUM_FEATURES: ['creature', 'custom_macros', 'camera', 'voice', 'barcode', 'gym', 'weight', 'supplements', 'shop'],
@@ -25,43 +28,181 @@ const TrialService = {
             this._setData(data);
         }
 
-        // Restore premium from Firebase user if logged in and local data lost
-        this._restorePremiumFromAuth();
+        // Layer 2: restore from cookie if localStorage was cleared
+        if (!data.paid) this._restoreFromCookie();
+
+        // Layer 3+4: async restore from IndexedDB and Firestore
+        this._premiumPromise = this._asyncRestorePremium();
 
         // Recover pending payment if verify-payment failed last time
         const pending = Storage._get('pending_payment', null);
         if (pending && pending.sessionId && (Date.now() - pending.ts) < 86400000) {
             this._verifyAndUnlock(pending.sessionId, pending.plan);
         } else if (pending) {
-            Storage._set('pending_payment', null); // expired, clear
+            Storage._set('pending_payment', null);
         }
     },
 
-    async _restorePremiumFromAuth() {
-        // If logged in but local trial data says not paid, check server
-        if (this.isPaid()) return;
+    // Wait for all async premium checks to complete (call before showing trial UI)
+    async waitForPremiumCheck() {
+        if (this._premiumVerified) return;
+        if (this._premiumPromise) {
+            try { await this._premiumPromise; } catch(e) {}
+        }
+        this._premiumVerified = true;
+    },
+
+    // ====== 4-LAYER PREMIUM PERSISTENCE ======
+
+    // Layer 1: localStorage (default via Storage._get/_set) — fast, but cleared by cache nuke
+
+    // Layer 2: Cookie — survives localStorage clear, survives cache nuke
+    _saveToCookie(paid, plan, paidDate) {
+        if (!paid) return;
+        try {
+            const val = JSON.stringify({ p: 1, pl: plan || 'annual', d: paidDate || new Date().toISOString() });
+            const expires = new Date(Date.now() + 400 * 86400000).toUTCString();
+            document.cookie = `ifp=${encodeURIComponent(val)};expires=${expires};path=/;SameSite=Strict`;
+        } catch(e) {}
+    },
+
+    _restoreFromCookie() {
+        try {
+            const match = document.cookie.match(/ifp=([^;]+)/);
+            if (!match) return false;
+            const data = JSON.parse(decodeURIComponent(match[1]));
+            if (data && data.p === 1) {
+                this.markPaid('restored-from-cookie', data.pl || 'annual');
+                console.log('[Trial] Premium restored from cookie');
+                return true;
+            }
+        } catch(e) {}
+        return false;
+    },
+
+    // Layer 3: IndexedDB — independent from localStorage, survives cache nuke
+    _saveToIDB(paid, plan, paidDate) {
+        if (!paid) return;
+        try {
+            const req = indexedDB.open('ironfuel_premium', 1);
+            req.onupgradeneeded = (e) => { e.target.result.createObjectStore('status'); };
+            req.onsuccess = (e) => {
+                const db = e.target.result;
+                const tx = db.transaction('status', 'readwrite');
+                tx.objectStore('status').put({ paid: true, plan: plan || 'annual', paidDate: paidDate || new Date().toISOString() }, 'premium');
+            };
+        } catch(e) {}
+    },
+
+    _restoreFromIDB() {
+        return new Promise((resolve) => {
+            try {
+                const req = indexedDB.open('ironfuel_premium', 1);
+                req.onupgradeneeded = (e) => { e.target.result.createObjectStore('status'); };
+                req.onsuccess = (e) => {
+                    const db = e.target.result;
+                    try {
+                        const tx = db.transaction('status', 'readonly');
+                        const get = tx.objectStore('status').get('premium');
+                        get.onsuccess = () => {
+                            const result = get.result;
+                            if (result && result.paid) {
+                                resolve({ paid: true, plan: result.plan, paidDate: result.paidDate });
+                            } else {
+                                resolve(null);
+                            }
+                        };
+                        get.onerror = () => resolve(null);
+                    } catch(e) { resolve(null); }
+                };
+                req.onerror = () => resolve(null);
+                // Timeout — don't block forever
+                setTimeout(() => resolve(null), 3000);
+            } catch(e) { resolve(null); }
+        });
+    },
+
+    // Layer 4: Firestore — survives device wipe, reinstall, device switch
+    async _restoreFromFirestore() {
+        try {
+            if (typeof AuthService === 'undefined' || !AuthService.isLoggedIn()) return null;
+            const user = AuthService.getCurrentUser();
+            if (!user) return null;
+            const token = await user.getIdToken();
+            const res = await fetch(
+                `https://firestore.googleapis.com/v1/projects/ironfuel-422fe/databases/(default)/documents/users/${user.uid}`,
+                { headers: { 'Authorization': 'Bearer ' + token } }
+            );
+            if (!res.ok) return null;
+            const doc = await res.json();
+            const fields = doc.fields || {};
+            if (fields.paid && (fields.paid.booleanValue === true || fields.paid.stringValue === 'true')) {
+                return {
+                    paid: true,
+                    plan: (fields.plan && fields.plan.stringValue) || 'annual',
+                    paidDate: (fields.paidDate && fields.paidDate.stringValue) || null
+                };
+            }
+        } catch(e) {}
+        return null;
+    },
+
+    async _savePremiumToFirestore(plan) {
         try {
             if (typeof AuthService === 'undefined' || !AuthService.isLoggedIn()) return;
             const user = AuthService.getCurrentUser();
             if (!user) return;
-            // Check Firestore for payment record via REST
             const token = await user.getIdToken();
-            const projectId = 'ironfuel-422fe';
-            const res = await fetch(
-                `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${user.uid}`,
-                { headers: { 'Authorization': 'Bearer ' + token } }
+            await fetch(
+                `https://firestore.googleapis.com/v1/projects/ironfuel-422fe/databases/(default)/documents/users/${user.uid}?updateMask.fieldPaths=paid&updateMask.fieldPaths=plan&updateMask.fieldPaths=paidDate`,
+                {
+                    method: 'PATCH',
+                    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fields: {
+                            paid: { booleanValue: true },
+                            plan: { stringValue: plan || 'annual' },
+                            paidDate: { stringValue: new Date().toISOString() }
+                        }
+                    })
+                }
             );
-            if (!res.ok) return;
-            const doc = await res.json();
-            const fields = doc.fields || {};
-            if (fields.paid && (fields.paid.booleanValue === true || fields.paid.stringValue === 'true')) {
-                const plan = (fields.plan && fields.plan.stringValue) || 'annual';
-                this.markPaid('restored-from-firestore', plan);
-                console.log('[Trial] Premium restored from Firestore');
+        } catch(e) {}
+    },
+
+    // Master async restore — checks IndexedDB + Firestore + re-renders dashboard
+    async _asyncRestorePremium() {
+        if (this.isPaid()) { this._premiumVerified = true; return; }
+        try {
+            // Check IndexedDB first (faster, local)
+            const idbData = await this._restoreFromIDB();
+            if (idbData && idbData.paid) {
+                this.markPaid('restored-from-indexeddb', idbData.plan);
+                console.log('[Trial] Premium restored from IndexedDB');
+                this._premiumVerified = true;
+                this._reRenderDashboardIfActive();
+                return;
             }
-        } catch(e) {
-            // Silently fail — not critical
-        }
+            // Check Firestore (slower, network)
+            const fsData = await this._restoreFromFirestore();
+            if (fsData && fsData.paid) {
+                this.markPaid('restored-from-firestore', fsData.plan);
+                console.log('[Trial] Premium restored from Firestore');
+                this._premiumVerified = true;
+                this._reRenderDashboardIfActive();
+                return;
+            }
+        } catch(e) {}
+        this._premiumVerified = true;
+    },
+
+    _reRenderDashboardIfActive() {
+        // If dashboard is currently showing, re-render to remove trial banner
+        try {
+            if (typeof App !== 'undefined' && App.currentPage === 'dashboard' && typeof DashboardPage !== 'undefined') {
+                DashboardPage.render();
+            }
+        } catch(e) {}
     },
 
     _getData() {
@@ -71,7 +212,7 @@ const TrialService = {
             paymentId: null,
             paidDate: null,
             hasCard: false,
-            plan: null // 'annual' or 'monthly'
+            plan: null
         });
     },
 
@@ -82,7 +223,6 @@ const TrialService = {
     isPaid() {
         const data = this._getData();
         if (!data.paid) return false;
-        // If paid but no date recorded, treat as valid (defensive)
         if (!data.paidDate) return true;
         if (data.paidDate) {
             const paidDate = new Date(data.paidDate);
@@ -91,10 +231,7 @@ const TrialService = {
             const subDays = data.plan === 'monthly' ? 31 : this.SUBSCRIPTION_DAYS;
             if (daysSincePaid >= subDays) return false;
         }
-        // Never let server IP-check revoke a local payment with real paymentId
-        // IP changes on mobile → server loses track → must not revoke real payments
         if (data._serverRevoked) {
-            // Clear stale server revoke — local payment proof takes priority
             data._serverRevoked = false;
             this._setData(data);
         }
@@ -157,39 +294,23 @@ const TrialService = {
     },
 
     markPaid(paymentId, plan) {
+        const p = plan || 'annual';
         const data = this._getData();
         data.paid = true;
         data.hasCard = true;
         data.paymentId = paymentId || 'manual';
         data.paidDate = data.paidDate || new Date().toISOString();
-        data.plan = plan || 'annual';
+        data.plan = p;
+        // Layer 1: localStorage
         this._setData(data);
+        // Layer 2: cookie (survives localStorage clear)
+        this._saveToCookie(true, p, data.paidDate);
+        // Layer 3: IndexedDB (survives cache nuke)
+        this._saveToIDB(true, p, data.paidDate);
+        // Layer 4: Firestore (survives device wipe)
+        this._savePremiumToFirestore(p);
+        // Server sync
         this._serverAction('paid');
-        this._savePremiumToFirestore(plan || 'annual');
-    },
-
-    async _savePremiumToFirestore(plan) {
-        try {
-            if (typeof AuthService === 'undefined' || !AuthService.isLoggedIn()) return;
-            const user = AuthService.getCurrentUser();
-            if (!user) return;
-            const token = await user.getIdToken();
-            const projectId = 'ironfuel-422fe';
-            await fetch(
-                `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${user.uid}?updateMask.fieldPaths=paid&updateMask.fieldPaths=plan&updateMask.fieldPaths=paidDate`,
-                {
-                    method: 'PATCH',
-                    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        fields: {
-                            paid: { booleanValue: true },
-                            plan: { stringValue: plan },
-                            paidDate: { stringValue: new Date().toISOString() }
-                        }
-                    })
-                }
-            );
-        } catch(e) { /* silent */ }
     },
 
     markCardRegistered() {

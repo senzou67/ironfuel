@@ -62,7 +62,7 @@ const SettingsPage = {
                     </button>
                 </div>
 
-                ${!TrialService.isPaid() ? `
+                ${!TrialService.isPaid() && TrialService._premiumVerified ? `
                 <div class="settings-group" style="border:2px solid var(--primary);border-radius:var(--radius)">
                     <div class="settings-group-title" style="color:var(--primary)">
                         ${TrialService.isTrialActive() ? '🎉 Essai gratuit — ' + TrialService.daysLeft() + 'j restants' : '⭐ Passe à Premium'}
