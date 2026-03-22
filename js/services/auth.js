@@ -9,12 +9,32 @@ const AuthService = {
             this._authReadyResolve = resolve;
         });
 
-        if (typeof firebase === 'undefined') {
-            this._initialized = true;
-            if (this._authReadyResolve) this._authReadyResolve();
+        // Firebase SDK ready → init immediately
+        if (typeof firebase !== 'undefined') {
+            this._initFirebase();
             return;
         }
 
+        // Firebase SDK not loaded yet — retry every 200ms up to 10s
+        // This prevents "connexion non disponible" if scripts load late
+        let attempts = 0;
+        const maxAttempts = 50; // 50 × 200ms = 10s
+        const retryInterval = setInterval(() => {
+            attempts++;
+            if (typeof firebase !== 'undefined') {
+                clearInterval(retryInterval);
+                console.log('[Auth] Firebase SDK loaded after ' + (attempts * 200) + 'ms');
+                this._initFirebase();
+            } else if (attempts >= maxAttempts) {
+                clearInterval(retryInterval);
+                console.error('[Auth] Firebase SDK failed to load after 10s');
+                this._initialized = true;
+                if (this._authReadyResolve) this._authReadyResolve();
+            }
+        }, 200);
+    },
+
+    _initFirebase() {
         const config = this._getConfig();
         if (!config.apiKey) {
             this._initialized = true;
@@ -26,6 +46,15 @@ const AuthService = {
             if (!firebase.apps.length) {
                 firebase.initializeApp(config);
             }
+
+            // Handle redirect result (fallback from popup on iOS/Safari)
+            firebase.auth().getRedirectResult().then(result => {
+                if (result && result.user) {
+                    this._user = result.user;
+                    this._saveUserProfile(result.user);
+                    this._onLoginSuccess(result.user);
+                }
+            }).catch(() => {});
 
             firebase.auth().onAuthStateChanged((user) => {
                 this._user = user;
@@ -39,6 +68,7 @@ const AuthService = {
                 }
             });
         } catch (err) {
+            console.error('[Auth] Firebase init error:', err);
             this._initialized = true;
             if (this._authReadyResolve) this._authReadyResolve();
         }
@@ -74,10 +104,32 @@ const AuthService = {
         return !!this._user;
     },
 
+    // Wait for Firebase SDK if not yet loaded (max 10s)
+    async _ensureFirebase() {
+        if (typeof firebase !== 'undefined' && firebase.auth) return true;
+        return new Promise(resolve => {
+            let attempts = 0;
+            const check = setInterval(() => {
+                attempts++;
+                if (typeof firebase !== 'undefined' && firebase.auth) {
+                    clearInterval(check);
+                    if (!firebase.apps.length) {
+                        firebase.initializeApp(this._getConfig());
+                    }
+                    resolve(true);
+                } else if (attempts >= 50) {
+                    clearInterval(check);
+                    resolve(false);
+                }
+            }, 200);
+        });
+    },
+
     // ===== GOOGLE SIGN-IN =====
     async signInWithGoogle() {
-        if (!this.isAvailable()) {
-            App.showToast('Connexion Google non disponible');
+        const ready = await this._ensureFirebase();
+        if (!ready) {
+            App.showToast('Chargement en cours… Réessaie dans quelques secondes');
             return null;
         }
 
@@ -92,9 +144,17 @@ const AuthService = {
         } catch (err) {
             if (err.code === 'auth/popup-closed-by-user') return null;
             if (err.code === 'auth/cancelled-popup-request') return null;
-            if (err.code === 'auth/popup-blocked') {
-                App.showToast('Popup bloquée — autorise les popups pour ce site');
-                return null;
+            // Popup blocked/failed → fallback to redirect (works on iOS Safari)
+            if (err.code === 'auth/popup-blocked' || err.code === 'auth/operation-not-supported-in-this-environment') {
+                try {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    provider.setCustomParameters({ prompt: 'select_account' });
+                    await firebase.auth().signInWithRedirect(provider);
+                    return null; // page will redirect
+                } catch (redirectErr) {
+                    App.showToast('Erreur de connexion Google');
+                    return null;
+                }
             }
             if (err.code === 'auth/unauthorized-domain') {
                 App.showToast('Domaine non autorisé dans Firebase');
@@ -111,8 +171,9 @@ const AuthService = {
 
     // ===== APPLE SIGN-IN =====
     async signInWithApple() {
-        if (!this.isAvailable()) {
-            App.showToast('Connexion Apple non disponible');
+        const ready = await this._ensureFirebase();
+        if (!ready) {
+            App.showToast('Chargement en cours… Réessaie dans quelques secondes');
             return null;
         }
 
@@ -128,6 +189,19 @@ const AuthService = {
         } catch (err) {
             if (err.code === 'auth/popup-closed-by-user') return null;
             if (err.code === 'auth/cancelled-popup-request') return null;
+            // Popup blocked/failed → fallback to redirect
+            if (err.code === 'auth/popup-blocked' || err.code === 'auth/operation-not-supported-in-this-environment') {
+                try {
+                    const provider = new firebase.auth.OAuthProvider('apple.com');
+                    provider.addScope('email');
+                    provider.addScope('name');
+                    await firebase.auth().signInWithRedirect(provider);
+                    return null;
+                } catch (redirectErr) {
+                    App.showToast('Erreur de connexion Apple');
+                    return null;
+                }
+            }
             App.showToast(`Erreur: ${err.code || err.message}`);
             return null;
         }
