@@ -186,7 +186,8 @@ const Creature = {
         // Widen viewBox for wings/auras so they don't clip
         const hasWings = equipped.some(i => i.type === 'wings');
         const hasAura = equipped.some(i => i.type === 'aura');
-        const vb = (hasWings || hasAura) ? '-15 -10 130 120' : '0 0 100 100';
+        // Always use padded viewBox — CSS aura glow needs space even without equipped aura items
+        const vb = (hasWings || hasAura) ? '-15 -10 130 120' : '-10 -5 120 110';
         let svg = `<svg viewBox="${vb}" width="${size}" height="${size}" class="creature-svg ${mood === 'celebrating' ? 'creature-bounce' : ''}" style="overflow:visible">`;
 
         // Premium check for brilliance/aura effects (always shown in shop preview)
