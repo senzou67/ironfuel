@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IronFuel — Mise à jour</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; background: #1a1a2e; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+.container { text-align: center; padding: 32px; max-width: 400px; }
+.logo { font-size: 48px; font-weight: 900; color: #E64A19; margin-bottom: 8px; }
+h1 { font-size: 20px; margin-bottom: 16px; }
+.status { font-size: 14px; color: #aaa; margin-bottom: 24px; line-height: 1.6; }
+.progress { width: 200px; height: 4px; background: #333; border-radius: 4px; margin: 0 auto 16px; overflow: hidden; }
+.progress-bar { height: 100%; background: #E64A19; border-radius: 4px; width: 0%; transition: width 0.3s; }
+.step { font-size: 13px; color: #E64A19; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="logo">IF</div>
+    <h1>Mise à jour en cours...</h1>
+    <div class="progress"><div class="progress-bar" id="bar"></div></div>
+    <div class="step" id="step">Préparation...</div>
+    <div class="status" id="status"></div>
+</div>
+<script>
+(async function() {
+    const bar = document.getElementById('bar');
+    const step = document.getElementById('step');
+    const status = document.getElementById('status');
+
+    function setProgress(pct, msg) {
+        bar.style.width = pct + '%';
+        step.textContent = msg;
+    }
+
+    try {
+        // Step 1: Unregister ALL service workers
+        setProgress(10, 'Suppression des anciens caches...');
+        if ('serviceWorker' in navigator) {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            for (const reg of regs) {
+                await reg.unregister();
+            }
+            status.textContent = regs.length + ' service worker(s) supprimé(s)';
+        }
+
+        // Step 2: Delete ALL caches
+        setProgress(30, 'Nettoyage du cache...');
+        if ('caches' in window) {
+            const keys = await caches.keys();
+            for (const key of keys) {
+                await caches.delete(key);
+            }
+            status.textContent += '\n' + keys.length + ' cache(s) supprimé(s)';
+        }
+
+        // Step 3: Clear IndexedDB (except premium data!)
+        setProgress(50, 'Nettoyage IndexedDB...');
+        if (indexedDB.databases) {
+            const dbs = await indexedDB.databases();
+            for (const db of dbs) {
+                if (db.name && db.name !== 'ironfuel_premium') {
+                    indexedDB.deleteDatabase(db.name);
+                }
+            }
+        }
+
+        // Step 4: Reset version in localStorage (but keep trial/premium data!)
+        setProgress(70, 'Réinitialisation version...');
+        try {
+            // Save premium data before clearing version
+            const trial = localStorage.getItem('nutritrack_trial');
+            const premium = localStorage.getItem('nutritrack_premium');
+
+            // Force version reset so new index.html triggers full refresh
+            localStorage.setItem('nutritrack_app_version', '0');
+
+            status.textContent += '\nVersion réinitialisée';
+        } catch(e) {}
+
+        // Step 5: Re-register fresh SW
+        setProgress(85, 'Installation nouvelle version...');
+        if ('serviceWorker' in navigator) {
+            try {
+                await navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' });
+            } catch(e) {}
+        }
+
+        // Step 6: Redirect to app
+        setProgress(100, 'Redirection...');
+        await new Promise(r => setTimeout(r, 800));
+        window.location.replace('/?t=' + Date.now());
+
+    } catch(err) {
+        setProgress(100, 'Terminé avec avertissements');
+        status.textContent = 'Redirection dans 2s...\n' + err.message;
+        setTimeout(() => window.location.replace('/?t=' + Date.now()), 2000);
+    }
+})();
+</script>
+</body>
+</html>

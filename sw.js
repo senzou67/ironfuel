@@ -36,8 +36,8 @@ if (FCM_CONFIG.messagingSenderId && FCM_CONFIG.appId) {
     console.log('[SW] FCM not configured — set messagingSenderId & appId in sw.js');
 }
 
-const CACHE_NAME = 'ironfuel-v63';
-const SW_VERSION = 63;
+const CACHE_NAME = 'ironfuel-v64';
+const SW_VERSION = 64;
 const ASSETS = [
     '/',
     '/index.html',
@@ -133,8 +133,8 @@ self.addEventListener('fetch', (e) => {
     if (e.request.method !== 'GET') return;
     const url = new URL(e.request.url);
 
-    // NEVER cache version.json — always go to network
-    if (url.pathname === '/version.json') {
+    // NEVER cache version.json or nuke.html — always go to network
+    if (url.pathname === '/version.json' || url.pathname === '/nuke.html') {
         e.respondWith(fetch(e.request));
         return;
     }
