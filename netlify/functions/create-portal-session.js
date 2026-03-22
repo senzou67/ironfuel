@@ -9,13 +9,33 @@ const headers = {
     'Content-Type': 'application/json'
 };
 
+const admin = (() => {
+    try {
+        const a = require('firebase-admin');
+        if (!a.apps.length) {
+            const sa = process.env.FIREBASE_SERVICE_ACCOUNT;
+            if (sa) a.initializeApp({ credential: a.credential.cert(JSON.parse(sa)) });
+        }
+        return a.apps.length ? a : null;
+    } catch { return null; }
+})();
+
 exports.handler = async (event) => {
     if (event.httpMethod === 'OPTIONS') {
-        return { statusCode: 204, headers };
+        return { statusCode: 204, headers: { ...headers, 'Access-Control-Allow-Headers': 'Content-Type, Authorization' } };
     }
 
     if (!stripe) {
         return { statusCode: 500, headers, body: JSON.stringify({ error: 'Stripe not configured' }) };
+    }
+
+    // Require Firebase auth
+    if (admin) {
+        const authHeader = event.headers.authorization || event.headers.Authorization || '';
+        const token = authHeader.replace('Bearer ', '');
+        if (!token) return { statusCode: 401, headers, body: JSON.stringify({ error: 'Auth required' }) };
+        try { await admin.auth().verifyIdToken(token); }
+        catch (e) { return { statusCode: 403, headers, body: JSON.stringify({ error: 'Invalid token' }) }; }
     }
 
     try {

@@ -523,9 +523,13 @@ const SettingsPage = {
         try {
             App.showToast('Ouverture du portail...');
             const user = AuthService.getCurrentUser();
+            const reqHeaders = { 'Content-Type': 'application/json' };
+            if (user) {
+                try { reqHeaders['Authorization'] = 'Bearer ' + await user.getIdToken(); } catch(e) {}
+            }
             const res = await fetch('/.netlify/functions/create-portal-session', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: reqHeaders,
                 body: JSON.stringify({
                     userId: user ? user.uid : Storage._get('device_id', ''),
                     email: user ? user.email : null
@@ -535,12 +539,10 @@ const SettingsPage = {
             if (data.url) {
                 window.location.href = data.url;
             } else {
-                // Fallback: direct Stripe Customer Portal link
-                window.open('https://billing.stripe.com/p/login/dRmcMXcr4bNCaKWci65c400', '_blank');
+                App.showToast('Impossible de charger le portail. Contacte iron.fuel@outlook.com');
             }
         } catch (err) {
-            // Fallback: direct Stripe Customer Portal link
-            window.open('https://billing.stripe.com/p/login/dRmcMXcr4bNCaKWci65c400', '_blank');
+            App.showToast('Erreur réseau. Réessaie ou contacte iron.fuel@outlook.com');
         }
     },
 

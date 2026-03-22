@@ -11,14 +11,9 @@ function getClientIP(event) {
 }
 
 function hashIP(ip) {
-    // Simple hash to avoid storing raw IPs
-    let hash = 0;
-    for (let i = 0; i < ip.length; i++) {
-        const chr = ip.charCodeAt(i);
-        hash = ((hash << 5) - hash) + chr;
-        hash |= 0;
-    }
-    return 'ip_' + Math.abs(hash).toString(36);
+    // SHA-256 hash to avoid storing raw IPs
+    const crypto = require('crypto');
+    return 'ip_' + crypto.createHash('sha256').update(ip + (process.env.IP_HASH_SALT || 'ironfuel')).digest('hex').substring(0, 16);
 }
 
 const ALLOWED_ORIGIN = process.env.URL || 'https://theironfuel.netlify.app';
@@ -140,6 +135,24 @@ exports.handler = async (event, context) => {
         }
 
         if (action === 'paid') {
+            // Require Firebase auth token to mark as paid
+            const authHeader = event.headers.authorization || event.headers.Authorization || '';
+            const token = authHeader.replace('Bearer ', '');
+            if (!token) {
+                return { statusCode: 401, headers, body: JSON.stringify({ error: 'Auth required' }) };
+            }
+            try {
+                const adminPkg = require('firebase-admin');
+                if (!adminPkg.apps.length) {
+                    const sa = process.env.FIREBASE_SERVICE_ACCOUNT;
+                    if (sa) adminPkg.initializeApp({ credential: adminPkg.credential.cert(JSON.parse(sa)) });
+                }
+                if (adminPkg.apps.length) await adminPkg.auth().verifyIdToken(token);
+                else return { statusCode: 403, headers, body: JSON.stringify({ error: 'Auth not configured' }) };
+            } catch (e) {
+                return { statusCode: 403, headers, body: JSON.stringify({ error: 'Invalid token' }) };
+            }
+
             // Mark IP as paid
             let record = null;
             try {
@@ -173,11 +186,11 @@ exports.handler = async (event, context) => {
 
     } catch (err) {
         console.error('Trial check error:', err);
-        // Fail open — don't block users if the function errors
+        // Fail closed — do not grant free trial on error
         return {
             statusCode: 200,
             headers,
-            body: JSON.stringify({ allowed: true, reason: 'error', daysLeft: 14 })
+            body: JSON.stringify({ allowed: true, reason: 'error', daysLeft: 0 })
         };
     }
 };

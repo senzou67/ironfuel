@@ -5,10 +5,21 @@ const stripe = STRIPE_KEY ? require('stripe')(STRIPE_KEY) : null;
 
 const ALLOWED_ORIGIN = process.env.URL || 'https://theironfuel.netlify.app';
 
+const admin = (() => {
+    try {
+        const a = require('firebase-admin');
+        if (!a.apps.length) {
+            const sa = process.env.FIREBASE_SERVICE_ACCOUNT;
+            if (sa) a.initializeApp({ credential: a.credential.cert(JSON.parse(sa)) });
+        }
+        return a.apps.length ? a : null;
+    } catch { return null; }
+})();
+
 exports.handler = async (event) => {
     const headers = {
         'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Access-Control-Allow-Methods': 'POST, OPTIONS'
     };
 
@@ -18,6 +29,15 @@ exports.handler = async (event) => {
 
     if (event.httpMethod !== 'POST') {
         return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
+    }
+
+    // Require Firebase auth
+    if (admin) {
+        const authHeader = event.headers.authorization || event.headers.Authorization || '';
+        const token = authHeader.replace('Bearer ', '');
+        if (!token) return { statusCode: 401, headers, body: JSON.stringify({ error: 'Auth required' }) };
+        try { await admin.auth().verifyIdToken(token); }
+        catch (e) { return { statusCode: 403, headers, body: JSON.stringify({ error: 'Invalid token' }) }; }
     }
 
     try {
@@ -42,7 +62,7 @@ exports.handler = async (event) => {
         return {
             statusCode: 500,
             headers,
-            body: JSON.stringify({ error: err.message })
+            body: JSON.stringify({ error: 'Verification failed' })
         };
     }
 };

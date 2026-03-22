@@ -206,9 +206,18 @@ const TrialService = {
                 ? AuthService.getCurrentUser().uid
                 : Storage._get('device_id', this._generateDeviceId());
 
+            const reqHeaders = { 'Content-Type': 'application/json' };
+            // Send auth token for 'paid' action (required by server)
+            if (action === 'paid' && AuthService.isLoggedIn()) {
+                try {
+                    const token = await AuthService.getCurrentUser().getIdToken();
+                    reqHeaders['Authorization'] = 'Bearer ' + token;
+                } catch(e) {}
+            }
+
             await fetch('/.netlify/functions/trial-check', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: reqHeaders,
                 body: JSON.stringify({ action, userId })
             });
         } catch (err) {
@@ -417,9 +426,14 @@ const TrialService = {
     async _verifyAndUnlock(sessionId, plan) {
         if (sessionId) {
             try {
+                const reqHeaders = { 'Content-Type': 'application/json' };
+                try {
+                    const user = AuthService.getCurrentUser();
+                    if (user) reqHeaders['Authorization'] = 'Bearer ' + await user.getIdToken();
+                } catch(e) {}
                 const res = await fetch('/.netlify/functions/verify-payment', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: reqHeaders,
                     body: JSON.stringify({ sessionId })
                 });
                 const data = await res.json();
@@ -428,8 +442,10 @@ const TrialService = {
                     return;
                 }
             } catch (err) {
-                // Network error — give benefit of the doubt but mark for recheck
-                console.warn('Payment verification network error, granting temporarily');
+                // Network error — do NOT grant premium without verification
+                console.warn('Payment verification network error');
+                App.showToast('Vérification en cours… Vérifie ta connexion.');
+                return;
             }
         }
 
@@ -440,7 +456,12 @@ const TrialService = {
     },
 
     _generateDeviceId() {
-        const id = 'dev_' + Math.random().toString(36).substr(2, 16);
+        let id;
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+            id = 'dev_' + crypto.randomUUID();
+        } else {
+            id = 'dev_' + Math.random().toString(36).substr(2, 16);
+        }
         Storage._set('device_id', id);
         return id;
     }

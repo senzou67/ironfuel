@@ -34,6 +34,13 @@ exports.handler = async (event) => {
     }
 
     try {
+        // Admin auth: require ADMIN_API_KEY to send notifications
+        const adminKey = process.env.ADMIN_API_KEY;
+        const authHeader = event.headers['x-admin-key'] || event.headers['X-Admin-Key'] || '';
+        if (!adminKey || authHeader !== adminKey) {
+            return { statusCode: 403, headers, body: JSON.stringify({ error: 'Forbidden' }) };
+        }
+
         const { userId, title, body, broadcast } = JSON.parse(event.body || '{}');
         const db = getDb();
         if (!db) {

@@ -65,26 +65,16 @@ const App = {
                 this._dismissSplash();
                 AuthService.showLoginScreen();
             } else {
-                // Init cloud sync + restore data if needed
-                SyncService.init();
-                await SyncService.onLogin();
-
-                // Logged in → check server-side trial (IP block)
-                const hasAccess = await TrialService.checkServerTrial();
-
-                // Show GDPR consent if not yet accepted
-                this._showGDPRConsentIfNeeded();
-
-                // Check onboarding or go to dashboard
-                const profile = Storage.getProfile();
-                if (!profile.weight || profile.weight === 0) {
+                // Show GDPR consent first — block sync/trial until consent given
+                const hasConsent = this._hasGDPRConsent();
+                if (!hasConsent) {
                     this._dismissSplash();
-                    Onboarding.start();
+                    this._showGDPRConsentIfNeeded(() => {
+                        // Consent given — now init sync and continue
+                        this._postConsentInit();
+                    });
                 } else {
-                    this.navigate('dashboard');
-                    this._dismissSplash();
-                    // R3: Show tutorial on first visit
-                    this._showTutorialIfNeeded();
+                    await this._postConsentInit();
                 }
             }
         });
@@ -236,11 +226,37 @@ const App = {
         }
     },
 
+    _hasGDPRConsent() {
+        try { return !!localStorage.getItem('nutritrack_gdpr_consent'); }
+        catch(e) { return true; } // If localStorage broken, don't block
+    },
+
+    async _postConsentInit() {
+        // Init cloud sync + restore data if needed
+        SyncService.init();
+        await SyncService.onLogin();
+
+        // Check server-side trial (IP block)
+        await TrialService.checkServerTrial();
+
+        // Check onboarding or go to dashboard
+        const profile = Storage.getProfile();
+        if (!profile.weight || profile.weight === 0) {
+            this._dismissSplash();
+            Onboarding.start();
+        } else {
+            this.navigate('dashboard');
+            this._dismissSplash();
+            this._showTutorialIfNeeded();
+        }
+    },
+
     // RGPD consent modal — shown once before any data processing
-    _showGDPRConsentIfNeeded() {
+    _showGDPRConsentIfNeeded(onAccept) {
         try {
-            if (localStorage.getItem('nutritrack_gdpr_consent')) return;
-        } catch(e) { return; }
+            if (localStorage.getItem('nutritrack_gdpr_consent')) { if (onAccept) onAccept(); return; }
+        } catch(e) { if (onAccept) onAccept(); return; }
+        this._gdprCallback = onAccept || null;
 
         const overlay = document.createElement('div');
         overlay.id = 'gdpr-overlay';
@@ -318,6 +334,11 @@ const App = {
             overlay.style.opacity = '0';
             overlay.style.transition = 'opacity 0.3s';
             setTimeout(() => overlay.remove(), 300);
+        }
+        // Trigger post-consent initialization
+        if (this._gdprCallback) {
+            this._gdprCallback();
+            this._gdprCallback = null;
         }
     },
 
@@ -425,9 +446,16 @@ const Onboarding = {
         document.body.appendChild(overlay);
     },
 
+    _escapeHTML(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    },
+
     stepWelcome() {
         const user = AuthService.getCurrentUser();
-        const displayName = user?.displayName || user?.email?.split('@')[0] || '';
+        const rawName = user?.displayName || user?.email?.split('@')[0] || '';
+        const displayName = this._escapeHTML(rawName);
         return `
             <div class="ob-icon">💪</div>
             <h2>Bienvenue ${displayName} !</h2>
@@ -651,8 +679,9 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 
 // PWA Force-Update: detect new service worker and auto-reload
+// SW registration is in index.html <head> — here we just attach update listeners
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').then(reg => {
+    navigator.serviceWorker.ready.then(reg => {
         // Check for updates every 60s
         setInterval(() => reg.update(), 60000);
 
@@ -661,14 +690,12 @@ if ('serviceWorker' in navigator) {
             if (!newSW) return;
             newSW.addEventListener('statechange', () => {
                 if (newSW.state === 'activated' && navigator.serviceWorker.controller) {
-                    // New version active — reload to get fresh assets
                     window.location.reload();
                 }
             });
         });
     });
 
-    // If a new SW took control (skipWaiting + clients.claim), reload immediately
     navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (window._swReloading) return;
         window._swReloading = true;

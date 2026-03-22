@@ -291,16 +291,23 @@ const Storage = {
     },
 
     // === STREAK ===
+    _streakCache: null,
+    _streakCacheDate: null,
+
     getStreak() {
+        const today = this._dateKey();
+        if (this._streakCache !== null && this._streakCacheDate === today) {
+            return this._streakCache;
+        }
+
         const dates = this.getLogDates();
-        if (dates.length === 0) return 0;
+        if (dates.length === 0) { this._streakCache = 0; this._streakCacheDate = today; return 0; }
 
         let streak = 0;
-        const today = new Date();
+        const now = new Date();
         for (let i = 0; i < 365; i++) {
-            const d = new Date(today);
+            const d = new Date(now);
             d.setDate(d.getDate() - i);
-            const key = this._dateKey(d);
             const log = this.getDayLog(d);
             const hasEntries = Object.values(log.meals).some(m => m.length > 0);
             if (hasEntries) {
@@ -309,7 +316,13 @@ const Storage = {
                 break;
             }
         }
+        this._streakCache = streak;
+        this._streakCacheDate = today;
         return streak;
+    },
+
+    invalidateStreakCache() {
+        this._streakCache = null;
     },
 
     // === STATISTIQUES ALIMENTS (Favoris intelligents) ===
@@ -540,7 +553,7 @@ const Storage = {
 
     importData(data) {
         // Only import nutritrack_ keys and block sensitive overrides
-        const blocked = ['nutritrack_firebase_config', 'nutritrack_trial'];
+        const blocked = ['nutritrack_firebase_config', 'nutritrack_trial', 'nutritrack_coins', 'nutritrack_owned_items', 'nutritrack_equipped_items', 'nutritrack_creature', 'nutritrack_creature_streak', 'nutritrack_auth_user', 'nutritrack_device_id', 'nutritrack_fcm_token'];
         Object.entries(data).forEach(([key, value]) => {
             if (!key.startsWith('nutritrack_')) return;
             if (blocked.includes(key)) return;

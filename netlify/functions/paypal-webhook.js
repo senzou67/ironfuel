@@ -30,6 +30,42 @@ exports.handler = async (event) => {
     }
 
     try {
+        // Verify PayPal webhook signature
+        const webhookId = process.env.PAYPAL_WEBHOOK_ID;
+        if (webhookId) {
+            const PAYPAL_API = process.env.PAYPAL_MODE === 'live'
+                ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
+            const clientId = process.env.PAYPAL_CLIENT_ID;
+            const secret = process.env.PAYPAL_SECRET;
+            if (clientId && secret) {
+                const auth = Buffer.from(`${clientId}:${secret}`).toString('base64');
+                const tokenRes = await fetch(`${PAYPAL_API}/v1/oauth2/token`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'grant_type=client_credentials'
+                });
+                const tokenData = await tokenRes.json();
+                const verifyRes = await fetch(`${PAYPAL_API}/v1/notifications/verify-webhook-signature`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${tokenData.access_token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        auth_algo: event.headers['paypal-auth-algo'],
+                        cert_url: event.headers['paypal-cert-url'],
+                        transmission_id: event.headers['paypal-transmission-id'],
+                        transmission_sig: event.headers['paypal-transmission-sig'],
+                        transmission_time: event.headers['paypal-transmission-time'],
+                        webhook_id: webhookId,
+                        webhook_event: JSON.parse(event.body)
+                    })
+                });
+                const verifyData = await verifyRes.json();
+                if (verifyData.verification_status !== 'SUCCESS') {
+                    console.error('[PayPal Webhook] Signature verification failed:', verifyData);
+                    return { statusCode: 403, headers, body: 'Invalid signature' };
+                }
+            }
+        }
+
         const body = JSON.parse(event.body || '{}');
         const eventType = body.event_type;
         const resource = body.resource || {};

@@ -59,8 +59,18 @@ exports.handler = async (event) => {
         const { orderId, subscriptionId, userId, type, plan } = JSON.parse(event.body || '{}');
         const db = getDb();
 
-        // Handle subscription confirmation (from client-side PayPal Buttons)
+        // Handle subscription confirmation — verify with PayPal API first
         if (type === 'subscription' && subscriptionId) {
+            // Verify subscription exists and is active on PayPal
+            const accessToken = await getAccessToken();
+            const subRes = await fetch(`${PAYPAL_API}/v1/billing/subscriptions/${subscriptionId}`, {
+                headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' }
+            });
+            const subData = await subRes.json();
+            if (subData.status !== 'ACTIVE' && subData.status !== 'APPROVED') {
+                return { statusCode: 400, headers, body: JSON.stringify({ error: 'Subscription not active', status: subData.status }) };
+            }
+
             if (db) {
                 await db.collection('subscriptions').doc(userId || subscriptionId).set({
                     provider: 'paypal',

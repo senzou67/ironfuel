@@ -30,11 +30,11 @@ exports.handler = async (event) => {
         // === DONATION (one-time payment) ===
         if (mode === 'donation') {
             const donationAmount = amount || 5;
-            if (donationAmount < 0.50) {
+            if (donationAmount < 0.50 || donationAmount > 500) {
                 return {
                     statusCode: 400,
                     headers,
-                    body: JSON.stringify({ error: 'Le montant minimum est de 0.50€.' })
+                    body: JSON.stringify({ error: 'Le montant doit être entre 0.50€ et 500€.' })
                 };
             }
             const amountCents = Math.round(donationAmount * 100);
@@ -142,7 +142,7 @@ exports.handler = async (event) => {
         return {
             statusCode: 500,
             headers,
-            body: JSON.stringify({ error: err.message })
+            body: JSON.stringify({ error: 'Checkout creation failed' })
         };
     }
 };

@@ -36,7 +36,7 @@ if (FCM_CONFIG.messagingSenderId && FCM_CONFIG.appId) {
     console.log('[SW] FCM not configured — set messagingSenderId & appId in sw.js');
 }
 
-const CACHE_NAME = 'ironfuel-v54';
+const CACHE_NAME = 'ironfuel-v55';
 const ASSETS = [
     '/',
     '/index.html',
@@ -115,7 +115,7 @@ self.addEventListener('activate', (e) => {
     self.clients.claim();
 });
 
-// Fetch — network first for JS/CSS/HTML, cache fallback for offline
+// Fetch — cache-first for versioned assets, network-first for HTML/API
 self.addEventListener('fetch', (e) => {
     if (e.request.method !== 'GET') return;
     const url = new URL(e.request.url);
@@ -128,8 +128,24 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
-    // Network-first for all app assets (JS, CSS, HTML)
-    // Ensures updates are always served immediately
+    // Cache-first for versioned assets (?v=55) — immutable until version bump
+    if (url.search && /[?&]v=\d+/.test(url.search)) {
+        e.respondWith(
+            caches.match(e.request).then(cached => {
+                if (cached) return cached;
+                return fetch(e.request).then(response => {
+                    if (response.ok) {
+                        const clone = response.clone();
+                        caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+                    }
+                    return response;
+                });
+            })
+        );
+        return;
+    }
+
+    // Network-first for HTML and non-versioned assets
     e.respondWith(
         fetch(e.request).then(response => {
             if (response.ok) {
@@ -138,7 +154,6 @@ self.addEventListener('fetch', (e) => {
             }
             return response;
         }).catch(() => {
-            // Offline fallback — serve from cache
             return caches.match(e.request);
         })
     );
