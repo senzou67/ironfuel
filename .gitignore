@@ -1,0 +1,13 @@
+node_modules/
+.netlify/
+.env
+.env.local
+*.log
+.DS_Store
+Thumbs.db
+desktop/build/
+desktop/dist/
+*.exe
+desktop/__pycache__/
+*.pyc
+.claude/

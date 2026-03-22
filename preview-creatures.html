@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creature Preview — IronFuel</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #1a1a2e; color: white; padding: 20px; }
+        h1 { text-align: center; margin-bottom: 8px; font-size: 24px; }
+        .subtitle { text-align: center; color: #aaa; margin-bottom: 24px; font-size: 14px; }
+        .type-section { margin-bottom: 40px; }
+        .type-title { font-size: 18px; font-weight: 700; margin-bottom: 12px; padding: 8px 16px; border-radius: 8px; display: inline-block; }
+        .type-title.fire { background: linear-gradient(135deg, #E64A19, #FF6D00); }
+        .type-title.plant { background: linear-gradient(135deg, #2E7D32, #4CAF50); }
+        .type-title.water { background: linear-gradient(135deg, #0D47A1, #1E88E5); }
+        .forms-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; }
+        .form-card { background: #2a2a3e; border-radius: 16px; padding: 16px; text-align: center; border: 1px solid #3a3a4e; }
+        .form-card .label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .form-card .name { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+        .form-card .xp { font-size: 11px; color: #aaa; margin-top: 6px; }
+        .form-card svg { display: block; margin: 0 auto; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
+        .items-section { margin-top: 16px; }
+        .items-title { font-size: 14px; font-weight: 600; color: #ccc; margin-bottom: 10px; padding-left: 4px; }
+        .items-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
+        .item-card { background: #232338; border-radius: 12px; padding: 10px; text-align: center; border: 1px solid #333; }
+        .item-card svg { display: block; margin: 0 auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+        .item-card .item-name { font-size: 10px; color: #aaa; margin-top: 4px; text-transform: capitalize; }
+        .error { color: #ff6b6b; background: #2a1a1a; padding: 16px; border-radius: 8px; margin: 16px 0; white-space: pre-wrap; font-family: monospace; font-size: 12px; }
+        .section-divider { border: none; border-top: 1px solid #333; margin: 32px 0; }
+        @media (max-width: 700px) { .forms-row { grid-template-columns: repeat(2, 1fr); } .items-row { grid-template-columns: repeat(3, 1fr); } body { padding: 12px; } }
+    </style>
+</head>
+<body>
+    <h1>🎮 Creature Preview</h1>
+    <p class="subtitle">Les 3 starters × 4 formes d'évolution + prévisualisation items</p>
+    <div id="error-box"></div>
+    <div id="gallery"></div>
+
+    <script>
+        // Catch all errors
+        window.onerror = function(msg, url, line, col, err) {
+            document.getElementById('error-box').innerHTML = '<div class="error">ERROR: ' + msg + '\nLine: ' + line + '\nFile: ' + url + '</div>';
+        };
+
+        // Mock all dependencies that avatar.js needs
+        const Storage = {
+            _get: function(k, d) { return d; },
+            _set: function() {},
+            _dateKey: function() { return new Date().toISOString().split('T')[0]; },
+            getGoals: function() { return { calories: 2000, protein: 150, carbs: 250, fat: 70, water: 8 }; },
+            getDayTotals: function() { return { calories: 1200, protein: 80, carbs: 120, fat: 40 }; },
+            getDayLog: function() { return { meals: { breakfast: ['a'], lunch: [], dinner: [], snack: [] } }; },
+            getCreature: function() { return { type: 'fire', xp: 0, form: 1, chosen: true }; },
+            setCreature: function() {},
+            getCoins: function() { return 42; },
+            getEquippedItems: function() { return []; },
+            getProfile: function() { return { name: 'David' }; },
+            hasChosenStarter: function() { return true; },
+            getCreatureStreak: function() { return { current: 5, best: 10, lastActiveDate: null, freezesOwned: 1, freezesUsed: [] }; },
+            setCreatureStreak: function() {},
+            addCreatureXP: function() {},
+            hasXPBeenAwardedToday: function() { return true; },
+            markXPAwarded: function() {},
+            getWater: function() { return 3; },
+            isItemOwned: function() { return false; },
+            isItemEquipped: function() { return false; }
+        };
+        const Modal = { show: function() {}, close: function() {} };
+        const App = { showToast: function() {}, navigate: function() {}, showSuccessCheck: function() {} };
+    </script>
+    <script src="js/components/avatar.js"></script>
+    <script>
+        try {
+            if (typeof Creature === 'undefined') throw new Error('Creature object not loaded');
+
+            const types = [
+                { key: 'fire', label: '🔥 Flamoussin — Feu', names: Creature.NAMES.fire },
+                { key: 'plant', label: '🌿 Herbachat — Plante', names: Creature.NAMES.plant },
+                { key: 'water', label: '💧 Aquarein — Eau', names: Creature.NAMES.water }
+            ];
+            const xpLevels = [0, 500, 2000, 8000];
+            const formLabels = ['Forme 1 — Bébé', 'Forme 2 — Juvénile', 'Forme 3 — Ado', 'Forme 4 — Ultime'];
+
+            // Items to preview on creatures
+            const previewItems = [
+                { id: 'clothes_bandana', type: 'clothes', label: 'Bandana' },
+                { id: 'clothes_hoodie', type: 'clothes', label: 'Hoodie' },
+                { id: 'clothes_cape', type: 'clothes', label: 'Cape' },
+                { id: 'clothes_armor_light', type: 'clothes', label: 'Armure' },
+                { id: 'clothes_royal', type: 'clothes', label: 'Royal' },
+                { id: 'clothes_legendary', type: 'clothes', label: 'Légendaire' },
+                { id: 'scarf_basic', type: 'scarf', label: 'Écharpe' },
+                { id: 'scarf_flame', type: 'scarf', label: 'Écharpe Feu' },
+                { id: 'scarf_celestial', type: 'scarf', label: 'Céleste' },
+                { id: 'aura_fire', type: 'aura', label: 'Aura Feu' },
+                { id: 'aura_cosmos', type: 'aura', label: 'Aura Cosmos' },
+                { id: 'aura_divine', type: 'aura', label: 'Aura Divin' },
+                { id: 'sparkle_stars', type: 'sparkle', label: 'Étoiles' },
+                { id: 'sparkle_rainbow', type: 'sparkle', label: 'Arc-en-ciel' },
+                { id: 'sparkle_galaxy', type: 'sparkle', label: 'Galaxie' },
+                { id: 'pet_bird', type: 'pet', label: 'Oiseau' },
+                { id: 'pet_wolf', type: 'pet', label: 'Loup' },
+                { id: 'pet_dragon', type: 'pet', label: 'Dragon' },
+                { id: 'pet_phoenix', type: 'pet', label: 'Phénix' }
+            ];
+
+            let html = '';
+
+            // === SECTION 1: All 3 types × 4 forms (no items) ===
+            for (const t of types) {
+                html += '<div class="type-section">';
+                html += '<div class="type-title ' + t.key + '">' + t.label + '</div>';
+                html += '<div class="forms-row">';
+                for (let f = 0; f < 4; f++) {
+                    const xp = xpLevels[f];
+                    const svg = Creature.buildSVG(140, {
+                        creatureData: { type: t.key, xp: xp, form: 1, chosen: true },
+                        mood: f === 3 ? 'celebrating' : 'happy',
+                        previewItems: []
+                    });
+                    html += '<div class="form-card">' +
+                        '<div class="label">' + formLabels[f] + '</div>' +
+                        '<div class="name">' + t.names[f] + '</div>' +
+                        svg +
+                        '<div class="xp">' + xp + ' XP</div>' +
+                    '</div>';
+                }
+                html += '</div>';
+
+                // === Item previews for this type (using form 2 = Ado, good middle ground) ===
+                html += '<div class="items-section">';
+                html += '<div class="items-title">👁 Items sur ' + t.names[2] + ' (Forme 3)</div>';
+                html += '<div class="items-row">';
+                for (const item of previewItems) {
+                    const svg = Creature.buildSVG(100, {
+                        creatureData: { type: t.key, xp: 2000, form: 1, chosen: true },
+                        mood: 'happy',
+                        previewItems: [{ id: item.id, type: item.type }]
+                    });
+                    html += '<div class="item-card">' +
+                        svg +
+                        '<div class="item-name">' + item.label + '</div>' +
+                    '</div>';
+                }
+                html += '</div></div>';
+
+                html += '</div>';
+            }
+
+            document.getElementById('gallery').innerHTML = html;
+        } catch (e) {
+            document.getElementById('error-box').innerHTML = '<div class="error">JS ERROR: ' + e.message + '\n' + e.stack + '</div>';
+        }
+    </script>
+</body>
+</html>

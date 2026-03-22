@@ -1,0 +1,568 @@
+const Storage = {
+    _get(key, defaultVal) {
+        try {
+            const data = localStorage.getItem('nutritrack_' + key);
+            return data ? JSON.parse(data) : defaultVal;
+        } catch {
+            return defaultVal;
+        }
+    },
+
+    _set(key, value) {
+        try {
+            localStorage.setItem('nutritrack_' + key, JSON.stringify(value));
+        } catch (e) {
+            // QuotaExceededError — localStorage is full
+            if (e.name === 'QuotaExceededError' || e.code === 22) {
+                console.error('localStorage quota exceeded for key:', key);
+                // Try to free space by removing old log dates
+                try {
+                    const dates = this._get('log_dates', []);
+                    if (dates.length > 90) {
+                        const toRemove = dates.slice(0, dates.length - 90);
+                        toRemove.forEach(d => {
+                            try { localStorage.removeItem('nutritrack_log_' + d); } catch(x) {}
+                        });
+                        this._set('log_dates', dates.slice(-90));
+                        // Retry original write
+                        localStorage.setItem('nutritrack_' + key, JSON.stringify(value));
+                        return;
+                    }
+                } catch(x) {}
+                if (typeof App !== 'undefined' && App.showToast) {
+                    App.showToast('Stockage plein — exporte tes données');
+                }
+            }
+        }
+    },
+
+    // === PROFIL ===
+    getProfile() {
+        return this._get('profile', {
+            name: '',
+            age: 30,
+            sex: 'male',
+            height: 175,
+            weight: 70,
+            activity: 'moderate',
+            goal: 'maintain'
+        });
+    },
+
+    setProfile(profile) {
+        this._set('profile', profile);
+        // Recalculate goals when profile changes
+        const goals = this.getGoals();
+        if (!goals.custom) {
+            const auto = NutritionService.calculateDailyNeeds(profile);
+            goals.calories = auto.calories;
+            goals.protein = auto.protein;
+            goals.carbs = auto.carbs;
+            goals.fat = auto.fat;
+            this._set('goals', goals);
+        }
+        this._triggerSync();
+    },
+
+    // === OBJECTIFS ===
+    getGoals() {
+        return this._get('goals', {
+            calories: 2000,
+            protein: 150,
+            carbs: 250,
+            fat: 65,
+            fiber: 25,
+            water: 12, // 12 glasses of 250ml = 3L
+            custom: false
+        });
+    },
+
+    setGoals(goals) {
+        this._set('goals', goals);
+        this._triggerSync();
+    },
+
+    // === JOURNAL ALIMENTAIRE ===
+    _dateKey(date) {
+        if (!date) date = new Date();
+        return date.toISOString().split('T')[0];
+    },
+
+    getDayLog(date) {
+        const key = this._dateKey(date);
+        return this._get('log_' + key, {
+            date: key,
+            meals: {
+                breakfast: [],
+                lunch: [],
+                dinner: [],
+                snack: []
+            },
+            water: 0
+        });
+    },
+
+    setDayLog(log) {
+        this._set('log_' + log.date, log);
+        this._updateLogDates(log.date);
+        this._triggerSync();
+    },
+
+    addFoodToMeal(mealType, foodEntry, date) {
+        const log = this.getDayLog(date);
+        foodEntry.id = Date.now() + Math.random();
+        log.meals[mealType].push(foodEntry);
+        this.setDayLog(log);
+        return foodEntry;
+    },
+
+    removeFoodFromMeal(mealType, entryId, date) {
+        const log = this.getDayLog(date);
+        log.meals[mealType] = log.meals[mealType].filter(f => f.id !== entryId);
+        this.setDayLog(log);
+    },
+
+    updateFoodInMeal(mealType, entryId, updates, date) {
+        const log = this.getDayLog(date);
+        const idx = log.meals[mealType].findIndex(f => f.id === entryId);
+        if (idx >= 0) {
+            Object.assign(log.meals[mealType][idx], updates);
+            this.setDayLog(log);
+        }
+    },
+
+    // === EAU ===
+    getWater(date) {
+        const log = this.getDayLog(date);
+        return log.water || 0;
+    },
+
+    setWater(count, date) {
+        const log = this.getDayLog(date);
+        log.water = count;
+        this.setDayLog(log);
+    },
+
+    // === HISTORIQUE ===
+    _updateLogDates(dateStr) {
+        const dates = this._get('log_dates', []);
+        if (!dates.includes(dateStr)) {
+            dates.push(dateStr);
+            dates.sort();
+            this._set('log_dates', dates);
+        }
+    },
+
+    getLogDates() {
+        return this._get('log_dates', []);
+    },
+
+    getDayTotals(date) {
+        const log = this.getDayLog(date);
+        let totals = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
+        Object.values(log.meals).forEach(meal => {
+            meal.forEach(entry => {
+                totals.calories += entry.calories || 0;
+                totals.protein += entry.protein || 0;
+                totals.carbs += entry.carbs || 0;
+                totals.fat += entry.fat || 0;
+                totals.fiber += entry.fiber || 0;
+            });
+        });
+        return totals;
+    },
+
+    getMealTotals(mealType, date) {
+        const log = this.getDayLog(date);
+        let totals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+        (log.meals[mealType] || []).forEach(entry => {
+            totals.calories += entry.calories || 0;
+            totals.protein += entry.protein || 0;
+            totals.carbs += entry.carbs || 0;
+            totals.fat += entry.fat || 0;
+        });
+        return totals;
+    },
+
+    getHistoryRange(days) {
+        const results = [];
+        const today = new Date();
+        for (let i = days - 1; i >= 0; i--) {
+            const d = new Date(today);
+            d.setDate(d.getDate() - i);
+            const totals = this.getDayTotals(d);
+            results.push({
+                date: this._dateKey(d),
+                ...totals
+            });
+        }
+        return results;
+    },
+
+    // === POIDS ===
+    getWeightLog() {
+        return this._get('weight_log', []);
+    },
+
+    addWeight(weight, date) {
+        const log = this.getWeightLog();
+        const key = this._dateKey(date);
+        const existing = log.findIndex(e => e.date === key);
+        if (existing >= 0) {
+            log[existing].weight = weight;
+        } else {
+            log.push({ date: key, weight });
+            log.sort((a, b) => a.date.localeCompare(b.date));
+        }
+        this._set('weight_log', log);
+        this._triggerSync();
+    },
+
+    // === FAVORIS ===
+    getFavorites() {
+        return this._get('favorites', []);
+    },
+
+    toggleFavorite(foodId) {
+        const favs = this.getFavorites();
+        const idx = favs.indexOf(foodId);
+        if (idx >= 0) {
+            favs.splice(idx, 1);
+        } else {
+            favs.push(foodId);
+        }
+        this._set('favorites', favs);
+        return idx < 0;
+    },
+
+    isFavorite(foodId) {
+        return this.getFavorites().includes(foodId);
+    },
+
+    // === RÉCENTS ===
+    getRecent() {
+        return this._get('recent', []);
+    },
+
+    addRecent(foodId) {
+        let recent = this.getRecent();
+        recent = recent.filter(id => id !== foodId);
+        recent.unshift(foodId);
+        if (recent.length > 20) recent = recent.slice(0, 20);
+        this._set('recent', recent);
+    },
+
+    // === PARAMÈTRES ===
+    getSettings() {
+        return this._get('settings', {
+            apiKey: '',
+            theme: 'auto',
+            notifications: false
+        });
+    },
+
+    setSettings(settings) {
+        this._set('settings', settings);
+    },
+
+    getApiKey() {
+        return this.getSettings().apiKey;
+    },
+
+    setApiKey(key) {
+        const settings = this.getSettings();
+        settings.apiKey = key;
+        this.setSettings(settings);
+    },
+
+    getTheme() {
+        return this.getSettings().theme;
+    },
+
+    setTheme(theme) {
+        const settings = this.getSettings();
+        settings.theme = theme;
+        this.setSettings(settings);
+        if (theme === 'auto') {
+            document.documentElement.removeAttribute('data-theme');
+        } else {
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+    },
+
+    // === STREAK ===
+    getStreak() {
+        const dates = this.getLogDates();
+        if (dates.length === 0) return 0;
+
+        let streak = 0;
+        const today = new Date();
+        for (let i = 0; i < 365; i++) {
+            const d = new Date(today);
+            d.setDate(d.getDate() - i);
+            const key = this._dateKey(d);
+            const log = this.getDayLog(d);
+            const hasEntries = Object.values(log.meals).some(m => m.length > 0);
+            if (hasEntries) {
+                streak++;
+            } else if (i > 0) {
+                break;
+            }
+        }
+        return streak;
+    },
+
+    // === STATISTIQUES ALIMENTS (Favoris intelligents) ===
+    getFoodStats() {
+        return this._get('food_stats', {});
+    },
+
+    trackFoodUsage(foodId, mealType) {
+        const stats = this.getFoodStats();
+        const key = String(foodId);
+        if (!stats[key]) {
+            stats[key] = { count: 0, lastUsed: null, meals: {} };
+        }
+        stats[key].count++;
+        stats[key].lastUsed = new Date().toISOString();
+        stats[key].meals[mealType] = (stats[key].meals[mealType] || 0) + 1;
+        this._set('food_stats', stats);
+    },
+
+    getTopFoods(mealType, limit = 10) {
+        const stats = this.getFoodStats();
+        const now = Date.now();
+
+        let entries = Object.entries(stats).map(([foodId, s]) => {
+            const daysSinceUse = (now - new Date(s.lastUsed).getTime()) / (1000 * 60 * 60 * 24);
+            const recencyWeight = Math.max(0, 1 - (daysSinceUse / 30));
+            const mealRelevance = mealType && s.meals[mealType] ? (s.meals[mealType] / s.count) : 0.5;
+            const score = s.count * (0.5 + recencyWeight) * (0.5 + mealRelevance);
+            return { foodId: isNaN(Number(foodId)) ? foodId : parseInt(foodId), score, count: s.count };
+        });
+
+        entries.sort((a, b) => b.score - a.score);
+        return entries.slice(0, limit);
+    },
+
+    getCurrentMealType() {
+        const hour = new Date().getHours();
+        if (hour >= 6 && hour < 10) return 'breakfast';
+        if (hour >= 11 && hour < 14) return 'lunch';
+        if (hour >= 14 && hour < 17) return 'snack';
+        if (hour >= 17 && hour < 22) return 'dinner';
+        return 'snack';
+    },
+
+    // === ALIMENTS PERSONNALISES ===
+    getCustomFoods() {
+        return this._get('custom_foods', []);
+    },
+
+    addCustomFood(food) {
+        const foods = this.getCustomFoods();
+        food.id = 'custom_' + Date.now();
+        food.isCustom = true;
+        foods.push(food);
+        this._set('custom_foods', foods);
+        return food;
+    },
+
+    deleteCustomFood(id) {
+        const foods = this.getCustomFoods().filter(f => f.id !== id);
+        this._set('custom_foods', foods);
+    },
+
+    // === VISION PROVIDER ===
+    getVisionProvider() {
+        return this.getSettings().visionProvider || 'auto';
+    },
+
+    setVisionProvider(provider) {
+        const settings = this.getSettings();
+        settings.visionProvider = provider;
+        this.setSettings(settings);
+    },
+
+    getGeminiKey() {
+        return this.getSettings().geminiKey || '';
+    },
+
+    setGeminiKey(key) {
+        const settings = this.getSettings();
+        settings.geminiKey = key;
+        this.setSettings(settings);
+    },
+
+    // === IRONCOINS ===
+    getCoins() {
+        return this._get('coins', 0);
+    },
+
+    addCoins(amount) {
+        const current = this.getCoins();
+        this._set('coins', current + amount);
+        this._triggerSync();
+        return current + amount;
+    },
+
+    spendCoins(amount) {
+        const current = this.getCoins();
+        if (current < amount) return false;
+        this._set('coins', current - amount);
+        this._triggerSync();
+        return true;
+    },
+
+    // === BOUTIQUE ===
+    getOwnedItems() {
+        return this._get('owned_items', []);
+    },
+
+    addOwnedItem(item) {
+        const owned = this.getOwnedItems();
+        if (!owned.find(i => i.id === item.id)) {
+            owned.push(item);
+            this._set('owned_items', owned);
+            this._triggerSync();
+        }
+    },
+
+    getEquippedItems() {
+        return this._get('equipped_items', []);
+    },
+
+    equipItem(item) {
+        let equipped = this.getEquippedItems();
+        // Only one item per type
+        equipped = equipped.filter(i => i.type !== item.type);
+        equipped.push(item);
+        this._set('equipped_items', equipped);
+        this._triggerSync();
+    },
+
+    unequipItem(itemType) {
+        let equipped = this.getEquippedItems();
+        equipped = equipped.filter(i => i.type !== itemType);
+        this._set('equipped_items', equipped);
+        this._triggerSync();
+    },
+
+    isItemEquipped(itemId) {
+        return this.getEquippedItems().some(i => i.id === itemId);
+    },
+
+    isItemOwned(itemId) {
+        return this.getOwnedItems().some(i => i.id === itemId);
+    },
+
+    // === CREATURE ===
+    getCreature() {
+        return this._get('creature', null);
+    },
+
+    setCreature(creature) {
+        this._set('creature', creature);
+        this._triggerSync();
+    },
+
+    hasChosenStarter() {
+        const c = this.getCreature();
+        return !!(c && c.chosen);
+    },
+
+    getCreatureStreak() {
+        return this._get('creature_streak', {
+            current: 0,
+            best: 0,
+            lastActiveDate: null,
+            freezesOwned: 0,
+            freezesUsed: []
+        });
+    },
+
+    setCreatureStreak(data) {
+        this._set('creature_streak', data);
+    },
+
+    addCreatureXP(amount) {
+        const creature = this.getCreature();
+        if (!creature) return;
+        creature.xp = (creature.xp || 0) + amount;
+        // Update form based on XP thresholds
+        if (creature.xp >= 8000) creature.form = 4;
+        else if (creature.xp >= 2000) creature.form = 3;
+        else if (creature.xp >= 500) creature.form = 2;
+        else creature.form = 1;
+        this.setCreature(creature);
+        return creature;
+    },
+
+    hasXPBeenAwardedToday() {
+        const today = this._dateKey();
+        return this._get('creature_xp_last', '') === today;
+    },
+
+    markXPAwarded() {
+        this._set('creature_xp_last', this._dateKey());
+    },
+
+    // === DAILY BONUS TRACKING ===
+    hasDailyCalorieBonus() {
+        const today = this._dateKey();
+        return this._get('daily_cal_bonus', '') === today;
+    },
+
+    setDailyCalorieBonus() {
+        this._set('daily_cal_bonus', this._dateKey());
+    },
+
+    hasDailyWaterBonus() {
+        const today = this._dateKey();
+        return this._get('daily_water_bonus', '') === today;
+    },
+
+    setDailyWaterBonus() {
+        this._set('daily_water_bonus', this._dateKey());
+    },
+
+    // === EXPORT ===
+    exportData() {
+        const data = {};
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('nutritrack_')) {
+                data[key] = JSON.parse(localStorage.getItem(key));
+            }
+        }
+        return data;
+    },
+
+    importData(data) {
+        // Only import nutritrack_ keys and block sensitive overrides
+        const blocked = ['nutritrack_firebase_config', 'nutritrack_trial'];
+        Object.entries(data).forEach(([key, value]) => {
+            if (!key.startsWith('nutritrack_')) return;
+            if (blocked.includes(key)) return;
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+            } catch(e) {}
+        });
+    },
+
+    clearAll() {
+        const keys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('nutritrack_')) keys.push(key);
+        }
+        keys.forEach(k => localStorage.removeItem(k));
+    },
+
+    // === CLOUD SYNC TRIGGER ===
+    _triggerSync() {
+        if (typeof SyncService !== 'undefined' && SyncService.autoSync) {
+            SyncService.autoSync();
+        }
+    }
+};

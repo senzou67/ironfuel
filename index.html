@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="IronFuel">
+    <meta name="theme-color" content="#E64A19">
+    <meta name="description" content="Suivi nutrition et musculation intelligent — Photo IA, vocal, 500+ aliments, avatar fitness">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="IronFuel — Suivi Nutrition & Musculation">
+    <meta property="og:description" content="Photo IA, vocal, 500+ aliments, créature fitness. Ton coach nutrition intelligent.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://theironfuel.netlify.app">
+    <meta property="og:image" content="https://theironfuel.netlify.app/assets/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="IronFuel — Suivi Nutrition & Musculation">
+    <meta name="twitter:description" content="Photo IA, vocal, 500+ aliments, créature fitness. Ton coach nutrition intelligent.">
+    <meta name="twitter:image" content="https://theironfuel.netlify.app/assets/og-image.png">
+
+    <title>IronFuel</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="assets/manifest.json">
+
+    <!-- iOS Icons -->
+    <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="assets/icons/icon-152.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="assets/icons/icon-192.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/icon-96.png">
+    <link rel="icon" type="image/svg+xml" href="assets/icons/icon-96.svg">
+
+    <!-- iOS Splash screens (status bar padding) -->
+    <style>
+        /* Safe area insets for iOS notch */
+        body { padding-top: env(safe-area-inset-top); }
+        #bottom-nav { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
+
+    <!-- Force cache bust for major updates -->
+    <script>
+        (function(){
+            var V = 52;
+            var stored = 0;
+            var lsWorks = true;
+            try {
+                stored = parseInt(localStorage.getItem('nutritrack_app_version') || '0');
+                localStorage.setItem('nutritrack_app_version_test', '1');
+                localStorage.removeItem('nutritrack_app_version_test');
+            } catch(e) { lsWorks = false; }
+
+            if (stored < V && lsWorks) {
+                try { localStorage.setItem('nutritrack_app_version', V); } catch(e) {}
+                // 1. Nuke ALL caches
+                if ('caches' in window) {
+                    caches.keys().then(function(keys) {
+                        return Promise.all(keys.map(function(k) { return caches.delete(k); }));
+                    });
+                }
+                // 2. Unregister all SWs, then re-register + reload
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(function(regs) {
+                        return Promise.all(regs.map(function(r) { return r.unregister(); }));
+                    }).then(function() {
+                        navigator.serviceWorker.register('/sw.js').then(function() {
+                            window.location.reload(true);
+                        });
+                    });
+                } else {
+                    window.location.reload(true);
+                }
+            } else if ('serviceWorker' in navigator) {
+                // Normal visit or private browsing: register SW + trigger update
+                navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                    reg.update();
+                });
+            }
+        })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=52">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" defer></script>
+    <!-- Firebase Auth + Firestore + Messaging -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" defer></script>
+    <!-- Firestore SDK removed — SyncService uses REST API directly -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js" defer></script>
+</head>
+<body>
+    <!-- R5: Splash Screen -->
+    <div id="splash" class="splash-screen">
+        <div class="splash-logo">IF</div>
+        <div class="splash-title">IronFuel</div>
+        <div class="splash-loading"></div>
+    </div>
+
+    <div id="app">
+        <header id="app-header">
+            <h1 id="page-title">IronFuel</h1>
+            <button id="header-back" class="header-btn hidden" onclick="window.history.back()" aria-label="Retour à la page précédente">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </button>
+        </header>
+        <main id="page-content"></main>
+        <div id="fab-menu" class="fab-menu hidden">
+            <div class="fab-overlay" onclick="App.closeFabMenu()"></div>
+            <div class="fab-options">
+                <button class="fab-option" onclick="App.navigate('camera')">
+                    <span class="fab-icon">📷</span>
+                    <span>Photo IA</span>
+                </button>
+                <button class="fab-option" onclick="App.navigate('voice')">
+                    <span class="fab-icon">🎤</span>
+                    <span>Vocal</span>
+                </button>
+                <button class="fab-option" onclick="App.navigate('search')">
+                    <span class="fab-icon">🔍</span>
+                    <span>Recherche</span>
+                </button>
+                <button class="fab-option" onclick="App.navigate('barcode')">
+                    <span class="fab-icon">📊</span>
+                    <span>Code-barres</span>
+                </button>
+            </div>
+        </div>
+        <nav id="bottom-nav" role="navigation" aria-label="Navigation principale">
+            <div class="nav-indicator" id="nav-indicator"></div>
+            <button class="nav-btn active" data-page="dashboard" aria-label="Accueil">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+                <span>Accueil</span>
+            </button>
+            <button class="nav-btn" data-page="diary" aria-label="Journal alimentaire">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                <span>Journal</span>
+            </button>
+            <button class="nav-btn fab-trigger" id="fab-btn" onclick="App.toggleFabMenu()" aria-label="Ajouter un aliment">
+                <div class="fab-circle">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="white" aria-hidden="true"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                </div>
+            </button>
+            <button class="nav-btn" data-page="avatar" aria-label="Créature">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                <span>Créature</span>
+            </button>
+            <button class="nav-btn" data-page="profile" aria-label="Profil">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                <span>Profil</span>
+            </button>
+        </nav>
+    </div>
+
+    <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+    <script src="js/db.js?v=52"></script>
+    <script src="js/storage.js?v=52"></script>
+    <script src="js/services/nutrition.js?v=52"></script>
+    <script src="js/services/vision.js?v=52"></script>
+    <script src="js/services/speech.js?v=52"></script>
+    <script src="js/services/openfoodfacts.js?v=52"></script>
+    <script src="js/services/foodimages.js?v=52"></script>
+    <script src="js/services/analytics.js?v=52"></script>
+    <script src="js/services/auth.js?v=52"></script>
+    <script src="js/services/trial.js?v=52"></script>
+    <script src="js/services/sync.js?v=52"></script>
+    <script src="js/services/notifications.js?v=52"></script>
+    <script src="js/services/paypal.js?v=52"></script>
+    <script src="js/services/micronutrients.js?v=52"></script>
+    <script src="js/components/navbar.js?v=52"></script>
+    <script src="js/components/modal.js?v=52"></script>
+    <script src="js/components/charts.js?v=52"></script>
+    <script src="js/components/mealcard.js?v=52"></script>
+    <script src="js/components/fooditem.js?v=52"></script>
+    <script src="js/components/avatar.js?v=52"></script>
+    <script src="js/pages/dashboard.js?v=52"></script>
+    <script src="js/pages/diary.js?v=52"></script>
+    <script src="js/pages/search.js?v=52"></script>
+    <script src="js/pages/camera.js?v=52"></script>
+    <script src="js/pages/voice.js?v=52"></script>
+    <script src="js/pages/barcode.js?v=52"></script>
+    <script src="js/pages/history.js?v=52"></script>
+    <script src="js/pages/profile.js?v=52"></script>
+    <script src="js/pages/settings.js?v=52"></script>
+    <script src="js/pages/customfood.js?v=52"></script>
+    <script src="js/pages/gym.js?v=52"></script>
+    <script src="js/pages/supplements.js?v=52"></script>
+    <script src="js/pages/weight.js?v=52"></script>
+    <script src="js/pages/shop.js?v=52"></script>
+    <script src="js/pages/avatar.js?v=52"></script>
+    <script src="js/app.js?v=52"></script>
+
+    <!-- SW registration handled in <head> cache-bust script -->
+</body>
+</html>

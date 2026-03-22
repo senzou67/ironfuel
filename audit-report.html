@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IronFuel v47 — Audit UX/UI Post-Redesign</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #0a0a0f;
+            color: #eaeaf0;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(ellipse at 20% 50%, rgba(230,74,25,0.08) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 20%, rgba(255,193,7,0.05) 0%, transparent 50%),
+                        radial-gradient(ellipse at 50% 80%, rgba(33,150,243,0.04) 0%, transparent 50%);
+            animation: meshFloat 20s ease-in-out infinite;
+            z-index: -1;
+        }
+        @keyframes meshFloat {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(2%, -1%) rotate(1deg); }
+            66% { transform: translate(-1%, 2%) rotate(-1deg); }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        /* Header */
+        .report-header {
+            text-align: center;
+            padding: 48px 24px;
+            margin-bottom: 40px;
+            background: rgba(22,22,30,0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        .report-header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 60%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+            animation: headerShimmer 4s ease-in-out infinite;
+        }
+        @keyframes headerShimmer {
+            0%, 70%, 100% { left: -100%; }
+            40% { left: 150%; }
+        }
+        .report-header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #E64A19, #FF6D3A, #FFC107);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .report-header .subtitle {
+            color: #9898b0;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .report-header .date {
+            color: #666;
+            font-size: 13px;
+            margin-top: 12px;
+        }
+
+        /* Score global */
+        .score-hero {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin: 32px 0 16px;
+        }
+        .score-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: conic-gradient(#E64A19 0% 88%, rgba(255,255,255,0.06) 88% 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .score-circle-inner {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #16161e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .score-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #E64A19;
+        }
+        .score-label {
+            font-size: 11px;
+            color: #9898b0;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(22,22,30,0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+        .card h2 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.01em;
+        }
+        .card h2 .emoji { font-size: 24px; }
+
+        /* Score table */
+        .score-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 6px;
+        }
+        .score-table th {
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #9898b0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 8px 16px;
+        }
+        .score-table td {
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.03);
+            font-size: 14px;
+        }
+        .score-table tr td:first-child {
+            border-radius: 12px 0 0 12px;
+            font-weight: 600;
+        }
+        .score-table tr td:last-child {
+            border-radius: 0 12px 12px 0;
+            text-align: center;
+        }
+        .score-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 44px;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 15px;
+        }
+        .score-high { background: rgba(76,175,80,0.15); color: #66BB6A; }
+        .score-mid { background: rgba(255,152,0,0.15); color: #FFA726; }
+        .score-low { background: rgba(244,67,54,0.12); color: #EF5350; }
+
+        /* Progress bar inline */
+        .score-bar {
+            width: 100%;
+            height: 5px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        .score-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s;
+        }
+
+        /* Points lists */
+        .points-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        @media (max-width: 600px) {
+            .points-grid { grid-template-columns: 1fr; }
+        }
+        .point-card {
+            background: rgba(255,255,255,0.03);
+            border-radius: 14px;
+            padding: 18px;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        .point-card h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .point-card p {
+            font-size: 13px;
+            color: #9898b0;
+            line-height: 1.5;
+        }
+
+        /* Recommendations */
+        .recommendation {
+            padding: 18px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 14px;
+            margin-bottom: 12px;
+            border-left: 3px solid #E64A19;
+        }
+        .recommendation h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #eaeaf0;
+        }
+        .recommendation p {
+            font-size: 13px;
+            color: #9898b0;
+            line-height: 1.5;
+        }
+        .recommendation code {
+            background: rgba(230,74,25,0.1);
+            color: #FF6D3A;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        /* Comparison */
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 16px;
+        }
+        @media (max-width: 600px) {
+            .comparison { grid-template-columns: 1fr; }
+        }
+        .comparison-col h3 {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+            color: #9898b0;
+        }
+        .comparison-item {
+            font-size: 13px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            display: flex;
+            justify-content: space-between;
+        }
+        .old { color: #EF5350; text-decoration: line-through; opacity: 0.6; }
+        .new { color: #66BB6A; }
+
+        /* Footer */
+        .report-footer {
+            text-align: center;
+            padding: 32px;
+            color: #666;
+            font-size: 12px;
+        }
+        .report-footer a {
+            color: #E64A19;
+            text-decoration: none;
+        }
+
+        /* Tag */
+        .tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        .tag-new { background: rgba(76,175,80,0.15); color: #66BB6A; }
+        .tag-improved { background: rgba(33,150,243,0.15); color: #42A5F5; }
+        .tag-unchanged { background: rgba(255,255,255,0.06); color: #9898b0; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="report-header">
+        <h1>IronFuel v47 — Audit UX/UI</h1>
+        <p class="subtitle">Audit post-redesign premium (glassmorphism, animations, micro-interactions)</p>
+        <p class="date">20 mars 2026 &bull; Audit automatique Claude</p>
+
+        <div class="score-hero">
+            <div class="score-circle">
+                <div class="score-circle-inner">
+                    <span class="score-value">8.8</span>
+                    <span class="score-label">/ 10</span>
+                </div>
+            </div>
+        </div>
+        <p style="color:#9898b0;font-size:13px;margin-top:8px">
+            <span class="tag tag-improved">+0.7</span> vs audit du 20 mars (8.1/10)
+        </p>
+    </div>
+
+    <!-- SCORES DETAIL -->
+    <div class="card">
+        <h2><span class="emoji">📊</span> Scores par crit&egrave;re</h2>
+        <table class="score-table">
+            <thead>
+                <tr>
+                    <th>Crit&egrave;re</th>
+                    <th>D&eacute;tail</th>
+                    <th>Avant</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>🎨 Design</td>
+                    <td>
+                        Glassmorphism coh&eacute;rent, typographie Inter premium, ombres multi-couches, gradient header lumineux, background mesh anim&eacute;. Palette orange/blanc/dark harmonieuse. Progression majeure.
+                        <div class="score-bar"><div class="score-bar-fill" style="width:92%;background:linear-gradient(90deg,#E64A19,#FF6D3A)"></div></div>
+                    </td>
+                    <td><span style="color:#9898b0">8.5</span></td>
+                    <td><span class="score-badge score-high">9.2</span></td>
+                </tr>
+                <tr>
+                    <td>🧭 Ergonomie</td>
+                    <td>
+                        Nav pill indicator am&eacute;liore le feedback visuel. Page transitions crossfade fluides. Material ripple sur tous les &eacute;l&eacute;ments interactifs. FAB breathing glow attire l'attention. CTA shimmer sur boutons primaires.
+                        <div class="score-bar"><div class="score-bar-fill" style="width:88%;background:linear-gradient(90deg,#2196F3,#42A5F5)"></div></div>
+                    </td>
+                    <td><span style="color:#9898b0">8.0</span></td>
+                    <td><span class="score-badge score-high">8.8</span></td>
+                </tr>
+                <tr>
+                    <td>📝 Contenu</td>
+                    <td>
+                        Accents fran&ccedil;ais corrects. Labels clairs. Fun facts pertinents. Messages contextuels ("Ton estomac a envoy&eacute; un SOS"). IMC fallback propre. Pas de texte coup&eacute; d&eacute;tect&eacute;.
+                        <div class="score-bar"><div class="score-bar-fill" style="width:87%;background:linear-gradient(90deg,#FF9800,#FFC107)"></div></div>
+                    </td>
+                    <td><span style="color:#9898b0">8.5</span></td>
+                    <td><span class="score-badge score-high">8.7</span></td>
+                </tr>
+                <tr>
+                    <td>📱 Responsive</td>
+                    <td>
+                        Mobile 375px: parfait, tout visible. Tablet 768px: layout centr&eacute; 480px max-width, propre. Desktop: m&ecirc;me rendu, pas de d&eacute;bordement. Nav fixe en bas, header fixe en haut. Aucun overlap.
+                        <div class="score-bar"><div class="score-bar-fill" style="width:90%;background:linear-gradient(90deg,#4CAF50,#66BB6A)"></div></div>
+                    </td>
+                    <td><span style="color:#9898b0">8.5</span></td>
+                    <td><span class="score-badge score-high">9.0</span></td>
+                </tr>
+                <tr>
+                    <td>⚡ Performance</td>
+                    <td>
+                        Animations GPU-accelerated (transform/opacity). backdrop-filter peut impacter les appareils bas de gamme. Google Fonts charg&eacute;e avec preconnect. Pas de layout shift d&eacute;tect&eacute;.
+                        <div class="score-bar"><div class="score-bar-fill" style="width:85%;background:linear-gradient(90deg,#9C27B0,#BA68C8)"></div></div>
+                    </td>
+                    <td><span style="color:#9898b0">8.0</span></td>
+                    <td><span class="score-badge score-high">8.5</span></td>
+                </tr>
+                <tr>
+                    <td>🔧 Qualit&eacute; code</td>
+                    <td>
+                        Variables CSS bien structur&eacute;es (--glass-bg, --shadow-sm/md/lg, --transition-smooth/spring). Dark mode complet. Animations encapsul&eacute;es. Ripple via event delegation. Nav indicator propre.
+                        <div class="score-bar"><div class="score-bar-fill" style="width:87%;background:linear-gradient(90deg,#607D8B,#90A4AE)"></div></div>
+                    </td>
+                    <td><span style="color:#9898b0">7.5</span></td>
+                    <td><span class="score-badge score-high">8.7</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- WHAT CHANGED -->
+    <div class="card">
+        <h2><span class="emoji">🔄</span> Changements appliqu&eacute;s</h2>
+        <div class="comparison">
+            <div class="comparison-col">
+                <h3>Avant (v47 pre-redesign)</h3>
+                <div class="comparison-item"><span class="old">box-shadow: 0 2px 8px rgba(0,0,0,0.1)</span></div>
+                <div class="comparison-item"><span class="old">background: var(--surface) sur cards</span></div>
+                <div class="comparison-item"><span class="old">border-radius: 12px</span></div>
+                <div class="comparison-item"><span class="old">System font stack</span></div>
+                <div class="comparison-item"><span class="old">Pas d'animation de page</span></div>
+                <div class="comparison-item"><span class="old">Nav: dot ou couleur active seule</span></div>
+                <div class="comparison-item"><span class="old">FAB: ombre statique</span></div>
+                <div class="comparison-item"><span class="old">Fond statique #f5f5f5</span></div>
+            </div>
+            <div class="comparison-col">
+                <h3>Apr&egrave;s (redesign premium)</h3>
+                <div class="comparison-item"><span class="new">Ombres multi-couches (sm/md/lg)</span></div>
+                <div class="comparison-item"><span class="new">Glassmorphism: blur(16px) + rgba</span></div>
+                <div class="comparison-item"><span class="new">border-radius: 16px</span></div>
+                <div class="comparison-item"><span class="new">Google Fonts Inter 400-800</span></div>
+                <div class="comparison-item"><span class="new">Crossfade fadeSlideIn 0.3s</span></div>
+                <div class="comparison-item"><span class="new">Pill indicator glissant + glow</span></div>
+                <div class="comparison-item"><span class="new">FAB breathing animation 3s</span></div>
+                <div class="comparison-item"><span class="new">Gradient mesh anim&eacute; 20s</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- POINTS FORTS -->
+    <div class="card">
+        <h2><span class="emoji">💪</span> Points forts</h2>
+        <div class="points-grid">
+            <div class="point-card">
+                <h3>✅ Glassmorphism coh&eacute;rent</h3>
+                <p>Appliqu&eacute; uniformement sur cards, nav, modals, FAB options, toast, search bar. Le blur + bordure translucide cr&eacute;e une profondeur visuelle premium. Dark mode adapt&eacute; avec des rgba plus sombres.</p>
+            </div>
+            <div class="point-card">
+                <h3>✅ Micro-animations soign&eacute;es</h3>
+                <p>Material ripple au click, stagger d'entr&eacute;e sur le dashboard, macro bars shimmer, FAB breathing, CTA shimmer, XP bar shimmer. Tout est GPU-accelerated et non-intrusif.</p>
+            </div>
+            <div class="point-card">
+                <h3>✅ Feedback visuel complet</h3>
+                <p>Nav pill indicator qui glisse, page crossfade transitions, input focus glow, hover 3D tilt desktop, water progress shimmer. L'utilisateur sait toujours o&ugrave; il est et ce qui se passe.</p>
+            </div>
+            <div class="point-card">
+                <h3>✅ Syst&egrave;me de design propre</h3>
+                <p>Variables CSS structur&eacute;es (--glass-bg, --shadow-sm/md/lg, --transition-smooth/spring). Le dark mode h&eacute;rite automatiquement. Facile &agrave; maintenir et &agrave; &eacute;tendre.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- POINTS A AMELIORER -->
+    <div class="card">
+        <h2><span class="emoji">🔍</span> Points &agrave; am&eacute;liorer</h2>
+        <div class="points-grid">
+            <div class="point-card">
+                <h3>⚠️ Performance backdrop-filter</h3>
+                <p>Le <code>backdrop-filter: blur(16px)</code> sur de nombreux &eacute;l&eacute;ments peut causer du lag sur des appareils bas de gamme (Android &lt; 2020). Pr&eacute;voir un fallback ou une option de d&eacute;sactivation.</p>
+            </div>
+            <div class="point-card">
+                <h3>⚠️ Contraste texte secondaire</h3>
+                <p>Le <code>#9898b0</code> en dark mode sur fond <code>rgba(22,22,30,0.75)</code> est &agrave; la limite du ratio WCAG AA (4.5:1). Certains utilisateurs pourraient avoir du mal &agrave; lire le texte secondaire.</p>
+            </div>
+            <div class="point-card">
+                <h3>⚠️ Anneau calorique simple</h3>
+                <p>L'anneau calorique utilise un canvas basique sans le glow dynamique qui pulserait quand l'utilisateur approche de son objectif. Un <code>filter: drop-shadow</code> progressif ajouterait du polish.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- RECOMMANDATIONS -->
+    <div class="card">
+        <h2><span class="emoji">💡</span> Recommandations</h2>
+
+        <div class="recommendation">
+            <h4>1. Fallback performance pour appareils anciens</h4>
+            <p>Ajouter une media query <code>@media (prefers-reduced-motion: reduce)</code> pour d&eacute;sactiver les animations et le backdrop-filter sur les appareils qui le demandent. Option dans les param&egrave;tres pour un mode "all&eacute;g&eacute;".</p>
+        </div>
+
+        <div class="recommendation">
+            <h4>2. Am&eacute;liorer le contraste texte secondaire</h4>
+            <p>Passer <code>--text-secondary</code> de <code>#9898b0</code> &agrave; <code>#a8a8c0</code> en dark mode pour atteindre un ratio WCAG AA confortable de 5:1 minimum. Petit changement, grand impact accessibilit&eacute;.</p>
+        </div>
+
+        <div class="recommendation">
+            <h4>3. Anneau calorique dynamique</h4>
+            <p>Ajouter un <code>filter: drop-shadow(0 0 Xpx rgba(230,74,25,Y))</code> sur le canvas SVG dont l'intensit&eacute; augmente avec le pourcentage de calories consomm&eacute;es. &Agrave; 90%+, le glow pulse doucement.</p>
+        </div>
+    </div>
+
+    <!-- DETAILS TECHNIQUES -->
+    <div class="card">
+        <h2><span class="emoji">🔧</span> D&eacute;tails techniques v&eacute;rifi&eacute;s</h2>
+        <table class="score-table">
+            <thead>
+                <tr><th>V&eacute;rification</th><th>R&eacute;sultat</th><th>Statut</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Erreurs console JS</td>
+                    <td>0 erreur</td>
+                    <td><span class="score-badge score-high">OK</span></td>
+                </tr>
+                <tr>
+                    <td>Font Inter charg&eacute;e</td>
+                    <td><code>font-family: Inter, -apple-system...</code></td>
+                    <td><span class="score-badge score-high">OK</span></td>
+                </tr>
+                <tr>
+                    <td>Glassmorphism cards</td>
+                    <td><code>backdrop-filter: blur(16px)</code></td>
+                    <td><span class="score-badge score-high">OK</span></td>
+                </tr>
+                <tr>
+                    <td>Header blur + glow</td>
+                    <td><code>blur(20px)</code> + <code>box-shadow orange</code></td>
+                    <td><span class="score-badge score-high">OK</span></td>
+                </tr>
+                <tr>
+                    <td>Nav glassmorphism</td>
+                    <td><code>backdrop-filter: blur(16px)</code></td>
+                    <td><span class="score-badge score-high">OK</span></td>
+                </tr>
+                <tr>
+                    <td>Nav indicator sliding</td>
+                    <td>Positionn&eacute; &agrave; 20px → 322px au changement d'onglet</td>
+                    <td><span class="score-badge score-high">OK</span></td>
+                </tr>
+                <tr>
+                    <td>FAB breathing animation</td>
+                    <td>box-shadow pulse &agrave; 3s (valeur interm&eacute;diaire d&eacute;tect&eacute;e)</td>
+                    <td><span class="score-badge score-high">OK</span></td>
+                </tr>
+                <tr>
+                    <td>Page transition crossfade</td>
+                    <td>Classe <code>.page-enter</code> appliqu&eacute;e</td>
+                    <td><span class="score-badge score-high">OK</span></td>
+                </tr>
+                <tr>
+                    <td>Ripple effect</td>
+                    <td>Event delegation sur .btn, .nav-btn, .quick-action-btn</td>
+                    <td><span class="score-badge score-high">OK</span></td>
+                </tr>
+                <tr>
+                    <td>Dark mode</td>
+                    <td>Variables glass adapt&eacute;es, ombres renforc&eacute;es</td>
+                    <td><span class="score-badge score-high">OK</span></td>
+                </tr>
+                <tr>
+                    <td>Responsive mobile (375px)</td>
+                    <td>Aucun d&eacute;bordement, layout centr&eacute;</td>
+                    <td><span class="score-badge score-high">OK</span></td>
+                </tr>
+                <tr>
+                    <td>Responsive tablet (768px)</td>
+                    <td>Max-width 480px respect&eacute;</td>
+                    <td><span class="score-badge score-high">OK</span></td>
+                </tr>
+                <tr>
+                    <td>Requ&ecirc;tes r&eacute;seau</td>
+                    <td>Seul Google Analytics bloqu&eacute; (normal en localhost)</td>
+                    <td><span class="score-badge score-high">OK</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- FICHIERS MODIFIES -->
+    <div class="card">
+        <h2><span class="emoji">📁</span> Fichiers modifi&eacute;s dans le redesign</h2>
+        <table class="score-table">
+            <thead>
+                <tr><th>Fichier</th><th>Modifications</th><th>Impact</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>css/style.css</code></td>
+                    <td>Glassmorphism, variables premium, animations (shimmer, stagger, ripple, breathe), hover 3D, scrollbar, dark mode</td>
+                    <td><span class="tag tag-new">~200 lignes</span></td>
+                </tr>
+                <tr>
+                    <td><code>index.html</code></td>
+                    <td>Google Fonts Inter preconnect + link, nav-indicator div</td>
+                    <td><span class="tag tag-improved">+4 lignes</span></td>
+                </tr>
+                <tr>
+                    <td><code>js/app.js</code></td>
+                    <td>Page crossfade transition, material ripple event listener</td>
+                    <td><span class="tag tag-improved">+18 lignes</span></td>
+                </tr>
+                <tr>
+                    <td><code>js/components/navbar.js</code></td>
+                    <td>Sliding pill indicator (_moveIndicator)</td>
+                    <td><span class="tag tag-improved">rewrite</span></td>
+                </tr>
+                <tr>
+                    <td><code>js/pages/dashboard.js</code></td>
+                    <td>Ajout classe stagger-in sur le container</td>
+                    <td><span class="tag tag-improved">+1 ligne</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="report-footer">
+        <p>IronFuel v47 &bull; Audit g&eacute;n&eacute;r&eacute; par Claude &bull; <a href="https://theironfuel.netlify.app">theironfuel.netlify.app</a></p>
+        <p style="margin-top:8px">Score global : <strong>8.1 → 8.8</strong> (+0.7 points)</p>
+    </div>
+
+</div>
+</body>
+</html>
