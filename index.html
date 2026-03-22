@@ -71,7 +71,7 @@
                     navigator.serviceWorker.getRegistrations().then(function(regs) {
                         return Promise.all(regs.map(function(r) { return r.unregister(); }));
                     }).then(function() {
-                        navigator.serviceWorker.register('/sw.js').then(function() {
+                        navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).then(function() {
                             window.location.reload(true);
                         });
                     });
@@ -80,7 +80,7 @@
                 }
             } else if ('serviceWorker' in navigator) {
                 // Normal visit or private browsing: register SW + trigger update
-                navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).then(function(reg) {
                     reg.update();
                 });
             }
