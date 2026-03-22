@@ -1885,37 +1885,8 @@ const Creature = {
         // === Layer 2: Pulsating inner glow ===
         s += `<ellipse cx="${cx}" cy="${centerY}" rx="${r - 2}" ry="${r - 4}" fill="url(#${uid}g2)"><animate attributeName="opacity" dur="${a.speed * 0.7}s" repeatCount="indefinite" values="0.3;0.6;0.3" /><animate attributeName="rx" dur="${a.speed * 0.9}s" repeatCount="indefinite" values="${r - 4};${r};${r - 4}" /></ellipse>`;
 
-        // === Layer 3: Dynamic rotating ring ===
-        s += `<ellipse cx="${cx}" cy="${centerY}" rx="${r}" ry="${r - 2}" fill="none" stroke="${a.c1}" stroke-width="1.2" opacity="0.25" stroke-dasharray="8 12 3 12"><animate attributeName="stroke-dashoffset" from="0" to="-70" dur="${a.speed}s" repeatCount="indefinite" /><animate attributeName="opacity" dur="${a.speed * 0.8}s" repeatCount="indefinite" values="0.15;0.35;0.15" /></ellipse>`;
-
-        // === Layer 4: Counter-rotating inner ring ===
-        s += `<ellipse cx="${cx}" cy="${centerY}" rx="${r - 6}" ry="${r - 8}" fill="none" stroke="${a.c2}" stroke-width="0.7" opacity="0.15" stroke-dasharray="5 8 2 10"><animate attributeName="stroke-dashoffset" from="0" to="50" dur="${a.speed * 1.2}s" repeatCount="indefinite" /><animate attributeName="opacity" dur="${a.speed}s" repeatCount="indefinite" values="0.1;0.25;0.1" /></ellipse>`;
-
-        // === Layer 5: Orbiting energy particles (true orbital motion via animateMotion) ===
-        const orbitCount = Math.min(a.particles, 12);
-        for (let i = 0; i < orbitCount; i++) {
-            const pSize = 0.6 + (i % 4) * 0.3;
-            const orbitR = r - 3 + (i % 3) * 4;
-            const orbitRy = orbitR - 2 - (i % 2) * 2;
-            const dur = (a.speed * 0.8 + (i % 5) * 0.6).toFixed(1);
-            const delay = (i * (a.speed / orbitCount)).toFixed(1);
-            const col = i % 3 === 0 ? a.c3 : i % 3 === 1 ? a.c1 : a.c2;
-            const startAngle = (i / orbitCount) * 360;
-            // cx/cy set to center so particle isn't at 0,0 if animateMotion fails to start
-            s += `<circle cx="${cx}" cy="${centerY}" r="${pSize}" fill="${col}" filter="url(#${uid}glow)" opacity="0">`;
-            s += `<animateMotion dur="${dur}s" begin="${delay}s" repeatCount="indefinite" rotate="auto">`;
-            s += `<mpath href="#${uid}orbit${i % 3}"/>`;
-            s += `</animateMotion>`;
-            s += `<animate attributeName="opacity" dur="${dur}s" begin="${delay}s" repeatCount="indefinite" values="0.2;0.8;0.2" />`;
-            s += `<animate attributeName="r" dur="${dur}s" begin="${delay}s" repeatCount="indefinite" values="${(pSize * 0.4).toFixed(1)};${(pSize * 1.2).toFixed(1)};${(pSize * 0.4).toFixed(1)}" />`;
-            s += `</circle>`;
-        }
-        // Orbit paths (hidden, used by animateMotion)
-        for (let o = 0; o < 3; o++) {
-            const oR = r - 3 + o * 4;
-            const oRy = oR - 2 - o * 2;
-            s += `<ellipse id="${uid}orbit${o}" cx="${cx}" cy="${centerY}" rx="${oR}" ry="${oRy}" fill="none" stroke="none" />`;
-        }
+        // === Layer 3: Subtle soft ring (replaces old dashed rings that looked like grid) ===
+        s += `<ellipse cx="${cx}" cy="${centerY}" rx="${r}" ry="${r - 2}" fill="none" stroke="${a.c1}" stroke-width="0.8" opacity="0.1"><animate attributeName="rx" dur="${a.speed * 1.5}s" repeatCount="indefinite" values="${r - 2};${r + 3};${r - 2}" /><animate attributeName="opacity" dur="${a.speed * 1.5}s" repeatCount="indefinite" values="0.05;0.15;0.05" /></ellipse>`;
 
         // === Layer 6: Rising energy wisps ===
         for (let i = 0; i < 6; i++) {
