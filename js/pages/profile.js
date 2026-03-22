@@ -28,7 +28,7 @@ const ProfilePage = {
         const content = document.getElementById('page-content');
         content.innerHTML = `
             <div class="profile-container fade-in">
-                <div class="profile-avatar" style="display:flex;justify-content:center">
+                <div class="profile-avatar creature-display" data-type="${(Creature.getData().type || 'fire')}" style="display:flex;justify-content:center">
                     ${Avatar.buildSVG(90)}
                 </div>
                 <h2 style="text-align:center;font-size:20px">${profile.name || 'Mon profil'}</h2>

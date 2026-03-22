@@ -36,8 +36,8 @@ if (FCM_CONFIG.messagingSenderId && FCM_CONFIG.appId) {
     console.log('[SW] FCM not configured — set messagingSenderId & appId in sw.js');
 }
 
-const CACHE_NAME = 'ironfuel-v65';
-const SW_VERSION = 65;
+const CACHE_NAME = 'ironfuel-v66';
+const SW_VERSION = 66;
 const ASSETS = [
     '/',
     '/index.html',
@@ -106,24 +106,26 @@ self.addEventListener('install', (e) => {
     self.skipWaiting();
 });
 
-// Activate — clean old caches + force-refresh clients if outdated
+// Activate — clean old caches + force-navigate ALL open clients
+// This is the KEY to breaking the old-cache cycle:
+// When a new SW activates, it force-navigates all windows to reload with fresh content.
+// Using client.navigate() instead of postMessage because OLD index.html
+// doesn't have the FORCE_RELOAD listener — postMessage goes to /dev/null.
 self.addEventListener('activate', (e) => {
     e.waitUntil(
         caches.keys().then(keys =>
             Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
         ).then(() => self.clients.claim())
          .then(() => {
-            // Check server version and refresh all clients if they're outdated
-            return fetch('/version.json?_=' + Date.now(), { cache: 'no-store' })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.v && data.v > SW_VERSION) {
-                        // Server is ahead — tell all clients to reload
-                        return self.clients.matchAll({ type: 'window' }).then(clients => {
-                            clients.forEach(client => client.postMessage({ type: 'FORCE_RELOAD' }));
-                        });
+            // Force-navigate all open windows to reload with new content
+            return self.clients.matchAll({ type: 'window' }).then(clients => {
+                clients.forEach(client => {
+                    // navigate() forces a fresh load through the NEW sw
+                    if (client.url && 'navigate' in client) {
+                        client.navigate(client.url);
                     }
-                }).catch(() => { /* offline, ignore */ });
+                });
+            });
         })
     );
 });
