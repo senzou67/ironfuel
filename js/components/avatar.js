@@ -124,8 +124,10 @@ const Creature = {
 
         streak.lastActiveDate = today;
         if (streak.current > streak.best) streak.best = streak.current;
-        if (streak.current > 0 && streak.current % 7 === 0 && streak.freezesOwned < 3) {
+        // Premium: 1 freeze every 10 days of streak (max 1 at a time)
+        if (streak.current > 0 && streak.current % 10 === 0 && TrialService.isPaid() && streak.freezesOwned < 1) {
             streak.freezesOwned++;
+            App.showToast('🧊 Freeze gagné ! Tu peux rater 1 jour sans perdre ton streak');
         }
         Storage.setCreatureStreak(streak);
 

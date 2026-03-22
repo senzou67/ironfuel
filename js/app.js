@@ -644,11 +644,37 @@ const Onboarding = {
     }
 };
 
-// Capture install prompt for PWA install button
+// Capture install prompt for PWA install button (only on website, not installed PWA)
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     window._deferredInstallPrompt = e;
 });
+
+// PWA Force-Update: detect new service worker and auto-reload
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+        // Check for updates every 60s
+        setInterval(() => reg.update(), 60000);
+
+        reg.addEventListener('updatefound', () => {
+            const newSW = reg.installing;
+            if (!newSW) return;
+            newSW.addEventListener('statechange', () => {
+                if (newSW.state === 'activated' && navigator.serviceWorker.controller) {
+                    // New version active — reload to get fresh assets
+                    window.location.reload();
+                }
+            });
+        });
+    });
+
+    // If a new SW took control (skipWaiting + clients.claim), reload immediately
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (window._swReloading) return;
+        window._swReloading = true;
+        window.location.reload();
+    });
+}
 
 // Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', () => App.init());

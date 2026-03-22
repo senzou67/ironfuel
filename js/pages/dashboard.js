@@ -54,7 +54,7 @@ const DashboardPage = {
         const water = Storage.getWater();
         const waterGoal = goals.water || 12;
         const isPremium = TrialService.isPaid();
-        const isOnSite = !window.matchMedia('(display-mode: standalone)').matches && !navigator.standalone;
+        const isOnSite = !window.matchMedia('(display-mode: standalone)').matches && !navigator.standalone && !window.matchMedia('(display-mode: fullscreen)').matches;
 
         const pctCal = Math.min(Math.round((totals.calories / goals.calories) * 100), 150);
         const pctProt = goals.protein ? Math.min(Math.round((totals.protein / goals.protein) * 100), 100) : 0;

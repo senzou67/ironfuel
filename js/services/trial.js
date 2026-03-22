@@ -43,17 +43,12 @@ const TrialService = {
             const subDays = data.plan === 'monthly' ? 31 : this.SUBSCRIPTION_DAYS;
             if (daysSincePaid >= subDays) return false;
         }
-        // Server verification flag — only revoke if no legitimate payment proof
-        // Stripe/PayPal payments have a real paymentId; server IP check can't override those
-        // (IP changes on mobile → server loses track → must not revoke real payments)
+        // Never let server IP-check revoke a local payment with real paymentId
+        // IP changes on mobile → server loses track → must not revoke real payments
         if (data._serverRevoked) {
-            if (data.paymentId && data.paymentId !== 'manual') {
-                // Has real payment — clear stale server revoke flag
-                data._serverRevoked = false;
-                this._setData(data);
-            } else {
-                return false;
-            }
+            // Clear stale server revoke — local payment proof takes priority
+            data._serverRevoked = false;
+            this._setData(data);
         }
         return true;
     },
@@ -172,17 +167,10 @@ const TrialService = {
                 return true;
             }
 
-            // Server says NOT paid — only revoke if no legitimate Stripe/PayPal payment
-            // IP-based check can't reliably track paid status (IP changes on mobile)
+            // Server says NOT paid but local has payment — re-sync server
+            // Never revoke local payment — server IP-check is unreliable on mobile
             if (!data.paid && this._getData().paid) {
-                const local = this._getData();
-                if (!local.paymentId || local.paymentId === 'manual') {
-                    local._serverRevoked = true;
-                    this._setData(local);
-                } else {
-                    // Has real payment proof — re-register on server with new IP
-                    this._serverAction('paid');
-                }
+                this._serverAction('paid');
             }
 
             if (!data.allowed) {
