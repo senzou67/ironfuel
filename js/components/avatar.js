@@ -1873,10 +1873,10 @@ const Creature = {
 
         // === DEFS: Gradients & Filters ===
         s += `<defs>`;
-        s += `<radialGradient id="${uid}g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="${a.c3}" stop-opacity="0.15"/><stop offset="60%" stop-color="${a.c1}" stop-opacity="0.08"/><stop offset="100%" stop-color="${a.c1}" stop-opacity="0"/></radialGradient>`;
-        s += `<radialGradient id="${uid}g2" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="${a.c3}" stop-opacity="0.2"/><stop offset="100%" stop-color="${a.c2}" stop-opacity="0"/></radialGradient>`;
-        s += `<filter id="${uid}blur"><feGaussianBlur stdDeviation="2"/></filter>`;
-        s += `<filter id="${uid}glow"><feGaussianBlur stdDeviation="1.5"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
+        s += `<radialGradient id="${uid}g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="${a.c3}" stop-opacity="0.12"/><stop offset="50%" stop-color="${a.c1}" stop-opacity="0.06"/><stop offset="80%" stop-color="${a.c1}" stop-opacity="0.02"/><stop offset="100%" stop-color="${a.c1}" stop-opacity="0"/></radialGradient>`;
+        s += `<radialGradient id="${uid}g2" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="${a.c3}" stop-opacity="0.15"/><stop offset="70%" stop-color="${a.c2}" stop-opacity="0.03"/><stop offset="100%" stop-color="${a.c2}" stop-opacity="0"/></radialGradient>`;
+        s += `<filter id="${uid}blur" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="4"/></filter>`;
+        s += `<filter id="${uid}glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.5"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
         s += `</defs>`;
 
         // === Layer 1: Ambient glow field (soft background) ===
@@ -1901,7 +1901,8 @@ const Creature = {
             const delay = (i * (a.speed / orbitCount)).toFixed(1);
             const col = i % 3 === 0 ? a.c3 : i % 3 === 1 ? a.c1 : a.c2;
             const startAngle = (i / orbitCount) * 360;
-            s += `<circle r="${pSize}" fill="${col}" filter="url(#${uid}glow)" opacity="0.7">`;
+            // cx/cy set to center so particle isn't at 0,0 if animateMotion fails to start
+            s += `<circle cx="${cx}" cy="${centerY}" r="${pSize}" fill="${col}" filter="url(#${uid}glow)" opacity="0">`;
             s += `<animateMotion dur="${dur}s" begin="${delay}s" repeatCount="indefinite" rotate="auto">`;
             s += `<mpath href="#${uid}orbit${i % 3}"/>`;
             s += `</animateMotion>`;
