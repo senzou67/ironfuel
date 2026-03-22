@@ -141,6 +141,17 @@ const AvatarPage = {
 
         ShopPage._refreshCallback = () => this.render();
 
+        // Force-restart SVG animations (WebKit/iOS bug: innerHTML SVGs don't animate)
+        requestAnimationFrame(() => {
+            document.querySelectorAll('.creature-display svg, .creature-card-svg svg').forEach(svg => {
+                const parent = svg.parentNode;
+                if (parent) {
+                    const clone = svg.cloneNode(true);
+                    parent.replaceChild(clone, svg);
+                }
+            });
+        });
+
         // Inject floating particles
         this._spawnParticles();
     },
@@ -160,12 +171,19 @@ const AvatarPage = {
         for (let i = 0; i < 12; i++) {
             const p = document.createElement('div');
             p.className = 'creature-particle';
-            p.style.left = (10 + Math.random() * 80) + '%';
-            p.style.bottom = (5 + Math.random() * 20) + '%';
-            p.style.background = palette[Math.floor(Math.random() * palette.length)];
-            p.style.animationDelay = (Math.random() * 4) + 's';
-            p.style.animationDuration = (3 + Math.random() * 3) + 's';
-            p.style.width = p.style.height = (3 + Math.random() * 4) + 'px';
+            const size = (3 + Math.random() * 4) + 'px';
+            p.style.cssText = `
+                position:absolute;
+                left:${(10 + Math.random() * 80)}%;
+                bottom:${(5 + Math.random() * 20)}%;
+                background:${palette[Math.floor(Math.random() * palette.length)]};
+                animation-delay:${(Math.random() * 4)}s;
+                animation-duration:${(3 + Math.random() * 3)}s;
+                width:${size};height:${size};
+                border-radius:50%;
+                opacity:0;
+                pointer-events:none;
+            `;
             container.appendChild(p);
         }
         scene.appendChild(container);

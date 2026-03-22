@@ -19,6 +19,17 @@ const Modal = {
         // Animate in
         requestAnimationFrame(() => overlay.classList.add('show'));
 
+        // Force-restart SVG animations (WebKit/iOS bug: animations don't start in innerHTML-injected SVGs)
+        requestAnimationFrame(() => {
+            overlay.querySelectorAll('svg').forEach(svg => {
+                const parent = svg.parentNode;
+                if (parent) {
+                    const clone = svg.cloneNode(true);
+                    parent.replaceChild(clone, svg);
+                }
+            });
+        });
+
         // Close on overlay click
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) {

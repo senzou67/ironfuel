@@ -224,10 +224,11 @@ const ShopPage = {
             titlePreview = `<div style="margin:12px 0 4px;text-transform:uppercase;${style}">${item.emoji} ${item.name}</div>`;
         }
 
+        const creatureType = Creature.getData().type || 'fire';
         Modal.show(`
             <div style="text-align:center">
                 <div class="modal-title" style="display:flex;align-items:center;justify-content:center;gap:8px">Aperçu : <span style="display:inline-flex">${this._getIcon(item.id, item.emoji)}</span> ${item.name}</div>
-                <div style="margin:16px 0;display:flex;justify-content:center">
+                <div class="creature-display" data-type="${creatureType}" style="margin:16px 0;display:flex;justify-content:center">
                     ${previewSVG}
                 </div>
                 ${titlePreview}
