@@ -228,7 +228,7 @@ const ShopPage = {
         Modal.show(`
             <div style="text-align:center">
                 <div class="modal-title" style="display:flex;align-items:center;justify-content:center;gap:8px">Aperçu : <span style="display:inline-flex">${this._getIcon(item.id, item.emoji)}</span> ${item.name}</div>
-                <div class="creature-display" data-type="${creatureType}" style="margin:16px 0;display:flex;justify-content:center">
+                <div class="creature-display${currentEquipped.some(i => i.type === 'aura') ? ' has-svg-aura' : ''}" data-type="${creatureType}" style="margin:16px 0;display:flex;justify-content:center">
                     ${previewSVG}
                 </div>
                 ${titlePreview}

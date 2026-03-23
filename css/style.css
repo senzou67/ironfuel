@@ -3824,6 +3824,14 @@ input:focus, select:focus, textarea:focus {
 .creature-display:hover svg {
     filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15)) drop-shadow(0 0 30px var(--aura-color, rgba(230,74,25,0.6)));
 }
+/* When SVG contains internal aura elements, disable CSS drop-shadow glow to avoid rectangular artifact */
+.creature-display.has-svg-aura svg {
+    filter: none;
+    animation: none;
+}
+.creature-display.has-svg-aura:hover svg {
+    filter: none;
+}
 
 /* XP bar shimmer */
 .xp-fill, .xp-bar-fill {
@@ -4074,6 +4082,10 @@ input:focus, select:focus, textarea:focus {
     }
     .creature-display[data-type="plant"] svg {
         animation: creatureAuraPulseMobilePlant 2.5s ease-in-out infinite !important;
+    }
+    .creature-display.has-svg-aura svg {
+        filter: none !important;
+        animation: none !important;
     }
     .xp-fill::after, .xp-bar-fill::after {
         background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
