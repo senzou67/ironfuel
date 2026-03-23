@@ -10,7 +10,7 @@ const MealCard = {
 
     _getCollapsed() {
         try {
-            return JSON.parse(sessionStorage.getItem(this._collapsedKey) || '{}');
+            return JSON.parse(localStorage.getItem(this._collapsedKey) || '{}');
         } catch { return {}; }
     },
 
@@ -18,7 +18,7 @@ const MealCard = {
         const state = this._getCollapsed();
         if (collapsed) state[mealType] = true;
         else delete state[mealType];
-        sessionStorage.setItem(this._collapsedKey, JSON.stringify(state));
+        localStorage.setItem(this._collapsedKey, JSON.stringify(state));
     },
 
     render(mealType, items, showAdd = true, context = 'diary') {
