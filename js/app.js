@@ -148,7 +148,7 @@ const App = {
         // Material ripple effect
         document.addEventListener('click', (e) => {
             const target = e.target.closest('.btn, .nav-btn, .quick-action-btn, .fab-option, .meal-header');
-            if (!target) return;
+            if (!target || target.classList.contains('water-action-btn')) return;
             const rect = target.getBoundingClientRect();
             const ripple = document.createElement('span');
             ripple.className = 'ripple-effect';

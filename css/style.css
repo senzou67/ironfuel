@@ -564,6 +564,9 @@ body::before {
 .quick-action-btn:active {
     transform: scale(0.95);
 }
+.water-action-btn:active {
+    transform: none !important;
+}
 
 .quick-action-btn .icon {
     font-size: 24px;
