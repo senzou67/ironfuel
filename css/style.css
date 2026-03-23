@@ -615,6 +615,31 @@ body::before {
     justify-content: center;
 }
 
+.meal-chevron {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    transition: transform 0.3s ease;
+    transform: rotate(90deg);
+    display: inline-block;
+    line-height: 1;
+}
+
+.meal-section.collapsed .meal-chevron {
+    transform: rotate(0deg);
+}
+
+.meal-section.collapsed .meal-header {
+    border-radius: var(--radius);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.meal-item-count {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
 .meal-items {
     background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur));
@@ -624,6 +649,16 @@ body::before {
     border-radius: 0 0 var(--radius) var(--radius);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
+    max-height: 1000px;
+    transition: max-height 0.3s ease, opacity 0.2s ease;
+    opacity: 1;
+}
+
+.meal-section.collapsed .meal-items {
+    max-height: 0;
+    opacity: 0;
+    border: none;
+    box-shadow: none;
 }
 
 .food-item {
