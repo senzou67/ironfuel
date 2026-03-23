@@ -1,12 +1,12 @@
 const FoodItem = {
-    render(item, mealType) {
+    render(item, mealType, dateStr) {
         // Show micronutrient badges for premium users
         const microBadges = (typeof MicronutrientService !== 'undefined' && typeof TrialService !== 'undefined' && TrialService.hasFullAccess())
             ? MicronutrientService.renderFoodMicros(item)
             : '';
 
         return `
-            <div class="food-item" onclick="FoodItem.edit('${mealType}', ${item.id})" style="cursor:pointer">
+            <div class="food-item" onclick="FoodItem.edit('${mealType}', ${item.id}, '${dateStr || ''}')" style="cursor:pointer">
                 <div class="food-item-info">
                     <div class="food-item-name">${item.name}</div>
                     <div class="food-item-detail">
@@ -15,15 +15,22 @@ const FoodItem = {
                     ${microBadges}
                 </div>
                 <span class="food-item-calories">${item.calories} kcal</span>
-                <button class="food-item-delete" onclick="event.stopPropagation();FoodItem.remove('${mealType}', ${item.id})" title="Supprimer" aria-label="Supprimer ${item.name}">
+                <button class="food-item-delete" onclick="event.stopPropagation();FoodItem.remove('${mealType}', ${item.id}, '${dateStr || ''}')" title="Supprimer" aria-label="Supprimer ${item.name}">
                     ✕
                 </button>
             </div>
         `;
     },
 
-    edit(mealType, entryId) {
-        const log = Storage.getDayLog();
+    _parseDate(dateStr) {
+        if (!dateStr) return undefined;
+        const parts = dateStr.split('-');
+        return new Date(parts[0], parts[1] - 1, parts[2]);
+    },
+
+    edit(mealType, entryId, dateStr) {
+        const date = this._parseDate(dateStr);
+        const log = Storage.getDayLog(date);
         const entry = log.meals[mealType].find(f => f.id === entryId);
         if (!entry) return;
 
@@ -35,7 +42,8 @@ const FoodItem = {
                     grams: entry.grams,
                     mealType: mealType,
                     editMode: true,
-                    entryId: entryId
+                    entryId: entryId,
+                    dateStr: dateStr
                 });
                 return;
             }
@@ -53,14 +61,15 @@ const FoodItem = {
         }, {
             mealType: mealType,
             editMode: true,
-            entryId: entryId
+            entryId: entryId,
+            dateStr: dateStr
         });
     },
 
-    remove(mealType, entryId) {
-        Storage.removeFoodFromMeal(mealType, entryId);
+    remove(mealType, entryId, dateStr) {
+        const date = this._parseDate(dateStr);
+        Storage.removeFoodFromMeal(mealType, entryId, date);
         App.showToast('Aliment supprimé');
-        // Refresh current page
         if (App.currentPage === 'diary') {
             DiaryPage.render();
         } else if (App.currentPage === 'dashboard') {

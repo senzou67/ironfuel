@@ -47,11 +47,13 @@ const DashboardPage = {
     },
 
     render() {
+        const date = App.getSelectedDate();
+        const isToday = App.isToday();
         const goals = Storage.getGoals();
-        const totals = Storage.getDayTotals();
-        const log = Storage.getDayLog();
+        const totals = Storage.getDayTotals(date);
+        const log = Storage.getDayLog(date);
         const streak = Storage.getStreak();
-        const water = Storage.getWater();
+        const water = Storage.getWater(date);
         const waterGoal = goals.water || 12;
         const trialData = Storage._get('trial', {});
         const isPremium = TrialService.isPaid() || (trialData.paid === true && trialData.paymentId);
@@ -111,10 +113,26 @@ const DashboardPage = {
             ? this._renderMicroSummary()
             : '';
 
+        const dateLabel = App.getDateLabel();
+        const dateKey = date.toISOString().split('T')[0];
+        const todayKey = new Date().toISOString().split('T')[0];
+
         content.innerHTML = `
             <div class="fade-in stagger-in" style="padding:0 0 8px">
                 ${adBanner}
-                ${streak > 0 ? `
+
+                <!-- DATE SELECTOR -->
+                <div class="date-selector-bar">
+                    <button class="date-nav-btn" onclick="DashboardPage._shiftDate(-1)" aria-label="Jour précédent">‹</button>
+                    <button class="date-label-btn" onclick="DashboardPage._openDatePicker()">
+                        <span>${dateLabel}</span>
+                        <span class="date-chevron">▾</span>
+                    </button>
+                    <button class="date-nav-btn" onclick="DashboardPage._shiftDate(1)" aria-label="Jour suivant" ${dateKey === todayKey ? 'disabled' : ''}>›</button>
+                    <input type="date" id="hidden-date-picker" value="${dateKey}" max="${todayKey}" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
+                </div>
+
+                ${streak > 0 && isToday ? `
                     <div style="text-align:center;padding:8px">
                         <span class="streak-badge">🔥 ${streak} jour${streak > 1 ? 's' : ''} de suite</span>
                     </div>
@@ -241,8 +259,8 @@ const DashboardPage = {
             NotificationService.ensureRegistered();
         }
 
-        // Award daily XP if eligible
-        Creature.checkAndAwardXP();
+        // Award daily XP if eligible (only for today)
+        if (isToday) Creature.checkAndAwardXP();
     },
 
 
@@ -272,33 +290,35 @@ const DashboardPage = {
     },
 
     addWater() {
-        const current = Storage.getWater();
+        const date = App.getSelectedDate();
+        const current = Storage.getWater(date);
         const goals = Storage.getGoals();
-        const waterGoal = goals.water || 12; // default 3L = 12 glasses of 250ml
-        const maxGlasses = Math.min(waterGoal + 4, 20); // Allow a few extra but cap at 5L (20 glasses)
+        const waterGoal = goals.water || 12;
+        const maxGlasses = Math.min(waterGoal + 4, 20);
         if (current >= maxGlasses) {
             App.showToast(`Maximum atteint (${(maxGlasses * 0.25).toFixed(1)}L) 💧`);
             return;
         }
         const newCount = current + 1;
-        Storage.setWater(newCount);
-        this._checkWaterBonus(newCount);
+        Storage.setWater(newCount, date);
+        if (App.isToday()) this._checkWaterBonus(newCount);
         App.haptic('light');
         App.showToast(`+250ml 💧 (${(newCount * 0.25).toFixed(newCount * 0.25 % 1 === 0 ? 0 : 1)}L)`);
         this.render();
     },
 
     setWater(count) {
-        const current = Storage.getWater();
+        const date = App.getSelectedDate();
+        const current = Storage.getWater(date);
         const goals = Storage.getGoals();
         const waterGoal = goals.water || 12;
         const maxGlasses = Math.min(waterGoal + 4, 20);
         if (count === current) {
-            Storage.setWater(count - 1);
+            Storage.setWater(count - 1, date);
         } else {
             const capped = Math.min(count, maxGlasses);
-            Storage.setWater(capped);
-            this._checkWaterBonus(capped);
+            Storage.setWater(capped, date);
+            if (App.isToday()) this._checkWaterBonus(capped);
         }
         this.render();
     },
@@ -384,6 +404,24 @@ const DashboardPage = {
                 </div>
             </div>
         `;
+    },
+
+    _shiftDate(delta) {
+        const d = new Date(App.getSelectedDate());
+        d.setDate(d.getDate() + delta);
+        // Don't go beyond today
+        if (d > new Date()) return;
+        App.setSelectedDate(d.toISOString().split('T')[0]);
+    },
+
+    _openDatePicker() {
+        const picker = document.getElementById('hidden-date-picker');
+        if (picker) {
+            picker.showPicker ? picker.showPicker() : picker.click();
+            picker.onchange = (e) => {
+                App.setSelectedDate(e.target.value);
+            };
+        }
     },
 
     _getCalorieMessage(pct) {

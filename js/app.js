@@ -1,6 +1,41 @@
 const App = {
     currentPage: 'dashboard',
     previousPage: null,
+    selectedDate: null, // null = today
+
+    getSelectedDate() {
+        return this.selectedDate || new Date();
+    },
+
+    isToday() {
+        if (!this.selectedDate) return true;
+        const today = new Date().toISOString().split('T')[0];
+        return this.selectedDate.toISOString().split('T')[0] === today;
+    },
+
+    setSelectedDate(dateStr) {
+        if (!dateStr) {
+            this.selectedDate = null;
+        } else {
+            // Parse as local date (not UTC)
+            const parts = dateStr.split('-');
+            this.selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
+        }
+        // Re-render current page
+        if (this.currentPage === 'dashboard') DashboardPage.render();
+        else if (this.currentPage === 'diary') DiaryPage.render();
+    },
+
+    getDateLabel() {
+        const d = this.getSelectedDate();
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const dStr = d.toISOString().split('T')[0];
+        if (dStr === today.toISOString().split('T')[0]) return "Aujourd'hui";
+        if (dStr === yesterday.toISOString().split('T')[0]) return 'Hier';
+        return d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+    },
 
     pages: {
         dashboard: { title: 'IronFuel', render: () => DashboardPage.render(), nav: true },
