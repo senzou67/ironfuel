@@ -85,7 +85,7 @@ const Storage = {
     // === JOURNAL ALIMENTAIRE ===
     _dateKey(date) {
         if (!date) date = new Date();
-        return date.toISOString().split('T')[0];
+        return App._localDateKey(date);
     },
 
     getDayLog(date) {
