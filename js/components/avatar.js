@@ -1885,136 +1885,63 @@ const Creature = {
         // === Layer 2: Pulsating inner glow ===
         s += `<ellipse cx="${cx}" cy="${centerY}" rx="${r - 2}" ry="${r - 4}" fill="url(#${uid}g2)"><animate attributeName="opacity" dur="${a.speed * 0.7}s" repeatCount="indefinite" values="0.3;0.6;0.3" /><animate attributeName="rx" dur="${a.speed * 0.9}s" repeatCount="indefinite" values="${r - 4};${r};${r - 4}" /></ellipse>`;
 
-        // === Layer 3: Subtle soft ring (replaces old dashed rings that looked like grid) ===
-        s += `<ellipse cx="${cx}" cy="${centerY}" rx="${r}" ry="${r - 2}" fill="none" stroke="${a.c1}" stroke-width="0.8" opacity="0.1"><animate attributeName="rx" dur="${a.speed * 1.5}s" repeatCount="indefinite" values="${r - 2};${r + 3};${r - 2}" /><animate attributeName="opacity" dur="${a.speed * 1.5}s" repeatCount="indefinite" values="0.05;0.15;0.05" /></ellipse>`;
+        // Layers 3 & 6 removed — CSS drop-shadow amplified stroke elements into ugly grid pattern
 
-        // === Layer 6: Rising energy wisps ===
-        for (let i = 0; i < 6; i++) {
-            const wx = cx - r * 0.6 + i * (r * 1.2 / 5);
-            const wy = centerY + r * 0.3;
-            const wh = r * 0.8 + (i % 3) * 4;
-            const dur = (2 + i * 0.4).toFixed(1);
-            const delay = (i * 0.35).toFixed(1);
-            s += `<line x1="${wx.toFixed(1)}" y1="${wy.toFixed(1)}" x2="${(wx + (i % 2 === 0 ? 2 : -2)).toFixed(1)}" y2="${(wy - wh).toFixed(1)}" stroke="${a.c3}" stroke-width="0.6" opacity="0" stroke-linecap="round"><animate attributeName="opacity" dur="${dur}s" begin="${delay}s" repeatCount="indefinite" values="0;0.4;0" /><animate attributeName="y2" dur="${dur}s" begin="${delay}s" repeatCount="indefinite" values="${wy.toFixed(1)};${(wy - wh).toFixed(1)}" /></line>`;
-        }
-
-        // === TYPE-SPECIFIC DYNAMIC EFFECTS ===
+        // === TYPE-SPECIFIC DYNAMIC EFFECTS (fill-only, no strokes — CSS drop-shadow amplifies strokes into ugly grids) ===
         if (itemId === 'aura_fire') {
-            // Flickering flame tongues rising around creature
-            for (let i = 0; i < 8; i++) {
-                const angle = (i / 8) * Math.PI * 2;
-                const fx = cx + Math.cos(angle) * (r * 0.85);
-                const fy2 = centerY + Math.sin(angle) * (r * 0.8);
-                const fh = 5 + (i % 3) * 3;
-                const dur = (0.8 + i * 0.15).toFixed(2);
-                s += `<path d="M${fx.toFixed(1)} ${fy2.toFixed(1)} Q${(fx + (i % 2 ? 2 : -2)).toFixed(1)} ${(fy2 - fh / 2).toFixed(1)} ${fx.toFixed(1)} ${(fy2 - fh).toFixed(1)}" fill="none" stroke="${i % 2 ? a.c3 : a.c1}" stroke-width="${0.8 + (i % 2) * 0.4}" stroke-linecap="round" opacity="0"><animate attributeName="opacity" dur="${dur}s" repeatCount="indefinite" values="0;0.7;0.3;0.8;0" /><animate attributeName="d" dur="${dur}s" repeatCount="indefinite" values="M${fx.toFixed(1)} ${fy2.toFixed(1)} Q${(fx + 2).toFixed(1)} ${(fy2 - fh / 2).toFixed(1)} ${fx.toFixed(1)} ${(fy2 - fh).toFixed(1)};M${fx.toFixed(1)} ${fy2.toFixed(1)} Q${(fx - 2).toFixed(1)} ${(fy2 - fh / 2 - 2).toFixed(1)} ${(fx + 1).toFixed(1)} ${(fy2 - fh - 2).toFixed(1)};M${fx.toFixed(1)} ${fy2.toFixed(1)} Q${(fx + 2).toFixed(1)} ${(fy2 - fh / 2).toFixed(1)} ${fx.toFixed(1)} ${(fy2 - fh).toFixed(1)}" /></path>`;
-            }
-            // Heat shimmer distortion ring
+            // Heat shimmer
             s += `<ellipse cx="${cx}" cy="${centerY - r * 0.2}" rx="${r * 0.6}" ry="${r * 0.15}" fill="${a.c3}" opacity="0.05"><animate attributeName="ry" dur="1.5s" repeatCount="indefinite" values="${r * 0.12};${r * 0.2};${r * 0.12}" /><animate attributeName="opacity" dur="1.5s" repeatCount="indefinite" values="0.03;0.08;0.03" /></ellipse>`;
+            // Rising ember dots
+            for (let i = 0; i < 6; i++) {
+                const ex = cx - r * 0.5 + i * (r * 0.2);
+                const ey = centerY + r * 0.3;
+                const dur = (1.5 + i * 0.3).toFixed(1);
+                s += `<circle cx="${ex.toFixed(1)}" cy="${ey.toFixed(1)}" r="${0.8 + (i % 3) * 0.4}" fill="${i % 2 ? a.c3 : a.c1}" opacity="0"><animate attributeName="opacity" dur="${dur}s" begin="${(i * 0.25).toFixed(1)}s" repeatCount="indefinite" values="0;0.7;0" /><animate attributeName="cy" dur="${dur}s" begin="${(i * 0.25).toFixed(1)}s" repeatCount="indefinite" values="${ey.toFixed(1)};${(ey - r * 0.8).toFixed(1)}" /></circle>`;
+            }
 
         } else if (itemId === 'aura_lightning') {
-            // Dynamic lightning bolts that flash randomly
-            for (let i = 0; i < 5; i++) {
-                const angle = (i / 5) * Math.PI * 2 - Math.PI / 4;
-                const x1 = cx + Math.cos(angle) * (r * 0.3);
-                const y1 = centerY + Math.sin(angle) * (r * 0.25);
-                const x2 = cx + Math.cos(angle) * (r + 3);
-                const y2 = centerY + Math.sin(angle) * (r + 1);
-                const mx1 = x1 + (x2 - x1) * 0.3 + (i % 2 === 0 ? 4 : -4);
-                const my1 = y1 + (y2 - y1) * 0.3 + (i % 3 === 0 ? 3 : -2);
-                const mx2 = x1 + (x2 - x1) * 0.65 + (i % 2 === 0 ? -3 : 3);
-                const my2 = y1 + (y2 - y1) * 0.65;
-                s += `<path d="M${x1.toFixed(1)} ${y1.toFixed(1)} L${mx1.toFixed(1)} ${my1.toFixed(1)} L${mx2.toFixed(1)} ${my2.toFixed(1)} L${x2.toFixed(1)} ${y2.toFixed(1)}" fill="none" stroke="#FDD835" stroke-width="1.2" stroke-linecap="round" opacity="0" filter="url(#${uid}glow)"><animate attributeName="opacity" dur="${1.5 + i * 0.5}s" begin="${(i * 0.3).toFixed(1)}s" repeatCount="indefinite" values="0;0;0;0.9;0;0;0;0.7;0;0" /></path>`;
-                // Branch bolt
-                s += `<path d="M${mx1.toFixed(1)} ${my1.toFixed(1)} L${(mx1 + (i % 2 ? 5 : -5)).toFixed(1)} ${(my1 + 4).toFixed(1)}" fill="none" stroke="#FFF9C4" stroke-width="0.7" opacity="0"><animate attributeName="opacity" dur="${1.5 + i * 0.5}s" begin="${(i * 0.3).toFixed(1)}s" repeatCount="indefinite" values="0;0;0;0.6;0;0;0;0.4;0;0" /></path>`;
-            }
-            // Electric arc sparks at aura edge
-            for (let i = 0; i < 4; i++) {
-                const angle = (i / 4) * Math.PI * 2 + Math.PI / 8;
+            // Electric spark dots at aura edge
+            for (let i = 0; i < 6; i++) {
+                const angle = (i / 6) * Math.PI * 2 + Math.PI / 8;
                 const sx = cx + Math.cos(angle) * r;
                 const sy = centerY + Math.sin(angle) * (r - 2);
-                s += `<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="1.5" fill="#FFEB3B" filter="url(#${uid}glow)" opacity="0"><animate attributeName="opacity" dur="${0.3 + i * 0.1}s" begin="${(i * 0.6).toFixed(1)}s" repeatCount="indefinite" values="0;0.9;0" /><animate attributeName="r" dur="${0.3 + i * 0.1}s" begin="${(i * 0.6).toFixed(1)}s" repeatCount="indefinite" values="0.5;2;0.5" /></circle>`;
+                s += `<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="1.5" fill="#FFEB3B" filter="url(#${uid}glow)" opacity="0"><animate attributeName="opacity" dur="${0.3 + i * 0.15}s" begin="${(i * 0.5).toFixed(1)}s" repeatCount="indefinite" values="0;0.9;0" /><animate attributeName="r" dur="${0.3 + i * 0.15}s" begin="${(i * 0.5).toFixed(1)}s" repeatCount="indefinite" values="0.5;2.5;0.5" /></circle>`;
             }
 
         } else if (itemId === 'aura_cosmos') {
-            // Orbiting star constellation points
+            // Orbiting star constellation points (fill only)
             for (let i = 0; i < 7; i++) {
                 const angle = (i / 7) * Math.PI * 2;
                 const sr = r * (0.6 + (i % 3) * 0.15);
                 const sx = cx + Math.cos(angle) * sr;
                 const sy = centerY + Math.sin(angle) * (sr - 2);
                 const sz = 1 + (i % 3) * 0.5;
-                // 4-point star
                 s += `<polygon points="${sx},${sy - sz} ${sx + sz * 0.3},${sy - sz * 0.3} ${sx + sz},${sy} ${sx + sz * 0.3},${sy + sz * 0.3} ${sx},${sy + sz} ${sx - sz * 0.3},${sy + sz * 0.3} ${sx - sz},${sy} ${sx - sz * 0.3},${sy - sz * 0.3}" fill="${i % 2 ? '#B388FF' : '#E1BEE7'}" filter="url(#${uid}glow)" opacity="0.2"><animate attributeName="opacity" dur="${2 + i * 0.5}s" repeatCount="indefinite" values="0.1;0.9;0.1" /><animateTransform attributeName="transform" type="rotate" from="0 ${sx.toFixed(1)} ${sy.toFixed(1)}" to="360 ${sx.toFixed(1)} ${sy.toFixed(1)}" dur="${6 + i * 2}s" repeatCount="indefinite" /></polygon>`;
-            }
-            // Nebula swirl paths
-            for (let i = 0; i < 3; i++) {
-                const startA = (i / 3) * Math.PI * 2;
-                const midA = startA + Math.PI * 0.5;
-                const endA = startA + Math.PI;
-                const x1 = cx + Math.cos(startA) * r * 0.7, y1 = centerY + Math.sin(startA) * r * 0.65;
-                const xm = cx + Math.cos(midA) * r * 0.9, ym = centerY + Math.sin(midA) * r * 0.85;
-                const x2 = cx + Math.cos(endA) * r * 0.5, y2 = centerY + Math.sin(endA) * r * 0.45;
-                s += `<path d="M${x1.toFixed(1)} ${y1.toFixed(1)} Q${xm.toFixed(1)} ${ym.toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}" fill="none" stroke="${i % 2 ? '#B388FF' : '#7C4DFF'}" stroke-width="0.5" opacity="0" stroke-dasharray="3 5"><animate attributeName="opacity" dur="${3 + i}s" repeatCount="indefinite" values="0;0.3;0" /><animate attributeName="stroke-dashoffset" from="0" to="-30" dur="${2 + i * 0.5}s" repeatCount="indefinite" /></path>`;
             }
 
         } else if (itemId === 'aura_divine') {
-            // Radiating light rays that pulse outward
-            for (let i = 0; i < 12; i++) {
-                const angle = (i / 12) * Math.PI * 2;
-                const x1 = cx + Math.cos(angle) * (r * 0.7);
-                const y1 = centerY + Math.sin(angle) * (r * 0.65);
-                const x2 = cx + Math.cos(angle) * (r + 8);
-                const y2 = centerY + Math.sin(angle) * (r + 6);
-                s += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#FFF8E1" stroke-width="${0.4 + (i % 3) * 0.2}" stroke-linecap="round" opacity="0"><animate attributeName="opacity" dur="${2.5 + (i % 4) * 0.3}s" begin="${(i * 0.2).toFixed(1)}s" repeatCount="indefinite" values="0;0.35;0.1;0.3;0" /></line>`;
-            }
-            // Halo above head — elegant arc with glow
-            const haloY = hy - hr - 6;
-            s += `<path d="M${cx - hr - 4} ${haloY + 1} Q${cx} ${haloY - 7} ${cx + hr + 4} ${haloY + 1}" fill="none" stroke="#FFD700" stroke-width="1.5" filter="url(#${uid}glow)" opacity="0.5"><animate attributeName="opacity" dur="2.5s" repeatCount="indefinite" values="0.3;0.7;0.3" /></path>`;
-            // Inner halo
-            s += `<path d="M${cx - hr - 1} ${haloY + 1} Q${cx} ${haloY - 4} ${cx + hr + 1} ${haloY + 1}" fill="none" stroke="#FFF8E1" stroke-width="0.6" opacity="0.3"><animate attributeName="opacity" dur="2s" begin="0.5s" repeatCount="indefinite" values="0.2;0.5;0.2" /></path>`;
-            // Golden sparkle bursts
-            for (let i = 0; i < 4; i++) {
-                const angle = (i / 4) * Math.PI * 2;
+            // Golden sparkle bursts (fill only)
+            for (let i = 0; i < 6; i++) {
+                const angle = (i / 6) * Math.PI * 2;
                 const gx = cx + Math.cos(angle) * (r * 0.7);
                 const gy = centerY + Math.sin(angle) * (r * 0.65);
-                s += `<circle cx="${gx.toFixed(1)}" cy="${gy.toFixed(1)}" r="1.2" fill="#FFD700" filter="url(#${uid}glow)" opacity="0"><animate attributeName="opacity" dur="${1.5 + i * 0.4}s" begin="${(i * 0.4).toFixed(1)}s" repeatCount="indefinite" values="0;0.8;0" /><animate attributeName="r" dur="${1.5 + i * 0.4}s" begin="${(i * 0.4).toFixed(1)}s" repeatCount="indefinite" values="0.3;2;0.3" /></circle>`;
+                s += `<circle cx="${gx.toFixed(1)}" cy="${gy.toFixed(1)}" r="1.2" fill="#FFD700" filter="url(#${uid}glow)" opacity="0"><animate attributeName="opacity" dur="${1.5 + i * 0.4}s" begin="${(i * 0.35).toFixed(1)}s" repeatCount="indefinite" values="0;0.8;0" /><animate attributeName="r" dur="${1.5 + i * 0.4}s" begin="${(i * 0.35).toFixed(1)}s" repeatCount="indefinite" values="0.3;2.5;0.3" /></circle>`;
             }
 
         } else if (itemId === 'aura_shadow') {
-            // Dark tendrils rising and curling
-            for (let i = 0; i < 6; i++) {
-                const tx = cx - r * 0.5 + i * (r / 3);
-                const ty = centerY + r * 0.4;
-                const th = r * 0.7 + (i % 3) * 5;
-                const curl = (i % 2 === 0 ? 6 : -6);
-                const dur = (2.5 + i * 0.4).toFixed(1);
-                s += `<path d="M${tx.toFixed(1)} ${ty.toFixed(1)} Q${(tx + curl).toFixed(1)} ${(ty - th * 0.4).toFixed(1)} ${(tx - curl * 0.5).toFixed(1)} ${(ty - th).toFixed(1)}" fill="none" stroke="${i % 2 ? a.c1 : a.c2}" stroke-width="${0.8 + (i % 2) * 0.4}" stroke-linecap="round" opacity="0"><animate attributeName="opacity" dur="${dur}s" begin="${(i * 0.3).toFixed(1)}s" repeatCount="indefinite" values="0;0.35;0.15;0.3;0" /><animate attributeName="d" dur="${dur}s" begin="${(i * 0.3).toFixed(1)}s" repeatCount="indefinite" values="M${tx.toFixed(1)} ${ty.toFixed(1)} Q${(tx + curl).toFixed(1)} ${(ty - th * 0.4).toFixed(1)} ${(tx - curl * 0.5).toFixed(1)} ${(ty - th).toFixed(1)};M${tx.toFixed(1)} ${ty.toFixed(1)} Q${(tx - curl).toFixed(1)} ${(ty - th * 0.5).toFixed(1)} ${(tx + curl * 0.3).toFixed(1)} ${(ty - th - 3).toFixed(1)};M${tx.toFixed(1)} ${ty.toFixed(1)} Q${(tx + curl).toFixed(1)} ${(ty - th * 0.4).toFixed(1)} ${(tx - curl * 0.5).toFixed(1)} ${(ty - th).toFixed(1)}" /></path>`;
-            }
-            // Dark vortex spiral at feet
-            s += `<ellipse cx="${cx}" cy="${fy + 2}" rx="${r * 0.5}" ry="${r * 0.12}" fill="${a.c2}" opacity="0.1" stroke="${a.c1}" stroke-width="0.5" stroke-dasharray="3 5"><animate attributeName="stroke-dashoffset" from="0" to="-30" dur="2s" repeatCount="indefinite" /><animate attributeName="opacity" dur="3s" repeatCount="indefinite" values="0.05;0.15;0.05" /></ellipse>`;
+            // Dark vortex (fill only, no stroke)
+            s += `<ellipse cx="${cx}" cy="${fy + 2}" rx="${r * 0.5}" ry="${r * 0.12}" fill="${a.c2}" opacity="0.08"><animate attributeName="opacity" dur="3s" repeatCount="indefinite" values="0.05;0.12;0.05" /></ellipse>`;
 
         } else if (itemId === 'aura_wind') {
-            // Swirling wind arcs that rotate
-            for (let i = 0; i < 4; i++) {
-                const startA = (i / 4) * Math.PI * 2;
-                const sweep = Math.PI * 0.7;
-                const arc_r = r * (0.7 + (i % 2) * 0.2);
-                const x1 = cx + Math.cos(startA) * arc_r;
-                const y1 = centerY + Math.sin(startA) * (arc_r - 2);
-                const x2 = cx + Math.cos(startA + sweep) * arc_r;
-                const y2 = centerY + Math.sin(startA + sweep) * (arc_r - 2);
-                s += `<path d="M${x1.toFixed(1)} ${y1.toFixed(1)} A${arc_r.toFixed(0)} ${(arc_r - 2).toFixed(0)} 0 0 1 ${x2.toFixed(1)} ${y2.toFixed(1)}" fill="none" stroke="${i % 2 ? a.c1 : a.c3}" stroke-width="${0.6 + (i % 2) * 0.3}" stroke-linecap="round" opacity="0" stroke-dasharray="6 4"><animate attributeName="opacity" dur="${2.5 + i * 0.4}s" begin="${(i * 0.3).toFixed(1)}s" repeatCount="indefinite" values="0;0.4;0.15;0.35;0" /><animate attributeName="stroke-dashoffset" from="0" to="${i % 2 ? -20 : 20}" dur="${1.5 + i * 0.3}s" repeatCount="indefinite" /></path>`;
-            }
-            // Leaf-like particles caught in wind
-            for (let i = 0; i < 3; i++) {
-                const lx = cx - r * 0.4 + i * r * 0.4;
-                const ly = centerY + (i - 1) * r * 0.3;
-                s += `<path d="M${lx.toFixed(1)} ${ly.toFixed(1)} Q${(lx + 2).toFixed(1)} ${(ly - 1).toFixed(1)} ${(lx + 3).toFixed(1)} ${ly.toFixed(1)}" fill="${a.c1}" opacity="0"><animate attributeName="opacity" dur="${2 + i * 0.5}s" begin="${(i * 0.7).toFixed(1)}s" repeatCount="indefinite" values="0;0.5;0" /><animate attributeName="transform" type="translate" dur="${2 + i * 0.5}s" begin="${(i * 0.7).toFixed(1)}s" repeatCount="indefinite" values="0 0;${8 + i * 3} ${-4 - i * 2}" /></path>`;
+            // Leaf-like particles caught in wind (fill only)
+            for (let i = 0; i < 5; i++) {
+                const lx = cx - r * 0.4 + i * r * 0.2;
+                const ly = centerY + (i - 2) * r * 0.2;
+                s += `<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="1" fill="${i % 2 ? a.c1 : a.c3}" opacity="0"><animate attributeName="opacity" dur="${2 + i * 0.5}s" begin="${(i * 0.5).toFixed(1)}s" repeatCount="indefinite" values="0;0.5;0" /><animate attributeName="cx" dur="${2 + i * 0.5}s" begin="${(i * 0.5).toFixed(1)}s" repeatCount="indefinite" values="${lx.toFixed(1)};${(lx + 8 + i * 3).toFixed(1)}" /><animate attributeName="cy" dur="${2 + i * 0.5}s" begin="${(i * 0.5).toFixed(1)}s" repeatCount="indefinite" values="${ly.toFixed(1)};${(ly - 4 - i * 2).toFixed(1)}" /></circle>`;
             }
 
         } else if (itemId === 'aura_mist') {
-            // Drifting fog wisps
+            // Drifting fog wisps (fill only)
             for (let i = 0; i < 5; i++) {
                 const mx = cx - r * 0.6 + i * (r * 0.3);
                 const my = centerY + r * 0.1 + (i % 2) * r * 0.3;
