@@ -159,14 +159,16 @@ body::before {
     transform: translateX(-50%);
     width: 100%;
     max-width: 500px;
-    height: var(--header-height);
+    height: calc(var(--header-height) + env(safe-area-inset-top, 0px));
+    padding-top: env(safe-area-inset-top, 0px);
     background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 100;
-    padding: 0 16px;
+    padding-left: 16px;
+    padding-right: 16px;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     box-shadow: 0 1px 20px rgba(230,74,25,0.15);
@@ -204,7 +206,7 @@ body::before {
 
 /* Main content */
 #page-content {
-    padding-top: var(--header-height);
+    padding-top: calc(var(--header-height) + env(safe-area-inset-top, 0px));
     padding-bottom: calc(var(--nav-height) + 16px);
     min-height: 100vh;
     overflow-x: hidden;
