@@ -181,13 +181,21 @@ body::before {
 
 .header-btn {
     position: absolute;
-    left: 8px;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
     background: none;
     border: none;
     color: white;
     cursor: pointer;
-    padding: 8px;
+    padding: 12px;
     border-radius: 50%;
+    min-width: 48px;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .header-btn:active {
