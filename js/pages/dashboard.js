@@ -71,6 +71,12 @@ const DashboardPage = {
         const remaining = Math.max(goals.calories - totals.calories, 0);
         const waterPct = Math.min(Math.round((water / waterGoal) * 100), 100);
 
+        // Supplements completion check
+        const mySupplements = Storage._get('my_supplements', []);
+        const takenSuppl = Storage._get('suppl_' + Storage._dateKey(), []);
+        const supplAllDone = mySupplements.length > 0 && mySupplements.every(s => takenSuppl.some(t => t.id === s.id));
+        const supplCount = takenSuppl.filter(t => mySupplements.some(s => s.id === t.id)).length;
+
         // Weight data for mini widget
 
         // Separate meals with items from empty meals
@@ -219,7 +225,7 @@ const DashboardPage = {
                         <span class="icon">🏋️</span>Salle${!hasAccess ? ' 🔒' : ''}
                     </button>
                     <button class="quick-action-btn" onclick="${hasAccess ? "App.navigate('supplements')" : "TrialService.showFeatureLockedPrompt('supplements')"}" style="display:flex;align-items:center;gap:6px;justify-content:center">
-                        <span class="icon">💊</span>Compléments${!hasAccess ? ' 🔒' : ''}
+                        <span class="icon">💊</span>Compléments${!hasAccess ? ' 🔒' : mySupplements.length > 0 ? ` <span style="font-size:10px;color:var(--text-secondary)">${supplCount}/${mySupplements.length}</span>${supplAllDone ? ' <span style="font-size:11px">✅</span>' : ''}` : ''}
                     </button>
                     <button class="quick-action-btn" onclick="${hasAccess ? "App.navigate('weight')" : "TrialService.showFeatureLockedPrompt('weight')"}" style="display:flex;align-items:center;gap:6px;justify-content:center">
                         <span class="icon">⚖️</span>Poids${!hasAccess ? ' 🔒' : ''}

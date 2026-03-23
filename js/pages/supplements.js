@@ -138,6 +138,7 @@ const SupplementsPage = {
             Storage.addCoins(2);
         }
         Storage._set('suppl_' + today, taken);
+        this._checkSupplBonus(taken);
         if (typeof SyncService !== 'undefined') SyncService.autoSync();
         this.render();
     },
@@ -154,6 +155,7 @@ const SupplementsPage = {
         Storage._set('suppl_' + today, taken);
         App.showToast(`${info.icon} ${info.name} pris !`);
         Storage.addCoins(2);
+        this._checkSupplBonus(taken);
         if (typeof SyncService !== 'undefined') SyncService.autoSync();
         this.render();
     },
@@ -165,6 +167,19 @@ const SupplementsPage = {
         Storage._set('suppl_' + today, taken);
         App.showToast('Complément retiré');
         this.render();
+    },
+
+    _checkSupplBonus(taken) {
+        if (Storage.hasDailySupplBonus()) return;
+        const mySupplements = Storage._get('my_supplements', []);
+        if (mySupplements.length === 0) return;
+        const allTaken = mySupplements.every(s => taken.some(t => t.id === s.id));
+        if (allTaken) {
+            Storage.addCoins(10);
+            Storage.setDailySupplBonus();
+            App.haptic('success');
+            App.showToast('Tous les compléments pris ! +10 🪙 💊✅');
+        }
     },
 
     _addCustom() {

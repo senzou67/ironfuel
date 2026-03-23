@@ -539,6 +539,14 @@ const Storage = {
         this._set('daily_water_bonus', this._dateKey());
     },
 
+    hasDailySupplBonus() {
+        return this._get('daily_suppl_bonus', '') === this._dateKey();
+    },
+
+    setDailySupplBonus() {
+        this._set('daily_suppl_bonus', this._dateKey());
+    },
+
     // === EXPORT ===
     exportData() {
         const data = {};
