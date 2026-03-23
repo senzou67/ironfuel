@@ -36,8 +36,8 @@ if (FCM_CONFIG.messagingSenderId && FCM_CONFIG.appId) {
     console.log('[SW] FCM not configured — set messagingSenderId & appId in sw.js');
 }
 
-const CACHE_NAME = 'ironfuel-v80';
-const SW_VERSION = 80;
+const CACHE_NAME = 'ironfuel-v81';
+const SW_VERSION = 81;
 const ASSETS = [
     '/',
     '/index.html',
@@ -149,24 +149,7 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
-    // Cache-first for versioned assets (?v=XX) — immutable until version bump
-    if (url.search && /[?&]v=\d+/.test(url.search)) {
-        e.respondWith(
-            caches.match(e.request).then(cached => {
-                if (cached) return cached;
-                return fetch(e.request).then(response => {
-                    if (response.ok) {
-                        const clone = response.clone();
-                        caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
-                    }
-                    return response;
-                });
-            })
-        );
-        return;
-    }
-
-    // Network-first for HTML and non-versioned assets
+    // Network-first for ALL local assets (including versioned ?v=XX)
     e.respondWith(
         fetch(e.request).then(response => {
             if (response.ok) {
