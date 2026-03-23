@@ -6,16 +6,32 @@ const MealCard = {
         snack: { name: 'Collation', icon: '🍎' }
     },
 
+    _collapsedKey: 'ironfuel_collapsed_meals',
+
+    _getCollapsed() {
+        try {
+            return JSON.parse(sessionStorage.getItem(this._collapsedKey) || '{}');
+        } catch { return {}; }
+    },
+
+    _setCollapsed(mealType, collapsed) {
+        const state = this._getCollapsed();
+        if (collapsed) state[mealType] = true;
+        else delete state[mealType];
+        sessionStorage.setItem(this._collapsedKey, JSON.stringify(state));
+    },
+
     render(mealType, items, showAdd = true, context = 'diary') {
         const config = this.mealConfig[mealType];
         const date = App.getSelectedDate();
         const totals = Storage.getMealTotals(mealType, date);
         const dateStr = App._localDateKey(date);
+        const isCollapsed = this._getCollapsed()[mealType];
 
         const headerClick = `MealCard.toggleMeal('${mealType}')`;
 
         return `
-            <div class="meal-section fade-in" id="meal-section-${mealType}">
+            <div class="meal-section fade-in${isCollapsed ? ' collapsed' : ''}" id="meal-section-${mealType}">
                 <div class="meal-header" onclick="${headerClick}">
                     <div class="meal-header-left">
                         <span class="meal-icon" aria-hidden="true">${config.icon}</span>
@@ -42,7 +58,8 @@ const MealCard = {
     toggleMeal(mealType) {
         const section = document.getElementById('meal-section-' + mealType);
         if (section) {
-            section.classList.toggle('collapsed');
+            const nowCollapsed = section.classList.toggle('collapsed');
+            this._setCollapsed(mealType, nowCollapsed);
         }
     }
 };
