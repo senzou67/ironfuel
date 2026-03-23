@@ -307,7 +307,29 @@ const DashboardPage = {
         if (App.isToday()) this._checkWaterBonus(newCount);
         App.haptic('light');
         App.showToast(`+250ml 💧 (${(newCount * 0.25).toFixed(newCount * 0.25 % 1 === 0 ? 0 : 1)}L)`);
-        this.render();
+        this._updateWaterButton(newCount, waterGoal);
+    },
+
+    _updateWaterButton(water, waterGoal) {
+        const btn = document.querySelector('.water-action-btn');
+        if (!btn) return;
+        const pct = Math.min(100, Math.round((water / waterGoal) * 100));
+        const fill = btn.querySelector('.water-fill-bg');
+        if (fill) {
+            fill.style.height = pct + '%';
+            if (pct > 0 && !fill.querySelector('svg')) {
+                fill.innerHTML = '<svg style="position:absolute;top:-4px;left:0;width:200%;height:8px;animation:waveMove 2s linear infinite" viewBox="0 0 1200 8" preserveAspectRatio="none"><path d="M0 4C200 0 400 8 600 4C800 0 1000 8 1200 4V8H0Z" fill="rgba(79,195,247,0.4)"/></svg>';
+            }
+        }
+        const spans = btn.querySelectorAll('span');
+        if (spans[1]) spans[1].textContent = (water * 0.25).toFixed(water % 4 === 0 ? 0 : 1) + 'L';
+        const check = btn.querySelector('span:last-child');
+        if (water >= waterGoal && check && !check.textContent.includes('✅')) {
+            const s = document.createElement('span');
+            s.style.fontSize = '11px';
+            s.textContent = '✅';
+            btn.appendChild(s);
+        }
     },
 
     setWater(count) {
