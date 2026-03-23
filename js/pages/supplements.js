@@ -106,11 +106,11 @@ const SupplementsPage = {
                     <div style="font-size:14px;font-weight:700;margin-bottom:10px">Ajouter un complément</div>
                     <div style="display:flex;gap:8px;align-items:stretch">
                         <input type="text" id="custom-suppl-name"
-                               placeholder="Ex: Spiruline, Collagène..."
+                               placeholder="Ex: Spiruline..."
                                class="form-input"
-                               style="flex:1;font-size:18px;font-weight:600;padding:14px 16px;min-height:52px;border-radius:12px;color:#212121;background:#fff">
+                               style="flex:1 1 0%;min-width:0;font-size:16px;font-weight:600;padding:12px 14px;min-height:48px;border-radius:12px;color:#212121;background:#fff">
                         <button class="btn btn-primary" onclick="SupplementsPage._addCustom()"
-                                style="padding:14px 24px;font-size:18px;min-height:52px;border-radius:12px;font-weight:700">+</button>
+                                style="flex:0 0 48px;width:48px;padding:0;font-size:20px;min-height:48px;border-radius:12px;font-weight:700;display:flex;align-items:center;justify-content:center">+</button>
                     </div>
                 </div>
 
