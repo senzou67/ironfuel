@@ -57,9 +57,51 @@ const MealCard = {
 
     toggleMeal(mealType) {
         const section = document.getElementById('meal-section-' + mealType);
-        if (section) {
-            const nowCollapsed = section.classList.toggle('collapsed');
-            this._setCollapsed(mealType, nowCollapsed);
+        if (!section) return;
+        const items = section.querySelector('.meal-items');
+        const isCollapsed = section.classList.contains('collapsed');
+
+        if (isCollapsed) {
+            // Expand: show then animate
+            section.classList.remove('collapsed');
+            if (items) {
+                items.style.opacity = '0';
+                items.style.maxHeight = '0';
+                items.style.overflow = 'hidden';
+                items.style.transition = 'max-height 0.3s ease, opacity 0.2s ease';
+                requestAnimationFrame(() => {
+                    items.style.maxHeight = items.scrollHeight + 'px';
+                    items.style.opacity = '1';
+                    setTimeout(() => {
+                        items.style.maxHeight = '';
+                        items.style.overflow = '';
+                        items.style.transition = '';
+                        items.style.opacity = '';
+                    }, 300);
+                });
+            }
+        } else {
+            // Collapse: animate then hide
+            if (items) {
+                items.style.maxHeight = items.scrollHeight + 'px';
+                items.style.overflow = 'hidden';
+                items.style.transition = 'max-height 0.3s ease, opacity 0.2s ease';
+                requestAnimationFrame(() => {
+                    items.style.maxHeight = '0';
+                    items.style.opacity = '0';
+                    setTimeout(() => {
+                        section.classList.add('collapsed');
+                        items.style.maxHeight = '';
+                        items.style.overflow = '';
+                        items.style.transition = '';
+                        items.style.opacity = '';
+                    }, 300);
+                });
+            } else {
+                section.classList.add('collapsed');
+            }
         }
+
+        this._setCollapsed(mealType, !isCollapsed);
     }
 };

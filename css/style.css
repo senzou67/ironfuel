@@ -706,16 +706,10 @@ body::before {
     border-radius: 0 0 var(--radius) var(--radius);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
-    max-height: 1000px;
-    transition: max-height 0.3s ease, opacity 0.2s ease;
-    opacity: 1;
 }
 
 .meal-section.collapsed .meal-items {
-    max-height: 0;
-    opacity: 0;
-    border: none;
-    box-shadow: none;
+    display: none;
 }
 
 .food-item {
