@@ -34,7 +34,7 @@ const SupplementsPage = {
                 <div class="card" style="padding:14px 16px;margin-bottom:12px">
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
                         <span style="font-size:14px;font-weight:700">Aujourd'hui</span>
-                        <span style="font-size:12px;color:var(--text-secondary)">${takenToday.length} pris</span>
+                        <span class="suppl-today-count" style="font-size:12px;color:var(--text-secondary)">${takenToday.length} pris</span>
                     </div>
                     ${takenToday.length > 0 ? `
                         <div style="display:flex;flex-wrap:wrap;gap:6px">
@@ -127,20 +127,56 @@ const SupplementsPage = {
         const today = Storage._dateKey();
         let taken = Storage._get('suppl_' + today, []);
         const idx = taken.findIndex(t => t.id === id);
+        const btn = event?.target?.closest('button');
         if (idx >= 0) {
             taken.splice(idx, 1);
             App.showToast('Complément retiré');
+            App.haptic('light');
+            if (btn) {
+                btn.style.border = '2px solid var(--border)';
+                btn.style.background = 'var(--surface)';
+                const checkEl = btn.querySelector('[data-check]');
+                if (checkEl) checkEl.remove();
+            }
         } else {
             const info = this.SUPPLEMENTS.find(x => x.id === id) || { id, name: id };
             taken.push({ id, name: info.name, time: new Date().toISOString() });
-            App.showToast(`${info.icon || '💊'} ${info.name} pris !`);
-            // Bonus coins
             Storage.addCoins(2);
+            App.haptic('success');
+            // Visual gratification on button
+            if (btn) {
+                btn.style.border = '2px solid var(--primary)';
+                btn.style.background = 'var(--primary-light)';
+                btn.style.transform = 'scale(1.08)';
+                setTimeout(() => { btn.style.transform = 'scale(1)'; }, 200);
+                // Add check mark
+                if (!btn.querySelector('[data-check]')) {
+                    const check = document.createElement('div');
+                    check.setAttribute('data-check', '1');
+                    check.style.cssText = 'font-size:10px;color:var(--primary);margin-top:2px';
+                    check.textContent = '✓ Pris';
+                    btn.appendChild(check);
+                }
+                // Floating +2 coins animation
+                const coin = document.createElement('div');
+                coin.textContent = '+2 🪙';
+                coin.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:16px;font-weight:700;color:var(--primary);pointer-events:none;opacity:1;transition:all 0.8s ease-out;z-index:10';
+                btn.style.position = 'relative';
+                btn.appendChild(coin);
+                requestAnimationFrame(() => {
+                    coin.style.top = '-10px';
+                    coin.style.opacity = '0';
+                });
+                setTimeout(() => coin.remove(), 900);
+            }
+            App.showToast(`${info.icon || '💊'} ${info.name} pris ! +2 🪙`);
         }
         Storage._set('suppl_' + today, taken);
         this._checkSupplBonus(taken);
         if (typeof SyncService !== 'undefined') SyncService.autoSync();
-        this.render();
+        // Update today count without full re-render
+        const countEl = document.querySelector('.suppl-today-count');
+        if (countEl) countEl.textContent = taken.length + ' pris';
     },
 
     quickTake(id) {
@@ -153,8 +189,9 @@ const SupplementsPage = {
         const info = this.SUPPLEMENTS.find(x => x.id === id);
         taken.push({ id, name: info.name, time: new Date().toISOString() });
         Storage._set('suppl_' + today, taken);
-        App.showToast(`${info.icon} ${info.name} pris !`);
         Storage.addCoins(2);
+        App.haptic('success');
+        App.showToast(`${info.icon} ${info.name} pris ! +2 🪙`);
         this._checkSupplBonus(taken);
         if (typeof SyncService !== 'undefined') SyncService.autoSync();
         this.render();
