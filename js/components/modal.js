@@ -466,7 +466,7 @@ const Modal = {
 
     _isModalToday() {
         if (this._dateStr) {
-            return this._dateStr === new Date().toISOString().split('T')[0];
+            return this._dateStr === App._localDateKey(new Date());
         }
         return App.isToday();
     },

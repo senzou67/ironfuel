@@ -6,8 +6,10 @@ const DiaryPage = {
         const goals = Storage.getGoals();
 
         const dateLabel = App.getDateLabel();
-        const dateKey = date.toISOString().split('T')[0];
-        const todayKey = new Date().toISOString().split('T')[0];
+        const dateKey = App._localDateKey(date);
+        const tomorrowDate = new Date();
+        tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+        const maxDateKey = App._localDateKey(tomorrowDate);
 
         const content = document.getElementById('page-content');
         const mealEntries = Object.entries(log.meals);
@@ -24,8 +26,8 @@ const DiaryPage = {
                         <span>${dateLabel}</span>
                         <span class="date-chevron">▾</span>
                     </button>
-                    <button class="date-nav-btn" onclick="DiaryPage._shiftDate(1)" aria-label="Jour suivant" ${dateKey === todayKey ? 'disabled' : ''}>›</button>
-                    <input type="date" id="hidden-date-picker" value="${dateKey}" max="${todayKey}" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
+                    <button class="date-nav-btn" onclick="DiaryPage._shiftDate(1)" aria-label="Jour suivant" ${dateKey === maxDateKey ? 'disabled' : ''}>›</button>
+                    <input type="date" id="hidden-date-picker" value="${dateKey}" max="${maxDateKey}" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
                 </div>
 
                 <div class="card diary-summary">
@@ -70,17 +72,25 @@ const DiaryPage = {
     _shiftDate(delta) {
         const d = new Date(App.getSelectedDate());
         d.setDate(d.getDate() + delta);
-        if (d > new Date()) return;
-        App.setSelectedDate(d.toISOString().split('T')[0]);
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        if (App._localDateKey(d) > App._localDateKey(tomorrow)) return;
+        App.setSelectedDate(App._localDateKey(d));
     },
 
     _openDatePicker() {
         const picker = document.getElementById('hidden-date-picker');
-        if (picker) {
-            picker.showPicker ? picker.showPicker() : picker.click();
-            picker.onchange = (e) => {
-                App.setSelectedDate(e.target.value);
-            };
+        if (!picker) return;
+        picker.style.pointerEvents = 'auto';
+        picker.onchange = (e) => {
+            App.setSelectedDate(e.target.value);
+            picker.style.pointerEvents = 'none';
+        };
+        try {
+            picker.showPicker();
+        } catch (e) {
+            picker.focus();
+            picker.click();
         }
     }
 };
