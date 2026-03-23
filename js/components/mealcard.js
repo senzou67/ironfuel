@@ -8,7 +8,9 @@ const MealCard = {
 
     render(mealType, items, showAdd = true, context = 'diary') {
         const config = this.mealConfig[mealType];
-        const totals = Storage.getMealTotals(mealType);
+        const date = App.getSelectedDate();
+        const totals = Storage.getMealTotals(mealType, date);
+        const dateStr = date.toISOString().split('T')[0];
 
         const headerClick = `MealCard.toggleMeal('${mealType}')`;
 
@@ -31,7 +33,7 @@ const MealCard = {
                         <div class="food-item" style="justify-content:center;color:var(--text-secondary);font-size:13px;padding:16px">
                             Aucun aliment ajouté
                         </div>
-                    ` : items.map(item => FoodItem.render(item, mealType)).join('')}
+                    ` : items.map(item => FoodItem.render(item, mealType, dateStr)).join('')}
                 </div>
             </div>
         `;

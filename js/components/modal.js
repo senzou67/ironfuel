@@ -199,6 +199,7 @@ const Modal = {
         this._editMode = editMode;
         this._editEntryId = entryId;
         this._editMealType = mealType;
+        this._dateStr = options.dateStr || null;
 
         const mealNames = {
             breakfast: 'Petit-d\u00e9jeuner',
@@ -290,6 +291,7 @@ const Modal = {
         this._editMode = editMode;
         this._editEntryId = entryId;
         this._editMealType = mealType;
+        this._dateStr = options.dateStr || null;
 
         const mealNames = {
             breakfast: 'Petit-d\u00e9jeuner',
@@ -454,6 +456,21 @@ const Modal = {
         if (btn) btn.textContent = isFav ? '\u2B50' : '\u2606';
     },
 
+    _getModalDate() {
+        if (this._dateStr) {
+            const p = this._dateStr.split('-');
+            return new Date(p[0], p[1] - 1, p[2]);
+        }
+        return App.selectedDate || undefined;
+    },
+
+    _isModalToday() {
+        if (this._dateStr) {
+            return this._dateStr === new Date().toISOString().split('T')[0];
+        }
+        return App.isToday();
+    },
+
     // === ADD FOOD ===
     addFood(foodId) {
         const food = FoodDB.getById(foodId);
@@ -461,6 +478,7 @@ const Modal = {
         const grams = parseInt(document.getElementById('modal-grams').value) || 100;
         const mealType = document.getElementById('modal-meal').value;
         const n = FoodDB.getNutrition(food, grams);
+        const date = this._getModalDate();
 
         Storage.addFoodToMeal(mealType, {
             foodId: food.id,
@@ -471,18 +489,20 @@ const Modal = {
             carbs: n.carbs,
             fat: n.fat,
             fiber: n.fiber
-        });
+        }, date);
 
         Storage.addRecent(food.id);
         Storage.trackFoodUsage(food.id, mealType);
 
-        // IronCoins: +5 per food added
-        Storage.addCoins(5);
-        this._checkCalorieBonus();
+        // IronCoins: +5 per food added (only for today)
+        if (this._isModalToday()) {
+            Storage.addCoins(5);
+            this._checkCalorieBonus();
+        }
 
         this.close();
         App.showSuccessCheck();
-        App.showToast(`${food.name} ajouté ! +5 \uD83E\uDE99`);
+        App.showToast(`${food.name} ajouté !${this._isModalToday() ? ' +5 \uD83E\uDE99' : ''}`);
 
         if (App.currentPage === 'dashboard' || App.currentPage === 'diary') {
             App.navigate(App.currentPage);
@@ -503,7 +523,7 @@ const Modal = {
             carbs: n.carbs,
             fat: n.fat,
             fiber: n.fiber
-        });
+        }, this._getModalDate());
 
         this.close();
         App.showToast(`${food.name} modifié !`);
@@ -528,17 +548,19 @@ const Modal = {
             carbs: Math.round(this._customFood.carbs * ratio * 10) / 10,
             fat: Math.round(this._customFood.fat * ratio * 10) / 10,
             fiber: Math.round((this._customFood.fiber || 0) * ratio * 10) / 10
-        });
+        }, this._getModalDate());
 
         Storage.trackFoodUsage(this._customFood.name, mealType);
 
-        // IronCoins: +5 per food added
-        Storage.addCoins(5);
-        this._checkCalorieBonus();
+        // IronCoins: +5 per food added (only for today)
+        if (this._isModalToday()) {
+            Storage.addCoins(5);
+            this._checkCalorieBonus();
+        }
 
         this.close();
         App.showSuccessCheck();
-        App.showToast(`${this._customFood.name} ajouté ! +5 \uD83E\uDE99`);
+        App.showToast(`${this._customFood.name} ajouté !${this._isModalToday() ? ' +5 \uD83E\uDE99' : ''}`);
 
         if (App.currentPage === 'dashboard' || App.currentPage === 'diary') {
             App.navigate(App.currentPage);
@@ -558,7 +580,7 @@ const Modal = {
             carbs: Math.round(this._customFood.carbs * ratio * 10) / 10,
             fat: Math.round(this._customFood.fat * ratio * 10) / 10,
             fiber: Math.round((this._customFood.fiber || 0) * ratio * 10) / 10
-        });
+        }, this._getModalDate());
 
         this.close();
         App.showToast(`${this._customFood.name} modifié !`);
@@ -569,6 +591,7 @@ const Modal = {
     },
 
     _checkCalorieBonus() {
+        if (!this._isModalToday()) return;
         if (Storage.hasDailyCalorieBonus()) return;
         const goals = Storage.getGoals();
         const totals = Storage.getDayTotals();
