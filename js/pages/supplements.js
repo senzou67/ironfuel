@@ -108,7 +108,7 @@ const SupplementsPage = {
                         <input type="text" id="custom-suppl-name"
                                placeholder="Ex: Spiruline, Collagène..."
                                class="form-input"
-                               style="flex:1;font-size:16px;padding:14px 16px;min-height:52px;border-radius:12px">
+                               style="flex:1;font-size:18px;font-weight:600;padding:14px 16px;min-height:52px;border-radius:12px;color:#212121;background:#fff">
                         <button class="btn btn-primary" onclick="SupplementsPage._addCustom()"
                                 style="padding:14px 24px;font-size:18px;min-height:52px;border-radius:12px;font-weight:700">+</button>
                     </div>
