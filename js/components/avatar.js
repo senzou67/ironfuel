@@ -103,7 +103,7 @@ const Creature = {
         if (!hasMeal) return;
 
         const streak = Storage.getCreatureStreak();
-        const today = new Date().toISOString().split('T')[0];
+        const today = App._localDateKey();
 
         if (streak.lastActiveDate) {
             const last = new Date(streak.lastActiveDate);
