@@ -3,24 +3,45 @@ const App = {
     previousPage: null,
     selectedDate: null, // null = today
 
+    // Helper: format Date to YYYY-MM-DD in local timezone (never UTC)
+    _localDateKey(d) {
+        if (!d) d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    },
+
     getSelectedDate() {
         return this.selectedDate || new Date();
     },
 
     isToday() {
         if (!this.selectedDate) return true;
-        const today = new Date().toISOString().split('T')[0];
-        return this.selectedDate.toISOString().split('T')[0] === today;
+        return this._localDateKey(this.selectedDate) === this._localDateKey(new Date());
+    },
+
+    isTomorrow() {
+        if (!this.selectedDate) return false;
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        return this._localDateKey(this.selectedDate) === this._localDateKey(tomorrow);
+    },
+
+    isFuture() {
+        if (!this.selectedDate) return false;
+        return this._localDateKey(this.selectedDate) > this._localDateKey(new Date());
     },
 
     setSelectedDate(dateStr) {
         if (!dateStr) {
             this.selectedDate = null;
         } else {
-            // Parse as local date (not UTC)
             const parts = dateStr.split('-');
             this.selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
         }
+        // Reset to null if it's today
+        if (this.selectedDate && this.isToday()) this.selectedDate = null;
         // Re-render current page
         if (this.currentPage === 'dashboard') DashboardPage.render();
         else if (this.currentPage === 'diary') DiaryPage.render();
@@ -31,9 +52,12 @@ const App = {
         const today = new Date();
         const yesterday = new Date(today);
         yesterday.setDate(yesterday.getDate() - 1);
-        const dStr = d.toISOString().split('T')[0];
-        if (dStr === today.toISOString().split('T')[0]) return "Aujourd'hui";
-        if (dStr === yesterday.toISOString().split('T')[0]) return 'Hier';
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const dStr = this._localDateKey(d);
+        if (dStr === this._localDateKey(today)) return "Aujourd'hui";
+        if (dStr === this._localDateKey(yesterday)) return 'Hier';
+        if (dStr === this._localDateKey(tomorrow)) return 'Demain';
         return d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
     },
 

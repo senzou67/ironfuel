@@ -10,7 +10,7 @@ const MealCard = {
         const config = this.mealConfig[mealType];
         const date = App.getSelectedDate();
         const totals = Storage.getMealTotals(mealType, date);
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = App._localDateKey(date);
 
         const headerClick = `MealCard.toggleMeal('${mealType}')`;
 
