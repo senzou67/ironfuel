@@ -3344,6 +3344,29 @@ body::before {
     100% { opacity: 0; transform: scale(1) translateY(-40px); }
 }
 
+/* Gym workout logged — confetti burst on today card (mirrors water-goal-reached) */
+.gym-goal-reached {
+    position: relative;
+}
+.gym-goal-reached::after {
+    content: '💪';
+    position: absolute;
+    top: -20px;
+    right: 10px;
+    font-size: 24px;
+    animation: confettiBurst 1s ease forwards;
+    pointer-events: none;
+}
+/* Gym button pulse on log */
+.gym-workout-logged {
+    animation: gymBtnPulse 0.6s ease-out !important;
+}
+@keyframes gymBtnPulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(76,175,80,0.5); }
+    40% { transform: scale(1.1); box-shadow: 0 0 0 12px rgba(76,175,80,0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(76,175,80,0); }
+}
+
 /* Food item slide-in when added */
 .food-item-added {
     animation: foodSlideIn 0.35s ease-out;
