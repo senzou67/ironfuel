@@ -238,11 +238,23 @@ const GymPage = {
 
             // Gratification burst on the workout card
             if (isNew) {
+                App.haptic('success');
                 setTimeout(() => {
                     const btn = document.querySelector(`.gym-type-btn[onclick*="'${typeId}'"]`);
                     if (btn) {
                         btn.classList.add('gym-workout-logged');
                         setTimeout(() => btn.classList.remove('gym-workout-logged'), 1200);
+                        // Floating +5 coins animation
+                        const coin = document.createElement('div');
+                        coin.textContent = '+5 🪙';
+                        coin.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:16px;font-weight:700;color:var(--primary);pointer-events:none;opacity:1;transition:all 0.8s ease-out;z-index:10';
+                        btn.style.position = 'relative';
+                        btn.appendChild(coin);
+                        requestAnimationFrame(() => {
+                            coin.style.top = '-10px';
+                            coin.style.opacity = '0';
+                        });
+                        setTimeout(() => coin.remove(), 900);
                     }
                     const todayCard = document.querySelector('.gym-today-card');
                     if (todayCard) {
