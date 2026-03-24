@@ -75,7 +75,7 @@ const GymPage = {
                 </div>
 
                 <!-- Today's Workout -->
-                <div class="card" style="padding:14px 16px;margin-top:12px">
+                <div class="card gym-today-card" style="padding:14px 16px;margin-top:12px">
                     <div style="font-size:14px;font-weight:700;margin-bottom:10px">Aujourd'hui</div>
                     ${this._renderTodayWorkout()}
                 </div>
@@ -226,11 +226,30 @@ const GymPage = {
             Storage._set('gym_' + key, { type: typeId, time: new Date().toISOString() });
 
             const type = this.WORKOUT_TYPES.find(t => t.id === typeId);
-            App.showToast(`${type ? type.icon : '✓'} Séance ${type ? type.name : typeId} enregistrée !`);
+            const isNew = !existing;
 
             // Bonus coins for gym
-            if (!existing) {
+            if (isNew) {
                 Storage.addCoins(5);
+                App.showToast(`${type ? type.icon : '✓'} Séance enregistrée ! +5 🪙`);
+            } else {
+                App.showToast(`${type ? type.icon : '✓'} Séance ${type ? type.name : typeId} modifiée`);
+            }
+
+            // Gratification burst on the workout card
+            if (isNew) {
+                setTimeout(() => {
+                    const btn = document.querySelector(`.gym-type-btn[onclick*="'${typeId}'"]`);
+                    if (btn) {
+                        btn.classList.add('gym-workout-logged');
+                        setTimeout(() => btn.classList.remove('gym-workout-logged'), 1200);
+                    }
+                    const todayCard = document.querySelector('.gym-today-card');
+                    if (todayCard) {
+                        todayCard.classList.add('gym-goal-reached');
+                        setTimeout(() => todayCard.classList.remove('gym-goal-reached'), 1500);
+                    }
+                }, 100);
             }
         }
 
