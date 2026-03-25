@@ -121,15 +121,30 @@ const GymPage = {
             const isToday = i === dayOfWeek;
             const type = gym ? this.WORKOUT_TYPES.find(t => t.id === gym.type) : null;
             const color = type ? type.color : 'var(--border)';
-            const filled = !!gym;
+            const isDone = gym && (gym.done || false);
+            const hasGym = !!gym;
+
+            let dotStyle, dotContent;
+            if (isDone) {
+                // Done: solid filled
+                dotStyle = `background:${color};color:white`;
+                dotContent = type ? type.icon : '✓';
+            } else if (hasGym) {
+                // Planned but not done: border only
+                dotStyle = `border:2.5px solid ${color};background:${color}15;color:${color}`;
+                dotContent = type ? type.icon : '○';
+            } else {
+                dotStyle = `border:2px solid ${isToday ? 'var(--primary)' : 'var(--border)'}`;
+                dotContent = isToday ? '•' : '';
+            }
 
             html += `
-                <div style="flex:1;text-align:center" onclick="GymPage._selectDay('${key}')" role="button" aria-label="${days[i]} ${filled ? (type ? type.name : 'fait') : (isToday ? 'aujourd hui' : 'libre')}">
+                <div style="flex:1;text-align:center" onclick="GymPage._selectDay('${key}')" role="button" aria-label="${days[i]} ${isDone ? 'fait' : hasGym ? 'planifié' : (isToday ? 'aujourd hui' : 'libre')}">
                     <div style="font-size:10px;color:var(--text-secondary);margin-bottom:4px">${days[i]}</div>
                     <div style="width:28px;height:28px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;
-                        ${filled ? `background:${color};color:white` : `border:2px solid ${isToday ? 'var(--primary)' : 'var(--border)'}`};
-                        font-size:${filled ? '14px' : '10px'};font-weight:600;cursor:pointer;transition:all 0.2s">
-                        ${filled ? (type ? type.icon : '✓') : (isToday ? '•' : '')}
+                        ${dotStyle};
+                        font-size:${hasGym ? '14px' : '10px'};font-weight:600;cursor:pointer;transition:all 0.2s">
+                        ${dotContent}
                     </div>
                 </div>
             `;
@@ -155,13 +170,22 @@ const GymPage = {
             const gym = Storage._get('gym_' + key, null);
             const isToday = key === today;
             const type = gym ? this.WORKOUT_TYPES.find(t => t.id === gym.type) : null;
+            const isDone = gym && (gym.done || false);
+            const color = type ? type.color : 'var(--primary)';
+
+            let dayStyle = '';
+            if (isDone) {
+                dayStyle = `background:${color}30;border-color:${color};border-width:2px`;
+            } else if (gym) {
+                dayStyle = `background:${color}08;border-color:${color};border-style:dashed`;
+            }
 
             html += `
                 <div class="gym-cal-day ${isToday ? 'today' : ''} ${gym ? 'done' : ''}"
                      onclick="GymPage._selectDay('${key}')"
-                     style="${gym ? `background:${type ? type.color : 'var(--primary)'}20;border-color:${type ? type.color : 'var(--primary)'}` : ''}">
+                     style="${dayStyle}">
                     <span class="gym-cal-num">${day}</span>
-                    ${gym ? `<span style="font-size:10px">${type ? type.icon : '✓'}</span>` : ''}
+                    ${gym ? `<span style="font-size:10px;${isDone ? '' : 'opacity:0.5'}">${type ? type.icon : '✓'}</span>` : ''}
                 </div>
             `;
         }
@@ -179,15 +203,17 @@ const GymPage = {
         }
 
         const type = this.WORKOUT_TYPES.find(t => t.id === gym.type);
+        const isDone = gym.done || false;
         return `
             <div style="display:flex;align-items:center;gap:12px">
-                <div style="width:48px;height:48px;border-radius:12px;background:${type ? type.color : 'var(--primary)'}15;display:flex;align-items:center;justify-content:center;font-size:24px">
+                <div style="width:48px;height:48px;border-radius:12px;background:${type ? type.color : 'var(--primary)'}${isDone ? '30' : '15'};display:flex;align-items:center;justify-content:center;font-size:24px;${isDone ? `border:2px solid ${type ? type.color : 'var(--primary)'}` : ''}">
                     ${type ? type.icon : '✓'}
                 </div>
                 <div style="flex:1">
                     <div style="font-size:15px;font-weight:700">${type ? type.name : gym.type}</div>
-                    <div style="font-size:12px;color:var(--text-secondary)">${gym.note || 'Séance enregistrée'}</div>
+                    <div style="font-size:12px;color:${isDone ? 'var(--success)' : 'var(--text-secondary)'}">${isDone ? 'Séance effectuée ✅' : 'Séance planifiée'}</div>
                 </div>
+                <button class="gym-done-btn" onclick="GymPage.toggleDone()" style="position:relative;overflow:visible;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;border:2px solid ${isDone ? 'var(--success)' : 'var(--primary)'};background:${isDone ? 'var(--success)' : 'transparent'};color:${isDone ? 'white' : 'var(--primary)'};transition:all 0.2s">${isDone ? '✓ Fait' : 'Fait ?'}</button>
                 <button class="btn btn-outline" onclick="GymPage._removeToday()" aria-label="Supprimer la séance d'aujourd'hui" style="padding:6px 10px;font-size:11px;color:var(--danger);border-color:var(--danger)">✕</button>
             </div>
         `;
@@ -223,46 +249,65 @@ const GymPage = {
             localStorage.removeItem('nutritrack_gym_' + key);
             App.showToast('Séance supprimée');
         } else {
-            Storage._set('gym_' + key, { type: typeId, time: new Date().toISOString() });
+            const done = existing ? (existing.done || false) : false;
+            Storage._set('gym_' + key, { type: typeId, time: new Date().toISOString(), done });
 
             const type = this.WORKOUT_TYPES.find(t => t.id === typeId);
             const isNew = !existing;
 
-            // Bonus coins for gym
             if (isNew) {
-                Storage.addCoins(5);
-                App.showToast(`${type ? type.icon : '✓'} Séance enregistrée ! +5 🪙`);
+                App.showToast(`${type ? type.icon : '✓'} Séance planifiée !`);
+                App.haptic('light');
             } else {
                 App.showToast(`${type ? type.icon : '✓'} Séance ${type ? type.name : typeId} modifiée`);
             }
+        }
 
-            // Gratification burst on the workout card
-            if (isNew) {
-                App.haptic('success');
-                setTimeout(() => {
-                    const btn = document.querySelector(`.gym-type-btn[onclick*="'${typeId}'"]`);
-                    if (btn) {
-                        btn.classList.add('gym-workout-logged');
-                        setTimeout(() => btn.classList.remove('gym-workout-logged'), 1200);
-                        // Floating +5 coins animation
-                        const coin = document.createElement('div');
-                        coin.textContent = '+5 🪙';
-                        coin.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:16px;font-weight:700;color:var(--primary);pointer-events:none;opacity:1;transition:all 0.8s ease-out;z-index:10';
-                        btn.style.position = 'relative';
-                        btn.appendChild(coin);
-                        requestAnimationFrame(() => {
-                            coin.style.top = '-10px';
-                            coin.style.opacity = '0';
-                        });
-                        setTimeout(() => coin.remove(), 900);
-                    }
-                    const todayCard = document.querySelector('.gym-today-card');
-                    if (todayCard) {
-                        todayCard.classList.add('gym-goal-reached');
-                        setTimeout(() => todayCard.classList.remove('gym-goal-reached'), 1500);
-                    }
-                }, 100);
-            }
+        if (typeof SyncService !== 'undefined') SyncService.autoSync();
+        this.render();
+    },
+
+    toggleDone() {
+        const today = Storage._dateKey();
+        const gym = Storage._get('gym_' + today, null);
+        if (!gym) return;
+
+        const wasDone = gym.done || false;
+        gym.done = !wasDone;
+        Storage._set('gym_' + today, gym);
+
+        if (gym.done) {
+            // Gratification on marking done
+            Storage.addCoins(5);
+            const type = this.WORKOUT_TYPES.find(t => t.id === gym.type);
+            App.showToast(`${type ? type.icon : '✓'} Séance effectuée ! +5 🪙`);
+            App.haptic('success');
+            setTimeout(() => {
+                const todayCard = document.querySelector('.gym-today-card');
+                if (todayCard) {
+                    todayCard.classList.add('gym-goal-reached');
+                    setTimeout(() => todayCard.classList.remove('gym-goal-reached'), 1500);
+                }
+                // Floating coins on the done button
+                const doneBtn = document.querySelector('.gym-done-btn');
+                if (doneBtn) {
+                    const coin = document.createElement('div');
+                    coin.textContent = '+5 🪙';
+                    coin.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:16px;font-weight:700;color:var(--primary);pointer-events:none;opacity:1;transition:all 0.8s ease-out;z-index:10';
+                    doneBtn.style.position = 'relative';
+                    doneBtn.appendChild(coin);
+                    requestAnimationFrame(() => {
+                        coin.style.top = '-10px';
+                        coin.style.opacity = '0';
+                    });
+                    setTimeout(() => coin.remove(), 900);
+                }
+            }, 100);
+        } else {
+            // Undo: remove coins
+            Storage.addCoins(-5);
+            App.showToast('Séance marquée comme non effectuée');
+            App.haptic('light');
         }
 
         if (typeof SyncService !== 'undefined') SyncService.autoSync();
@@ -290,7 +335,7 @@ const GymPage = {
             const key = Storage._dateKey(d);
             const gym = Storage._get('gym_' + key, null);
             if (gym && gym.type !== 'rest') {
-                done++;
+                if (gym.done) done++;
                 typeCounts[gym.type] = (typeCounts[gym.type] || 0) + 1;
             }
         }

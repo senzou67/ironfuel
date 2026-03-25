@@ -80,6 +80,7 @@ const DashboardPage = {
         // Gym completion check
         const gymToday = Storage._get('gym_' + Storage._dateKey(date), null);
         const gymType = gymToday && typeof GymPage !== 'undefined' ? GymPage.WORKOUT_TYPES.find(t => t.id === gymToday.type) : null;
+        const gymDone = gymToday && (gymToday.done || false);
 
         // Weight data for mini widget
 
@@ -226,8 +227,8 @@ const DashboardPage = {
                         ${water >= waterGoal ? '<span style="font-size:11px">✅</span>' : ''}
                     </button>
                     <button class="quick-action-btn gym-action-btn" onclick="${hasAccess ? "App.navigate('gym')" : "TrialService.showFeatureLockedPrompt('gym')"}" style="position:relative;overflow:hidden;display:flex;align-items:center;gap:6px;justify-content:center;z-index:1">
-                        ${hasAccess && gymToday ? `<div style="position:absolute;bottom:0;left:0;width:100%;height:100%;background:linear-gradient(180deg,${gymType ? gymType.color + '25' : 'rgba(76,175,80,0.2)'} 0%,${gymType ? gymType.color + '40' : 'rgba(76,175,80,0.35)'} 100%);z-index:-1;border-radius:0 0 12px 12px"></div>` : ''}
-                        <span class="icon">${hasAccess && gymType ? gymType.icon : '🏋️'}</span>${!hasAccess ? 'Salle 🔒' : gymToday ? `<span style="font-weight:600">${gymType ? gymType.name : 'Fait'}</span> <span style="font-size:11px">✅</span>` : 'Salle'}
+                        ${hasAccess && gymToday ? `<div style="position:absolute;bottom:0;left:0;width:100%;height:${gymDone ? '100' : '40'}%;background:linear-gradient(180deg,${gymType ? gymType.color + (gymDone ? '30' : '15') : 'rgba(76,175,80,0.15)'} 0%,${gymType ? gymType.color + (gymDone ? '45' : '25') : 'rgba(76,175,80,0.25)'} 100%);transition:height 0.5s cubic-bezier(0.4,0,0.2,1);z-index:-1;border-radius:0 0 12px 12px"></div>` : ''}
+                        <span class="icon">${hasAccess && gymType ? gymType.icon : '🏋️'}</span>${!hasAccess ? 'Salle 🔒' : gymDone ? `<span style="font-weight:600">${gymType ? gymType.name : 'Fait'}</span> <span style="font-size:11px">✅</span>` : gymToday ? `<span style="font-weight:600">${gymType ? gymType.name : 'Planifié'}</span>` : 'Salle'}
                     </button>
                     <button class="quick-action-btn suppl-action-btn" onclick="${hasAccess ? "App.navigate('supplements')" : "TrialService.showFeatureLockedPrompt('supplements')"}" style="position:relative;overflow:hidden;display:flex;align-items:center;gap:6px;justify-content:center;z-index:1">
                         ${hasAccess && mySupplements.length > 0 ? `<div style="position:absolute;bottom:0;left:0;width:100%;height:${Math.min(100, Math.round((supplCount / mySupplements.length) * 100))}%;background:linear-gradient(180deg,rgba(206,147,255,0.3) 0%,rgba(156,39,176,0.4) 100%);transition:height 0.5s cubic-bezier(0.4,0,0.2,1);z-index:-1;border-radius:0 0 12px 12px"></div>` : ''}
