@@ -118,7 +118,7 @@ const ChatPage = {
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
                     <div style="flex:1">
                         <div style="font-size:15px;font-weight:700">${food.name}</div>
-                        <div style="font-size:12px;color:var(--text-secondary)">~${food.weight_g}g</div>
+                        <div style="font-size:12px;color:var(--text-secondary)">~${food.weight_g}g ${food.source === 'usda' ? '<span style="color:var(--success);font-weight:600">USDA</span>' : food.source === 'openfoodfacts' ? '<span style="color:var(--success);font-weight:600">OFF</span>' : '<span style="opacity:0.6">estimé</span>'}</div>
                     </div>
                     <div style="display:flex;align-items:center;gap:6px">
                         <input type="number" value="${food.weight_g}" min="1" max="2000" style="width:60px;padding:6px 8px;text-align:center;font-size:14px;font-weight:600;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text)"

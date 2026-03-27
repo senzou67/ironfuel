@@ -187,7 +187,7 @@ const CameraPage = {
             ${foods.map((food, i) => `
                 <div class="ai-result-card">
                     <div class="ai-result-title">${food.name}</div>
-                    <div class="ai-result-weight">~${food.weight_g}g estimé</div>
+                    <div class="ai-result-weight">~${food.weight_g}g ${food.source === 'usda' ? '· <span style="color:var(--success);font-weight:600">USDA</span>' : food.source === 'openfoodfacts' ? '· <span style="color:var(--success);font-weight:600">OFF</span>' : '· estimé'}</div>
                     <div class="nutrition-preview">
                         <div class="nutrition-item cal">
                             <span class="nutrition-item-value">${food.calories}</span>

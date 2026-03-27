@@ -1,3 +1,4 @@
+const { enrichFoods } = require('./nutrition-lookup');
 const ALLOWED_ORIGIN = process.env.URL || 'https://theironfuel.netlify.app';
 const admin = (() => {
     try {
@@ -61,24 +62,28 @@ exports.handler = async (event) => {
             };
         }
 
-        const prompt = `Analyse cette photo de nourriture. Pour chaque aliment visible, donne-moi les informations suivantes au format JSON strict.
+        const prompt = `Analyse cette photo de nourriture. Identifie chaque aliment visible.
 
 Reponds UNIQUEMENT avec un JSON valide, sans texte avant ou apres, au format:
 {
   "foods": [
     {
       "name": "nom de l'aliment en francais",
+      "name_en": "food name in English (for database lookup)",
       "weight_g": estimation du poids en grammes (nombre entier),
-      "calories": calories totales pour ce poids (nombre entier),
-      "protein": proteines en grammes (nombre avec 1 decimale),
-      "carbs": glucides en grammes (nombre avec 1 decimale),
-      "fat": lipides en grammes (nombre avec 1 decimale),
-      "fiber": fibres en grammes (nombre avec 1 decimale)
+      "calories": calories totales estimees pour ce poids (nombre entier),
+      "protein": proteines estimees en grammes (nombre avec 1 decimale),
+      "carbs": glucides estimes en grammes (nombre avec 1 decimale),
+      "fat": lipides estimes en grammes (nombre avec 1 decimale),
+      "fiber": fibres estimees en grammes (nombre avec 1 decimale)
     }
   ]
 }
 
-Estime le poids de maniere realiste en te basant sur la taille apparente des portions. Si tu vois une assiette, estime par rapport a la taille standard d'une assiette (26cm).`;
+Regles:
+- Estime le poids de maniere realiste en te basant sur la taille apparente des portions.
+- Si tu vois une assiette, estime par rapport a la taille standard d'une assiette (26cm).
+- name_en doit etre le nom generique de l'aliment en anglais (ex: "grilled chicken breast", "white rice", "banana").`;
 
         const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
         let text = null;
@@ -164,10 +169,13 @@ Estime le poids de maniere realiste en te basant sur la taille apparente des por
             };
         }
 
+        // Enrich with verified nutrition data (USDA > Open Food Facts > Gemini estimate)
+        const enriched = await enrichFoods(result.foods || []);
+
         return {
             statusCode: 200,
             headers,
-            body: JSON.stringify({ foods: result.foods || [] })
+            body: JSON.stringify({ foods: enriched })
         };
 
     } catch (err) {

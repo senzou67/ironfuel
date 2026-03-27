@@ -1,0 +1,123 @@
+// === NUTRITION LOOKUP — USDA + Open Food Facts ===
+// Looks up verified nutrition data for identified foods.
+// Priority: USDA FoodData Central > Open Food Facts > Gemini fallback
+
+const USDA_KEY = process.env.USDA_API_KEY || 'DEMO_KEY';
+
+// Search USDA FoodData Central for a food by English name
+async function searchUSDA(query) {
+    try {
+        const url = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${USDA_KEY}&query=${encodeURIComponent(query)}&dataType=Foundation,SR%20Legacy&pageSize=3`;
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const data = await res.json();
+        const food = data.foods?.[0];
+        if (!food) return null;
+
+        const get = (name) => {
+            const n = food.foodNutrients?.find(n => n.nutrientName === name);
+            return n ? n.value : 0;
+        };
+
+        // USDA values are per 100g
+        return {
+            source: 'usda',
+            name_en: food.description,
+            per100g: {
+                calories: Math.round(get('Energy')),
+                protein: Math.round(get('Protein') * 10) / 10,
+                carbs: Math.round(get('Carbohydrate, by difference') * 10) / 10,
+                fat: Math.round(get('Total lipid (fat)') * 10) / 10,
+                fiber: Math.round(get('Fiber, total dietary') * 10) / 10
+            }
+        };
+    } catch {
+        return null;
+    }
+}
+
+// Search Open Food Facts for a food by French name
+async function searchOFF(query) {
+    try {
+        const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=3&fields=product_name,nutriments`;
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const data = await res.json();
+        const product = data.products?.[0];
+        if (!product || !product.nutriments) return null;
+
+        const n = product.nutriments;
+        // OFF values are per 100g
+        return {
+            source: 'openfoodfacts',
+            name_off: product.product_name,
+            per100g: {
+                calories: Math.round(n['energy-kcal_100g'] || n['energy-kcal'] || 0),
+                protein: Math.round((n.proteins_100g || n.proteins || 0) * 10) / 10,
+                carbs: Math.round((n.carbohydrates_100g || n.carbohydrates || 0) * 10) / 10,
+                fat: Math.round((n.fat_100g || n.fat || 0) * 10) / 10,
+                fiber: Math.round((n.fiber_100g || n.fiber || 0) * 10) / 10
+            }
+        };
+    } catch {
+        return null;
+    }
+}
+
+// Enrich a food item identified by Gemini with verified nutrition data
+// food: { name, name_en, weight_g, calories, protein, carbs, fat, fiber }
+async function enrichFood(food) {
+    const weight = food.weight_g || 100;
+    const factor = weight / 100;
+
+    // 1. Try USDA (most accurate, English name)
+    if (food.name_en) {
+        const usda = await searchUSDA(food.name_en);
+        if (usda && usda.per100g.calories > 0) {
+            return {
+                name: food.name,
+                weight_g: weight,
+                calories: Math.round(usda.per100g.calories * factor),
+                protein: Math.round(usda.per100g.protein * factor * 10) / 10,
+                carbs: Math.round(usda.per100g.carbs * factor * 10) / 10,
+                fat: Math.round(usda.per100g.fat * factor * 10) / 10,
+                fiber: Math.round(usda.per100g.fiber * factor * 10) / 10,
+                source: 'usda'
+            };
+        }
+    }
+
+    // 2. Try Open Food Facts (French name)
+    const off = await searchOFF(food.name);
+    if (off && off.per100g.calories > 0) {
+        return {
+            name: food.name,
+            weight_g: weight,
+            calories: Math.round(off.per100g.calories * factor),
+            protein: Math.round(off.per100g.protein * factor * 10) / 10,
+            carbs: Math.round(off.per100g.carbs * factor * 10) / 10,
+            fat: Math.round(off.per100g.fat * factor * 10) / 10,
+            fiber: Math.round(off.per100g.fiber * factor * 10) / 10,
+            source: 'openfoodfacts'
+        };
+    }
+
+    // 3. Fallback: Gemini estimates (already in the food object)
+    return {
+        name: food.name,
+        weight_g: weight,
+        calories: food.calories || 0,
+        protein: food.protein || 0,
+        carbs: food.carbs || 0,
+        fat: food.fat || 0,
+        fiber: food.fiber || 0,
+        source: 'estimate'
+    };
+}
+
+// Enrich multiple foods in parallel
+async function enrichFoods(foods) {
+    return Promise.all(foods.map(f => enrichFood(f)));
+}
+
+module.exports = { searchUSDA, searchOFF, enrichFood, enrichFoods };
