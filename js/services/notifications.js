@@ -185,13 +185,15 @@ const NotificationService = {
 // Schedules per-feature notifications locally (no server needed)
 const LocalNotificationScheduler = {
     _timers: [],
+    _midnightTimer: null,
 
     getPreferences() {
         return Storage._get('notification_prefs', {
             motivation: { enabled: true, time: '08:00' },
             supplements: { enabled: false, time: '08:30' },
             gym: { enabled: false, time: '17:00' },
-            weight: { enabled: false, time: '07:30' }
+            weight: { enabled: false, time: '07:30' },
+            water: { enabled: false, time: '12:00' }
         });
     },
 
@@ -206,6 +208,7 @@ const LocalNotificationScheduler = {
         // Clear existing timers
         this._timers.forEach(t => clearTimeout(t));
         this._timers = [];
+        if (this._midnightTimer) clearTimeout(this._midnightTimer);
 
         if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
 
@@ -223,14 +226,40 @@ const LocalNotificationScheduler = {
             const timer = setTimeout(() => this._fire(cat), delay);
             this._timers.push(timer);
         });
+
+        // Schedule midnight reset to reschedule for the next day
+        const midnight = new Date(now);
+        midnight.setDate(midnight.getDate() + 1);
+        midnight.setHours(0, 1, 0, 0);
+        this._midnightTimer = setTimeout(() => this.rescheduleAll(), midnight - now);
     },
 
     _fire(category) {
         if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+
+        // Check if task already done today — skip notification if so
+        const today = Storage._dateKey();
+        if (category === 'supplements') {
+            const mySupplements = Storage._get('my_supplements', []);
+            const taken = Storage._get('suppl_' + today, []);
+            if (mySupplements.length > 0 && mySupplements.every(s => taken.some(t => t.id === s.id))) return;
+        } else if (category === 'gym') {
+            const gym = Storage._get('gym_' + today, null);
+            if (gym && gym.done) return;
+        } else if (category === 'weight') {
+            const log = Storage.getWeightLog();
+            if (log.some(w => w.date === today)) return;
+        } else if (category === 'water') {
+            const water = Storage.getWater();
+            const goal = Storage.getGoals().water || 12;
+            if (water >= goal) return;
+        }
+
         const messages = {
             supplements: { title: 'IronFuel 💊', body: 'N\'oublie pas tes compléments !' },
             gym: { title: 'IronFuel 🏋️', body: 'C\'est l\'heure de ta séance !' },
             weight: { title: 'IronFuel ⚖️', body: 'Pense à noter ton poids !' },
+            water: { title: 'IronFuel 💧', body: 'Hydrate-toi ! N\'oublie pas ton eau 💧' },
             motivation: { title: 'IronFuel 💪', body: 'Chaque repas compte. Allez, on track ! 🔥' }
         };
         const msg = messages[category] || messages.motivation;
@@ -251,3 +280,12 @@ const LocalNotificationScheduler = {
         } catch(e) {}
     }
 };
+
+// Reschedule on visibility change (app resume from background)
+if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            LocalNotificationScheduler.rescheduleAll();
+        }
+    });
+}

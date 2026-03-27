@@ -201,12 +201,8 @@ const Modal = {
         this._editMealType = mealType;
         this._dateStr = options.dateStr || null;
 
-        const mealNames = {
-            breakfast: 'Petit-d\u00e9jeuner',
-            lunch: 'D\u00e9jeuner',
-            dinner: 'D\u00eener',
-            snack: 'Collation'
-        };
+        const mealNames = {};
+        Storage.getMeals().forEach(m => mealNames[m.id] = m.name);
 
         const btnText = editMode ? 'Modifier' : 'Ajouter au journal';
         const btnAction = editMode ? `Modal.updateFood(${foodIdParam})` : `Modal.addFood(${foodIdParam})`;
@@ -293,12 +289,8 @@ const Modal = {
         this._editMealType = mealType;
         this._dateStr = options.dateStr || null;
 
-        const mealNames = {
-            breakfast: 'Petit-d\u00e9jeuner',
-            lunch: 'D\u00e9jeuner',
-            dinner: 'D\u00eener',
-            snack: 'Collation'
-        };
+        const mealNames = {};
+        Storage.getMeals().forEach(m => mealNames[m.id] = m.name);
 
         const baseWeight = foodData.weight_g || 100;
         const btnText = editMode ? 'Modifier' : 'Ajouter au journal';

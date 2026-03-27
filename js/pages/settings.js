@@ -32,7 +32,8 @@ const SettingsPage = {
                             { key: 'motivation', label: '💪 Motivation' },
                             { key: 'supplements', label: '💊 Compléments' },
                             { key: 'gym', label: '🏋️ Salle' },
-                            { key: 'weight', label: '⚖️ Poids' }
+                            { key: 'weight', label: '⚖️ Poids' },
+                            { key: 'water', label: '💧 Eau' }
                         ];
                         return cats.map(c => {
                             const pref = prefs[c.key] || { enabled: false, time: '08:00' };
@@ -53,6 +54,18 @@ const SettingsPage = {
                 </div>
 
                 <div class="settings-group">
+                    <div class="settings-group-title">Repas</div>
+                    <button class="settings-item" onclick="SettingsPage._editMeals()">
+                        <span>🍽️ Gérer mes repas</span>
+                        <span style="font-size:12px;color:var(--text-secondary)">${Storage.getMeals().length} repas</span>
+                    </button>
+                    <button class="settings-item" onclick="SettingsPage._editMealDistribution()">
+                        <span>📊 Répartition des calories</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                </div>
+
+                <div class="settings-group">
                     <div class="settings-group-title">Données</div>
                     <button class="settings-item" onclick="SettingsPage.clearData()" style="color:var(--danger)">
                         <span>Réinitialiser toutes les données</span>
@@ -68,11 +81,19 @@ const SettingsPage = {
                         ${TrialService.isTrialActive() ? '🎉 Essai gratuit — ' + TrialService.daysLeft() + 'j restants' : '⭐ Passe à Premium'}
                     </div>
                     <div class="settings-item" style="flex-direction:column;align-items:stretch;gap:10px">
-                        <p style="font-size:13px;color:var(--text-secondary);line-height:1.4">
-                            ${TrialService.isTrialActive()
-                                ? 'Profite de l\'accès complet pendant ton essai. Abonne-toi pour ne rien perdre !'
-                                : 'Débloque la créature, les objectifs personnalisés, la photo IA et plus encore.'}
-                        </p>
+                        <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:4px">
+                            <div style="font-weight:700;color:var(--text);margin-bottom:6px">Fonctionnalités Premium :</div>
+                            <div style="display:flex;flex-direction:column;gap:4px">
+                                <span>💊 Suivi des compléments alimentaires</span>
+                                <span>🏋️ Enregistrement et suivi des séances de salle</span>
+                                <span>⚖️ Suivi du poids avec graphiques</span>
+                                <span>📊 Modification des objectifs caloriques et macros</span>
+                                <span>🍽️ Personnalisation des repas (ajout, suppression)</span>
+                                <span>🐾 Évolution finale de l'avatar</span>
+                                <span>📸 Détection d'aliments par photo IA</span>
+                                <span>🎙️ Ajout vocal d'aliments</span>
+                            </div>
+                        </div>
 
                         <div style="display:flex;gap:8px">
                             <div class="settings-plan-card selected" id="settings-plan-annual" onclick="SettingsPage._selectPlan('annual')" style="flex:1;padding:12px;border:2px solid var(--primary);border-radius:10px;text-align:center;cursor:pointer;background:var(--primary-light)">
@@ -95,19 +116,36 @@ const SettingsPage = {
                         <p style="font-size:11px;color:var(--primary);text-align:center;font-weight:600">🚫 Sans engagement — Résiliable à tout moment</p>
                     </div>
                 </div>
-                ` : `
-                <div class="settings-group">
+                ` : (() => {
+                    const daysLeft = TrialService.subscriptionDaysLeft();
+                    const trialData = Storage._get('trial', {});
+                    const paidDate = trialData.paidDate ? new Date(trialData.paidDate).toLocaleDateString('fr-FR') : '—';
+                    const plan = trialData.plan === 'monthly' ? 'Mensuel' : 'Annuel';
+                    return `
+                <div class="settings-group" style="border:2px solid #4CAF50;border-radius:var(--radius)">
                     <div class="settings-group-title" style="color:#4CAF50">✅ Abonnement Premium actif</div>
                     <div class="settings-item">
-                        <span>Statut</span>
-                        <span style="color:#4CAF50;font-weight:600">Premium</span>
+                        <span>Plan</span>
+                        <span style="color:#4CAF50;font-weight:600">${plan}</span>
+                    </div>
+                    <div class="settings-item">
+                        <span>Activé le</span>
+                        <span style="color:var(--text-secondary)">${paidDate}</span>
                     </div>
                     <div class="settings-item">
                         <span>Expire dans</span>
-                        <span style="color:var(--text-secondary)">${TrialService.subscriptionDaysLeft()} jours</span>
+                        <span style="color:${daysLeft < 30 ? 'var(--danger)' : '#4CAF50'};font-weight:700">${daysLeft} jours</span>
                     </div>
+                    ${daysLeft > 0 ? `
+                    <div style="padding:0 16px 12px">
+                        <div style="height:6px;border-radius:3px;background:var(--border);overflow:hidden">
+                            <div style="width:${Math.min(100, Math.round(daysLeft / (trialData.plan === 'monthly' ? 31 : 365) * 100))}%;height:100%;background:#4CAF50;border-radius:3px"></div>
+                        </div>
+                    </div>
+                    ` : ''}
                 </div>
-                `}
+                `;
+                })()}
 
                 <div class="settings-group">
                     <div class="settings-group-title">Soutien</div>
@@ -122,29 +160,12 @@ const SettingsPage = {
                 ${TrialService.isPaid() ? `
                 <div class="settings-group">
                     <div class="settings-group-title">Abonnement</div>
-                    <button class="settings-item" onclick="SettingsPage.manageSubscription()">
+                    <button class="settings-item" onclick="SettingsPage._showSubscriptionInfo()">
                         <span>📋 Gérer mon abonnement</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                     </button>
-                    <button class="settings-item" onclick="window.open('https://billing.stripe.com/p/login/dRmcMXcr4bNCaKWci65c400','_blank')">
-                        <span>💳 Portail de facturation Stripe</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
-                    </button>
                 </div>
                 ` : ''}
-
-                <div class="settings-group">
-                    <div class="settings-group-title">Données</div>
-                    <button class="settings-item" onclick="SettingsPage.exportData()">
-                        <span>📥 Exporter mes données (JSON)</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                    </button>
-                    <label class="settings-item" style="cursor:pointer">
-                        <span>📤 Importer des données</span>
-                        <input type="file" accept=".json" onchange="SettingsPage.importData(event)" style="display:none">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                    </label>
-                </div>
 
                 <div class="settings-group">
                     <div class="settings-group-title">Compte</div>
@@ -594,5 +615,178 @@ const SettingsPage = {
         } catch (err) {
             App.showToast('Erreur de paiement. Réessaie.');
         }
+    },
+
+    _showSubscriptionInfo() {
+        const trialData = Storage._get('trial', {});
+        const daysLeft = TrialService.subscriptionDaysLeft();
+        const paidDate = trialData.paidDate ? new Date(trialData.paidDate).toLocaleDateString('fr-FR') : '—';
+        const plan = trialData.plan === 'monthly' ? 'Mensuel (1,25€/mois)' : 'Annuel (14,99€/an)';
+        const expiryDate = trialData.paidDate ? new Date(new Date(trialData.paidDate).getTime() + (trialData.plan === 'monthly' ? 31 : 365) * 86400000).toLocaleDateString('fr-FR') : '—';
+
+        Modal.show(`
+            <div class="modal-title">Mon abonnement</div>
+            <div style="margin-bottom:16px">
+                <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+                    <span style="color:var(--text-secondary)">Plan</span>
+                    <span style="font-weight:700;color:var(--primary)">${plan}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+                    <span style="color:var(--text-secondary)">Activé le</span>
+                    <span style="font-weight:600">${paidDate}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+                    <span style="color:var(--text-secondary)">Expire le</span>
+                    <span style="font-weight:600">${expiryDate}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:10px 0">
+                    <span style="color:var(--text-secondary)">Jours restants</span>
+                    <span style="font-weight:700;color:${daysLeft < 30 ? 'var(--danger)' : 'var(--success)'}">${daysLeft} jours</span>
+                </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+                <button class="btn btn-outline" onclick="window.open('https://billing.stripe.com/p/login/dRmcMXcr4bNCaKWci65c400','_blank');Modal.close()" style="width:100%;font-size:13px">💳 Portail Stripe (factures, résiliation)</button>
+                <button class="btn btn-outline" onclick="window.open('mailto:iron.fuel@outlook.com?subject=Abonnement%20IronFuel','_blank');Modal.close()" style="width:100%;font-size:13px">📧 Contacter le support</button>
+            </div>
+        `);
+    },
+
+    // === MEAL MANAGEMENT ===
+    _editMeals() {
+        const meals = Storage.getMeals();
+        const icons = ['🌅', '☀️', '🌙', '🍎', '🥗', '🍕', '🥤', '🍽️', '🥑', '🫕', '🍜', '☕'];
+
+        const renderList = () => {
+            const current = Storage.getMeals();
+            let html = current.map((m, i) => `
+                <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1.5px solid var(--border);border-radius:12px;margin-bottom:6px;background:var(--surface)">
+                    <span style="font-size:20px;cursor:pointer" onclick="SettingsPage._pickMealIcon(${i})" id="meal-icon-${i}">${m.icon}</span>
+                    <input type="text" value="${m.name}" class="form-input meal-name-input" data-idx="${i}" style="flex:1;font-size:14px;font-weight:600;padding:8px 10px;border-radius:8px">
+                    ${current.length > 2 ? `<button onclick="SettingsPage._removeMeal(${i})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;padding:4px">✕</button>` : ''}
+                </div>
+            `).join('');
+
+            if (current.length < 6) {
+                html += `<button class="btn btn-outline" onclick="SettingsPage._addMeal()" style="width:100%;margin-top:6px;padding:10px;font-size:13px">+ Ajouter un repas</button>`;
+            }
+
+            return html;
+        };
+
+        Modal.show(`
+            <div class="modal-title">Mes repas</div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">2 à 6 repas. Clique sur l'icône pour la changer.</div>
+            <div id="meals-list" style="max-height:50vh;overflow-y:auto;margin-bottom:12px">
+                ${renderList()}
+            </div>
+            <button class="btn btn-primary" onclick="SettingsPage._saveMeals()" style="width:100%">Enregistrer</button>
+        `);
+    },
+
+    _pickMealIcon(idx) {
+        const icons = ['🌅', '☀️', '🌙', '🍎', '🥗', '🍕', '🥤', '🍽️', '🥑', '🫕', '🍜', '☕'];
+        const el = document.getElementById('meal-icon-' + idx);
+        if (!el) return;
+        const current = el.textContent.trim();
+        const next = icons[(icons.indexOf(current) + 1) % icons.length];
+        el.textContent = next;
+    },
+
+    _addMeal() {
+        const meals = Storage.getMeals();
+        if (meals.length >= 6) return;
+        const id = 'meal_' + Date.now();
+        meals.push({ id, name: 'Nouveau repas', icon: '🍽️', pct: 0 });
+        // Rebalance percentages
+        const pctEach = Math.floor(100 / meals.length);
+        meals.forEach((m, i) => m.pct = i < meals.length - 1 ? pctEach : 100 - pctEach * (meals.length - 1));
+        Storage.setMeals(meals);
+        this._editMeals(); // Re-render modal
+    },
+
+    _removeMeal(idx) {
+        const meals = Storage.getMeals();
+        if (meals.length <= 2) return;
+        meals.splice(idx, 1);
+        // Rebalance
+        const pctEach = Math.floor(100 / meals.length);
+        meals.forEach((m, i) => m.pct = i < meals.length - 1 ? pctEach : 100 - pctEach * (meals.length - 1));
+        Storage.setMeals(meals);
+        this._editMeals();
+    },
+
+    _saveMeals() {
+        const meals = Storage.getMeals();
+        document.querySelectorAll('.meal-name-input').forEach(input => {
+            const idx = parseInt(input.dataset.idx);
+            if (meals[idx]) {
+                meals[idx].name = input.value.trim() || meals[idx].name;
+                const iconEl = document.getElementById('meal-icon-' + idx);
+                if (iconEl) meals[idx].icon = iconEl.textContent.trim();
+            }
+        });
+        Storage.setMeals(meals);
+        Modal.close();
+        App.showToast('Repas mis à jour !');
+        this.render();
+    },
+
+    _editMealDistribution() {
+        const meals = Storage.getMeals();
+        const goals = Storage.getGoals();
+        const totalCal = goals.calories || 2000;
+
+        Modal.show(`
+            <div class="modal-title">Répartition des calories</div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Total : ${totalCal} kcal/jour. Ajuste le % par repas.</div>
+            <div id="dist-list" style="margin-bottom:12px">
+                ${meals.map((m, i) => `
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                        <span style="font-size:16px">${m.icon}</span>
+                        <span style="font-size:13px;font-weight:600;min-width:100px">${m.name}</span>
+                        <input type="range" class="dist-range" data-idx="${i}" min="5" max="60" value="${m.pct}" style="flex:1" oninput="SettingsPage._updateDistLabel(this)">
+                        <span class="dist-label" style="font-size:13px;font-weight:700;min-width:60px;text-align:right;color:var(--primary)">${m.pct}% — ${Math.round(totalCal * m.pct / 100)} kcal</span>
+                    </div>
+                `).join('')}
+            </div>
+            <div id="dist-total" style="text-align:center;font-size:13px;font-weight:700;margin-bottom:12px;color:${meals.reduce((s, m) => s + m.pct, 0) === 100 ? 'var(--success)' : 'var(--danger)'}">
+                Total : ${meals.reduce((s, m) => s + m.pct, 0)}%
+            </div>
+            <button class="btn btn-primary" onclick="SettingsPage._saveDistribution()" style="width:100%">Enregistrer</button>
+        `);
+    },
+
+    _updateDistLabel(input) {
+        const goals = Storage.getGoals();
+        const totalCal = goals.calories || 2000;
+        const pct = parseInt(input.value);
+        const label = input.nextElementSibling;
+        if (label) label.textContent = pct + '% — ' + Math.round(totalCal * pct / 100) + ' kcal';
+
+        // Update total
+        let sum = 0;
+        document.querySelectorAll('.dist-range').forEach(r => sum += parseInt(r.value));
+        const totalEl = document.getElementById('dist-total');
+        if (totalEl) {
+            totalEl.textContent = 'Total : ' + sum + '%';
+            totalEl.style.color = sum === 100 ? 'var(--success)' : 'var(--danger)';
+        }
+    },
+
+    _saveDistribution() {
+        let sum = 0;
+        document.querySelectorAll('.dist-range').forEach(r => sum += parseInt(r.value));
+        if (sum !== 100) {
+            App.showToast('Le total doit être 100% (actuellement ' + sum + '%)');
+            return;
+        }
+        const meals = Storage.getMeals();
+        document.querySelectorAll('.dist-range').forEach(r => {
+            const idx = parseInt(r.dataset.idx);
+            if (meals[idx]) meals[idx].pct = parseInt(r.value);
+        });
+        Storage.setMeals(meals);
+        Modal.close();
+        App.showToast('Répartition mise à jour !');
     }
 };

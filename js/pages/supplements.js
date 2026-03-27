@@ -216,6 +216,14 @@ const SupplementsPage = {
             Storage.setDailySupplBonus();
             App.haptic('success');
             App.showToast('Tous les compléments pris ! +10 🪙 💊✅');
+            // Confetti burst on card
+            setTimeout(() => {
+                const card = document.querySelector('.supplements-container .card');
+                if (card) {
+                    card.classList.add('water-goal-reached');
+                    setTimeout(() => card.classList.remove('water-goal-reached'), 1500);
+                }
+            }, 100);
         }
     },
 

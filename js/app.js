@@ -76,7 +76,8 @@ const App = {
         shop: { title: 'Boutique', render: () => ShopPage.render(), nav: false },
         avatar: { title: 'Créature', render: () => AvatarPage.render(), nav: true, cleanup: () => AvatarPage.cleanup() },
         supplements: { title: 'Compléments', render: () => SupplementsPage.render(), nav: false },
-        weight: { title: 'Poids', render: () => WeightPage.render(), nav: false }
+        weight: { title: 'Poids', render: () => WeightPage.render(), nav: false },
+        chat: { title: 'Chat IA', render: () => ChatPage.render(), nav: false }
     },
 
     init() {
@@ -195,7 +196,7 @@ const App = {
 
         // Check premium feature access (freemium model)
         // avatar page shows its own locked state — don't block navigation to it
-        const premiumPages = { camera: 'camera', voice: 'voice', barcode: 'barcode', shop: 'shop', gym: 'gym', weight: 'weight', supplements: 'supplements' };
+        const premiumPages = { camera: 'camera', voice: 'voice', barcode: 'barcode', shop: 'shop', gym: 'gym', weight: 'weight', supplements: 'supplements', chat: 'chat' };
         if (premiumPages[page] && TrialService.isFeatureLocked(premiumPages[page])) {
             TrialService.showFeatureLockedPrompt(premiumPages[page]);
             return;
