@@ -49,7 +49,7 @@
     <!-- Force cache bust — fetches /version.json DIRECTLY from server bypassing SW -->
     <script>
         (function(){
-            var LOCAL_V = 91; // Must match version.json
+            var LOCAL_V = 92; // Must match version.json
             var lsWorks = true;
             try {
                 localStorage.setItem('_test', '1');
@@ -168,6 +168,10 @@
         <div id="fab-menu" class="fab-menu hidden">
             <div class="fab-overlay" onclick="App.closeFabMenu()"></div>
             <div class="fab-options">
+                <button class="fab-option" onclick="App.navigate('chat')">
+                    <span class="fab-icon">💬</span>
+                    <span>Chat IA</span>
+                </button>
                 <button class="fab-option" onclick="App.navigate('camera')">
                     <span class="fab-icon">📷</span>
                     <span>Photo IA</span>
@@ -239,6 +243,7 @@
     <script defer src="js/pages/search.js?v=74"></script>
     <script defer src="js/pages/camera.js?v=74"></script>
     <script defer src="js/pages/voice.js?v=74"></script>
+    <script defer src="js/pages/chat.js?v=91"></script>
     <script defer src="js/pages/barcode.js?v=74"></script>
     <script defer src="js/pages/history.js?v=74"></script>
     <script defer src="js/pages/profile.js?v=74"></script>
