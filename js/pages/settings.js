@@ -80,11 +80,19 @@ const SettingsPage = {
                         ${TrialService.isTrialActive() ? '🎉 Essai gratuit — ' + TrialService.daysLeft() + 'j restants' : '⭐ Passe à Premium'}
                     </div>
                     <div class="settings-item" style="flex-direction:column;align-items:stretch;gap:10px">
-                        <p style="font-size:13px;color:var(--text-secondary);line-height:1.4">
-                            ${TrialService.isTrialActive()
-                                ? 'Profite de l\'accès complet pendant ton essai. Abonne-toi pour ne rien perdre !'
-                                : 'Débloque la créature, les objectifs personnalisés, la photo IA et plus encore.'}
-                        </p>
+                        <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:4px">
+                            <div style="font-weight:700;color:var(--text);margin-bottom:6px">Fonctionnalités Premium :</div>
+                            <div style="display:flex;flex-direction:column;gap:4px">
+                                <span>💊 Suivi des compléments alimentaires</span>
+                                <span>🏋️ Enregistrement et suivi des séances de salle</span>
+                                <span>⚖️ Suivi du poids avec graphiques</span>
+                                <span>📊 Modification des objectifs caloriques et macros</span>
+                                <span>🍽️ Personnalisation des repas (ajout, suppression)</span>
+                                <span>🐾 Évolution finale de l'avatar</span>
+                                <span>📸 Détection d'aliments par photo IA</span>
+                                <span>🎙️ Ajout vocal d'aliments</span>
+                            </div>
+                        </div>
 
                         <div style="display:flex;gap:8px">
                             <div class="settings-plan-card selected" id="settings-plan-annual" onclick="SettingsPage._selectPlan('annual')" style="flex:1;padding:12px;border:2px solid var(--primary);border-radius:10px;text-align:center;cursor:pointer;background:var(--primary-light)">
@@ -107,19 +115,36 @@ const SettingsPage = {
                         <p style="font-size:11px;color:var(--primary);text-align:center;font-weight:600">🚫 Sans engagement — Résiliable à tout moment</p>
                     </div>
                 </div>
-                ` : `
-                <div class="settings-group">
+                ` : (() => {
+                    const daysLeft = TrialService.subscriptionDaysLeft();
+                    const trialData = Storage._get('trial', {});
+                    const paidDate = trialData.paidDate ? new Date(trialData.paidDate).toLocaleDateString('fr-FR') : '—';
+                    const plan = trialData.plan === 'monthly' ? 'Mensuel' : 'Annuel';
+                    return `
+                <div class="settings-group" style="border:2px solid #4CAF50;border-radius:var(--radius)">
                     <div class="settings-group-title" style="color:#4CAF50">✅ Abonnement Premium actif</div>
                     <div class="settings-item">
-                        <span>Statut</span>
-                        <span style="color:#4CAF50;font-weight:600">Premium</span>
+                        <span>Plan</span>
+                        <span style="color:#4CAF50;font-weight:600">${plan}</span>
+                    </div>
+                    <div class="settings-item">
+                        <span>Activé le</span>
+                        <span style="color:var(--text-secondary)">${paidDate}</span>
                     </div>
                     <div class="settings-item">
                         <span>Expire dans</span>
-                        <span style="color:var(--text-secondary)">${TrialService.subscriptionDaysLeft()} jours</span>
+                        <span style="color:${daysLeft < 30 ? 'var(--danger)' : '#4CAF50'};font-weight:700">${daysLeft} jours</span>
                     </div>
+                    ${daysLeft > 0 ? `
+                    <div style="padding:0 16px 12px">
+                        <div style="height:6px;border-radius:3px;background:var(--border);overflow:hidden">
+                            <div style="width:${Math.min(100, Math.round(daysLeft / (trialData.plan === 'monthly' ? 31 : 365) * 100))}%;height:100%;background:#4CAF50;border-radius:3px"></div>
+                        </div>
+                    </div>
+                    ` : ''}
                 </div>
-                `}
+                `;
+                })()}
 
                 <div class="settings-group">
                     <div class="settings-group-title">Soutien</div>
@@ -134,13 +159,9 @@ const SettingsPage = {
                 ${TrialService.isPaid() ? `
                 <div class="settings-group">
                     <div class="settings-group-title">Abonnement</div>
-                    <button class="settings-item" onclick="SettingsPage.manageSubscription()">
+                    <button class="settings-item" onclick="SettingsPage._showSubscriptionInfo()">
                         <span>📋 Gérer mon abonnement</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-                    </button>
-                    <button class="settings-item" onclick="window.open('https://billing.stripe.com/p/login/dRmcMXcr4bNCaKWci65c400','_blank')">
-                        <span>💳 Portail de facturation Stripe</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
                     </button>
                 </div>
                 ` : ''}
@@ -593,6 +614,40 @@ const SettingsPage = {
         } catch (err) {
             App.showToast('Erreur de paiement. Réessaie.');
         }
+    },
+
+    _showSubscriptionInfo() {
+        const trialData = Storage._get('trial', {});
+        const daysLeft = TrialService.subscriptionDaysLeft();
+        const paidDate = trialData.paidDate ? new Date(trialData.paidDate).toLocaleDateString('fr-FR') : '—';
+        const plan = trialData.plan === 'monthly' ? 'Mensuel (1,25€/mois)' : 'Annuel (14,99€/an)';
+        const expiryDate = trialData.paidDate ? new Date(new Date(trialData.paidDate).getTime() + (trialData.plan === 'monthly' ? 31 : 365) * 86400000).toLocaleDateString('fr-FR') : '—';
+
+        Modal.show(`
+            <div class="modal-title">Mon abonnement</div>
+            <div style="margin-bottom:16px">
+                <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+                    <span style="color:var(--text-secondary)">Plan</span>
+                    <span style="font-weight:700;color:var(--primary)">${plan}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+                    <span style="color:var(--text-secondary)">Activé le</span>
+                    <span style="font-weight:600">${paidDate}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+                    <span style="color:var(--text-secondary)">Expire le</span>
+                    <span style="font-weight:600">${expiryDate}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:10px 0">
+                    <span style="color:var(--text-secondary)">Jours restants</span>
+                    <span style="font-weight:700;color:${daysLeft < 30 ? 'var(--danger)' : 'var(--success)'}">${daysLeft} jours</span>
+                </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+                <button class="btn btn-outline" onclick="window.open('https://billing.stripe.com/p/login/dRmcMXcr4bNCaKWci65c400','_blank');Modal.close()" style="width:100%;font-size:13px">💳 Portail Stripe (factures, résiliation)</button>
+                <button class="btn btn-outline" onclick="window.open('mailto:iron.fuel@outlook.com?subject=Abonnement%20IronFuel','_blank');Modal.close()" style="width:100%;font-size:13px">📧 Contacter le support</button>
+            </div>
+        `);
     },
 
     // === MEAL MANAGEMENT ===
