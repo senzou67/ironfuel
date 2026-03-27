@@ -7,9 +7,6 @@ const DiaryPage = {
 
         const dateLabel = App.getDateLabel();
         const dateKey = App._localDateKey(date);
-        const tomorrowDate = new Date();
-        tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-        const maxDateKey = App._localDateKey(tomorrowDate);
 
         const content = document.getElementById('page-content');
         const mealEntries = Object.entries(log.meals);
@@ -26,8 +23,8 @@ const DiaryPage = {
                         <span>${dateLabel}</span>
                         <span class="date-chevron">▾</span>
                     </button>
-                    <button class="date-nav-btn" onclick="DiaryPage._shiftDate(1)" aria-label="Jour suivant" ${dateKey === maxDateKey ? 'disabled' : ''}>›</button>
-                    <input type="date" id="hidden-date-picker" value="${dateKey}" max="${maxDateKey}" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
+                    <button class="date-nav-btn" onclick="DiaryPage._shiftDate(1)" aria-label="Jour suivant">›</button>
+                    <input type="date" id="hidden-date-picker" value="${dateKey}" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
                 </div>
 
                 <div class="card diary-summary">
@@ -61,8 +58,9 @@ const DiaryPage = {
         `;
 
         // Scroll to specific meal if requested (from dashboard click)
-        if (params.scrollTo) {
-            const mealEl = document.getElementById('meal-' + params.scrollTo);
+        const scrollTarget = params.scrollTo || params.meal;
+        if (scrollTarget) {
+            const mealEl = document.getElementById('meal-' + scrollTarget) || document.getElementById('meal-section-' + scrollTarget);
             if (mealEl) {
                 setTimeout(() => mealEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
             }
@@ -72,9 +70,6 @@ const DiaryPage = {
     _shiftDate(delta) {
         const d = new Date(App.getSelectedDate());
         d.setDate(d.getDate() + delta);
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        if (App._localDateKey(d) > App._localDateKey(tomorrow)) return;
         App.setSelectedDate(App._localDateKey(d));
     },
 

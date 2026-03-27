@@ -369,11 +369,7 @@ const VoicePage = {
     },
 
     _getMealTypeByTime() {
-        const hour = new Date().getHours();
-        if (hour < 10) return 'breakfast';
-        if (hour < 14) return 'lunch';
-        if (hour < 17) return 'snack';
-        return 'dinner';
+        return Storage.getCurrentMealType();
     },
 
     addAllFoods() {

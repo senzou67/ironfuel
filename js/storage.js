@@ -82,6 +82,23 @@ const Storage = {
         this._triggerSync();
     },
 
+    // === REPAS CONFIGURABLES ===
+    _defaultMeals: [
+        { id: 'breakfast', name: 'Petit-déjeuner', icon: '🌅', pct: 25 },
+        { id: 'lunch', name: 'Déjeuner', icon: '☀️', pct: 35 },
+        { id: 'dinner', name: 'Dîner', icon: '🌙', pct: 30 },
+        { id: 'snack', name: 'Collation', icon: '🍎', pct: 10 }
+    ],
+
+    getMeals() {
+        return this._get('user_meals', this._defaultMeals);
+    },
+
+    setMeals(meals) {
+        this._set('user_meals', meals);
+        this._triggerSync();
+    },
+
     // === JOURNAL ALIMENTAIRE ===
     _dateKey(date) {
         if (!date) date = new Date();
@@ -90,16 +107,17 @@ const Storage = {
 
     getDayLog(date) {
         const key = this._dateKey(date);
-        return this._get('log_' + key, {
+        const meals = this.getMeals();
+        const defaultMeals = {};
+        meals.forEach(m => defaultMeals[m.id] = []);
+        const log = this._get('log_' + key, {
             date: key,
-            meals: {
-                breakfast: [],
-                lunch: [],
-                dinner: [],
-                snack: []
-            },
+            meals: defaultMeals,
             water: 0
         });
+        // Ensure all configured meals exist in log
+        meals.forEach(m => { if (!log.meals[m.id]) log.meals[m.id] = []; });
+        return log;
     },
 
     setDayLog(log) {
@@ -359,12 +377,17 @@ const Storage = {
     },
 
     getCurrentMealType() {
+        const meals = this.getMeals();
         const hour = new Date().getHours();
-        if (hour >= 6 && hour < 10) return 'breakfast';
-        if (hour >= 11 && hour < 14) return 'lunch';
-        if (hour >= 14 && hour < 17) return 'snack';
-        if (hour >= 17 && hour < 22) return 'dinner';
-        return 'snack';
+        // Distribute meals across the day based on order
+        const slots = [
+            [6, 10], [11, 14], [14, 17], [17, 22], [22, 6]
+        ];
+        for (let i = 0; i < Math.min(meals.length, slots.length); i++) {
+            const [start, end] = slots[i];
+            if (start < end ? (hour >= start && hour < end) : (hour >= start || hour < end)) return meals[i].id;
+        }
+        return meals[meals.length - 1].id;
     },
 
     // === ALIMENTS PERSONNALISES ===

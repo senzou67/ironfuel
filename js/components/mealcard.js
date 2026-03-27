@@ -1,9 +1,8 @@
 const MealCard = {
-    mealConfig: {
-        breakfast: { name: 'Petit-déjeuner', icon: '🌅' },
-        lunch: { name: 'Déjeuner', icon: '☀️' },
-        dinner: { name: 'Dîner', icon: '🌙' },
-        snack: { name: 'Collation', icon: '🍎' }
+    getMealConfig(mealType) {
+        const meals = Storage.getMeals();
+        const m = meals.find(x => x.id === mealType);
+        return m ? { name: m.name, icon: m.icon } : { name: mealType, icon: '🍽️' };
     },
 
     _collapsedKey: 'ironfuel_collapsed_meals',
@@ -22,7 +21,7 @@ const MealCard = {
     },
 
     render(mealType, items, showAdd = true, context = 'diary') {
-        const config = this.mealConfig[mealType];
+        const config = this.getMealConfig(mealType);
         const date = App.getSelectedDate();
         const totals = Storage.getMealTotals(mealType, date);
         const dateStr = App._localDateKey(date);

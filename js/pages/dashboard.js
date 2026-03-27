@@ -90,8 +90,10 @@ const DashboardPage = {
         const mealsWithItems = Object.entries(log.meals).filter(([, items]) => items.length > 0);
         const emptyMeals = Object.entries(log.meals).filter(([, items]) => items.length === 0);
 
-        const mealIcons = { breakfast: '🌅', lunch: '☀️', dinner: '🌙', snack: '🍎' };
-        const mealNames = { breakfast: 'Petit-déj', lunch: 'Déjeuner', dinner: 'Dîner', snack: 'Collation' };
+        const userMeals = Storage.getMeals();
+        const mealIcons = {};
+        const mealNames = {};
+        userMeals.forEach(m => { mealIcons[m.id] = m.icon; mealNames[m.id] = m.name; });
 
         const content = document.getElementById('page-content');
 
