@@ -82,7 +82,9 @@ const DashboardPage = {
         const gymType = gymToday && typeof GymPage !== 'undefined' ? GymPage.WORKOUT_TYPES.find(t => t.id === gymToday.type) : null;
         const gymDone = gymToday && (gymToday.done || false);
 
-        // Weight data for mini widget
+        // Weight completion check
+        const weightLog = Storage.getWeightLog();
+        const weightToday = weightLog.find(w => w.date === Storage._dateKey(date));
 
         // Separate meals with items from empty meals
         const mealsWithItems = Object.entries(log.meals).filter(([, items]) => items.length > 0);
@@ -121,15 +123,11 @@ const DashboardPage = {
 
         // Micro-nutriments: compact summary (top 4 lowest)
         const microSummary = typeof MicronutrientService !== 'undefined' && TrialService.hasFullAccess()
-            ? this._renderMicroSummary()
+            ? this._renderMicroSummary(date)
             : '';
 
         const dateLabel = App.getDateLabel();
         const dateKey = App._localDateKey(date);
-        const todayKey = App._localDateKey(new Date());
-        const tomorrowDate = new Date();
-        tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-        const maxDateKey = App._localDateKey(tomorrowDate);
 
         content.innerHTML = `
             <div class="fade-in stagger-in" style="padding:0 0 8px">
@@ -142,8 +140,8 @@ const DashboardPage = {
                         <span>${dateLabel}</span>
                         <span class="date-chevron">▾</span>
                     </button>
-                    <button class="date-nav-btn" onclick="DashboardPage._shiftDate(1)" aria-label="Jour suivant" ${dateKey === maxDateKey ? 'disabled' : ''}>›</button>
-                    <input type="date" id="hidden-date-picker" value="${dateKey}" max="${maxDateKey}" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
+                    <button class="date-nav-btn" onclick="DashboardPage._shiftDate(1)" aria-label="Jour suivant">›</button>
+                    <input type="date" id="hidden-date-picker" value="${dateKey}" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
                 </div>
 
                 ${streak > 0 && isToday ? `
@@ -234,8 +232,9 @@ const DashboardPage = {
                         ${hasAccess && mySupplements.length > 0 ? `<div style="position:absolute;bottom:0;left:0;width:100%;height:${Math.min(100, Math.round((supplCount / mySupplements.length) * 100))}%;background:linear-gradient(180deg,rgba(206,147,255,0.3) 0%,rgba(156,39,176,0.4) 100%);transition:height 0.5s cubic-bezier(0.4,0,0.2,1);z-index:-1;border-radius:0 0 12px 12px"></div>` : ''}
                         <span class="icon">💊</span>${!hasAccess ? 'Compléments 🔒' : mySupplements.length > 0 ? `<span style="font-weight:600">${supplCount}/${mySupplements.length}</span>${supplAllDone ? ' <span style="font-size:11px">✅</span>' : ''}` : 'Compléments'}
                     </button>
-                    <button class="quick-action-btn" onclick="${hasAccess ? "App.navigate('weight')" : "TrialService.showFeatureLockedPrompt('weight')"}" style="display:flex;align-items:center;gap:6px;justify-content:center">
-                        <span class="icon">⚖️</span>Poids${!hasAccess ? ' 🔒' : ''}
+                    <button class="quick-action-btn" onclick="${hasAccess ? "App.navigate('weight')" : "TrialService.showFeatureLockedPrompt('weight')"}" style="position:relative;overflow:hidden;display:flex;align-items:center;gap:6px;justify-content:center;z-index:1">
+                        ${hasAccess && weightToday ? '<div style="position:absolute;bottom:0;left:0;width:100%;height:100%;background:linear-gradient(180deg,rgba(255,152,0,0.2) 0%,rgba(255,152,0,0.35) 100%);z-index:-1;border-radius:0 0 12px 12px"></div>' : ''}
+                        <span class="icon">⚖️</span>${!hasAccess ? 'Poids 🔒' : weightToday ? `<span style="font-weight:600">${weightToday.weight}kg</span> <span style="font-size:11px">✅</span>` : 'Poids'}
                     </button>
                 </div>
 
@@ -277,6 +276,25 @@ const DashboardPage = {
 
         // Award daily XP if eligible (only for today)
         if (isToday) Creature.checkAndAwardXP();
+
+        // Pop-up fun fact on first visit of the day
+        if (isToday) this._showDailyPopup();
+    },
+
+    _showDailyPopup() {
+        const today = Storage._dateKey();
+        const shown = localStorage.getItem('ironfuel_daily_popup');
+        if (shown === today) return;
+        localStorage.setItem('ironfuel_daily_popup', today);
+        const fact = this._getDailyFunFact();
+        Modal.show(`
+            <div style="text-align:center;padding:8px 0">
+                <div style="font-size:48px;margin-bottom:12px">💡</div>
+                <div style="font-size:12px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Le savais-tu ?</div>
+                <div style="font-size:15px;color:var(--text);line-height:1.5;margin-bottom:20px">${fact}</div>
+                <button class="btn btn-primary" onclick="Modal.close()" style="width:100%;padding:12px;font-size:14px">C'est parti ! 🔥</button>
+            </div>
+        `);
     },
 
 
@@ -402,8 +420,8 @@ const DashboardPage = {
         }
     },
 
-    _renderMicroSummary() {
-        const micros = MicronutrientService.estimateFromLog();
+    _renderMicroSummary(date) {
+        const micros = MicronutrientService.estimateFromLog(date);
         // Get top 4 lowest nutrients (most important to highlight)
         const sorted = Object.entries(MicronutrientService.RDV)
             .filter(([, info]) => !info.isLimit)
@@ -432,7 +450,7 @@ const DashboardPage = {
         }).join('');
 
         return `
-            <div class="card" onclick="MicronutrientService.showFullPanel()" style="padding:10px 16px;margin:0 16px 8px;cursor:pointer">
+            <div class="card" onclick="MicronutrientService.showFullPanel(App.getSelectedDate())" style="padding:10px 16px;margin:0 16px 8px;cursor:pointer">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
                     <span style="font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px">Micro-nutriments</span>
                     <span style="font-size:10px;color:var(--text-secondary)">Voir tout →</span>
@@ -447,10 +465,6 @@ const DashboardPage = {
     _shiftDate(delta) {
         const d = new Date(App.getSelectedDate());
         d.setDate(d.getDate() + delta);
-        // Allow up to tomorrow
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        if (App._localDateKey(d) > App._localDateKey(tomorrow)) return;
         App.setSelectedDate(App._localDateKey(d));
     },
 
@@ -477,32 +491,116 @@ const DashboardPage = {
             low: [
                 "T'as mangé ou t'as juste regardé le frigo ? 👀",
                 "Même un hamster mange plus que ça 🐹",
-                "Ton estomac a envoyé un SOS 🆘"
+                "Ton estomac a envoyé un SOS 🆘",
+                "Y'a du vide dans ce ventre, non ? 😶",
+                "Ton métabolisme fait grève 🪧",
+                "On dirait que t'as oublié de manger 🤔",
+                "C'est un jeûne ou t'es juste occupé ? 😂",
+                "Allez, nourris la bête ! 🦁",
+                "Même ta créature a faim là 😢",
+                "Houston, on a un problème caloriqueee 🚀",
+                "Ton corps mérite mieux que ça 💔",
+                "Un petit snack ? Juste un ? 🥺",
+                "Les calories se cachent, va les chercher 🔍",
+                "Mode économie d'énergie activé 🔋",
+                "Pas de fuel, pas de résultat 🏎️",
+                "Faut manger pour grandir 📏",
+                "Le frigo pleure de solitude 😭"
             ],
             quarter: [
                 "C'est un bon début, continue ! 💪",
                 "Le petit-déj c'est fait, reste le reste 😄",
-                "1/4 du chemin, tu gères 🚀"
+                "1/4 du chemin, tu gères 🚀",
+                "Premier repas validé, on enchaîne 🎬",
+                "C'est un début de roi 👑",
+                "T'as lancé la machine 🏗️",
+                "Le premier pas est le plus dur 🦶",
+                "On construit brique par brique 🧱",
+                "Ton corps commence à sourire 😊",
+                "Le moteur chauffe doucement 🔥",
+                "Bien joué, la suite arrive 📦",
+                "T'es dans le game maintenant 🎮",
+                "La base est posée, on monte 🏔️",
+                "Première victoire de la journée ✌️",
+                "Continue sur cette lancée 🌊",
+                "Y'a du potentiel, montre-le 💎",
+                "Allez, 3 repas et c'est carré 📐"
             ],
             half: [
                 "Mi-parcours, t'es sur la bonne voie ! 🎯",
                 "La moitié, c'est déjà pas mal 👌",
-                "Tu chauffes, continue comme ça 🔥"
+                "Tu chauffes, continue comme ça 🔥",
+                "Pile au milieu, t'es régulier 📊",
+                "Le cap des 50%, c'est solide 🧊",
+                "T'assures, un repas de plus et c'est bon 🍽️",
+                "L'équilibre est là, bravo 🎭",
+                "Tu gères comme un chef 👨‍🍳",
+                "La route est droite, fonce 🛣️",
+                "Demi-portion faite, demi-portion à venir 🔄",
+                "T'es en mode croisière 🚢",
+                "Le rythme est bon, garde-le 🥁",
+                "Ton assiette te remercie 🙌",
+                "50% du taf, 100% du talent 🌟",
+                "La machine tourne bien ⚙️",
+                "T'es sur les rails, prochain arrêt : objectif 🚂",
+                "Halfway there, legend 🦸"
             ],
             almost: [
                 "Presque ! Plus qu'un petit effort 💫",
                 "Ton corps te remercie déjà 🙏",
-                "Tu fais les choses bien 🏆"
+                "Tu fais les choses bien 🏆",
+                "Quasi parfait, un dernier snack ? 🥜",
+                "C'est chaud, t'y es presque 🌡️",
+                "La ligne d'arrivée est en vue 🏁",
+                "Dernier sprint, t'es un warrior 🗡️",
+                "95% du boulot est fait, respect 🫡",
+                "Encore un tout petit peu 🤏",
+                "T'es à deux doigts de la perf 🎯",
+                "Le finish est proche, tiens bon 💪",
+                "Ton assiette est quasi parfaite 🍽️",
+                "Impressionnant, t'arrête pas maintenant 🦈",
+                "Le boss final approche, t'es prêt 🎮",
+                "C'est le moment de closer 🔐",
+                "Objectif en approche, capitaine 🧑‍✈️",
+                "Un fruit et c'est bouclé 🍎"
             ],
             goal: [
                 "Objectif atteint, bravo champion ! 🏅",
                 "Parfait, t'as tout géré aujourd'hui 💪",
-                "Mission accomplie, GG ! 🎮"
+                "Mission accomplie, GG ! 🎮",
+                "100%, t'es un monstre 👹",
+                "Pile dans le mille 🎯",
+                "Journée parfaite, rien à redire 👏",
+                "T'as atteint le Graal nutritionnel 🏆",
+                "Ton corps est en mode turbo 🚀",
+                "Félicitations, t'es au top ! ⭐",
+                "C'est ça la discipline, respect 🫡",
+                "Nutrition maîtrisée, résultats assurés 📈",
+                "T'as cracké le code 🔓",
+                "Journée modèle, prends-la en photo 📸",
+                "Rien à ajouter, c'est parfait 💯",
+                "Le plan est respecté, bravo 📋",
+                "T'es une machine bien huilée ⚙️",
+                "Champion du jour, sans conteste 🥇"
             ],
             over: [
                 "T'as un peu forcé là non ? 😅",
                 "Bon… demain on repart de zéro 🔄",
-                "Le frigo t'a dit stop, écoute-le 🤫"
+                "Le frigo t'a dit stop, écoute-le 🤫",
+                "Surplus détecté, pas de panique 📡",
+                "C'était un jour de triche ou quoi ? 🤭",
+                "Un peu au-dessus, rien de grave 📊",
+                "Le ventre dit merci, le plan dit oups 😬",
+                "Allez, demain on rattrape 💪",
+                "Un écart de temps en temps c'est humain 🤷",
+                "Le corps pardonne, le plan aussi 🕊️",
+                "C'est pas la fin du monde 🌍",
+                "Un jour ne définit pas ta semaine 📅",
+                "Respire, analyse, et on repart 🧘",
+                "La perfection n'existe pas, la constance oui 📈",
+                "Excess d'amour pour la bouffe 😍",
+                "On note et on ajuste demain 📝",
+                "C'est l'intention qui compte (un peu) 😄"
             ]
         };
 

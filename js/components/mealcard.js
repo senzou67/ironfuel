@@ -40,7 +40,7 @@ const MealCard = {
                     </div>
                     <div style="display:flex;align-items:center;gap:12px">
                         <span class="meal-calories">${totals.calories} kcal</span>
-                        ${showAdd ? `<button class="meal-add-btn" onclick="event.stopPropagation();App.navigate('search',{meal:'${mealType}'})" aria-label="Ajouter un aliment au ${config.name}">+</button>` : ''}
+                        ${showAdd ? `<button class="meal-add-btn" onclick="event.stopPropagation();App.navigate('${context === 'dashboard' ? 'diary' : 'search'}',{meal:'${mealType}'})" aria-label="Ajouter un aliment au ${config.name}">+</button>` : ''}
                         <span class="meal-chevron">›</span>
                     </div>
                 </div>

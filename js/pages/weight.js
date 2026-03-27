@@ -186,8 +186,17 @@ const WeightPage = {
         Storage.setProfile(profile);
 
         Modal.close();
-        App.showToast(`Poids enregistré : ${weight} kg ⚖️`);
+        App.showToast(`Poids enregistré : ${weight} kg ⚖️ +3 🪙`);
         Storage.addCoins(3);
+        App.haptic('success');
+        // Confetti burst on card
+        setTimeout(() => {
+            const card = document.querySelector('.weight-container .card');
+            if (card) {
+                card.classList.add('water-goal-reached');
+                setTimeout(() => card.classList.remove('water-goal-reached'), 1500);
+            }
+        }, 100);
         this.render();
     },
 

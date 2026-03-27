@@ -134,19 +134,6 @@ const SettingsPage = {
                 ` : ''}
 
                 <div class="settings-group">
-                    <div class="settings-group-title">Données</div>
-                    <button class="settings-item" onclick="SettingsPage.exportData()">
-                        <span>📥 Exporter mes données (JSON)</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                    </button>
-                    <label class="settings-item" style="cursor:pointer">
-                        <span>📤 Importer des données</span>
-                        <input type="file" accept=".json" onchange="SettingsPage.importData(event)" style="display:none">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                    </label>
-                </div>
-
-                <div class="settings-group">
                     <div class="settings-group-title">Compte</div>
                     <div class="settings-item">
                         <span>Connecté en tant que</span>
