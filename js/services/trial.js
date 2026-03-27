@@ -11,7 +11,7 @@ const TrialService = {
     _premiumPromise: null,     // resolves when all premium checks done
 
     // === PREMIUM FEATURES (locked after trial for free users) ===
-    PREMIUM_FEATURES: ['creature', 'custom_macros', 'camera', 'voice', 'barcode', 'gym', 'weight', 'supplements', 'shop'],
+    PREMIUM_FEATURES: ['creature', 'custom_macros', 'camera', 'voice', 'barcode', 'gym', 'weight', 'supplements', 'shop', 'chat'],
 
     init() {
         // Admin force-premium via URL (for owner/dev only)

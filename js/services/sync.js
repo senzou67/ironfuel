@@ -21,7 +21,8 @@ const SyncService = {
         'coins', 'owned_items', 'equipped_items', 'favorites', 'recent',
         'custom_foods', 'weight_log', 'food_stats', 'settings', 'theme',
         'daily_cal_bonus', 'daily_water_bonus', 'log_dates', 'trial',
-        'gym_goals', 'my_supplements', 'custom_supplements'
+        'gym_goals', 'my_supplements', 'custom_supplements',
+        'user_meals', 'notification_prefs'
     ],
 
     init() {

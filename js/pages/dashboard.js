@@ -73,7 +73,7 @@ const DashboardPage = {
 
         // Supplements completion check
         const mySupplements = Storage._get('my_supplements', []);
-        const takenSuppl = Storage._get('suppl_' + Storage._dateKey(), []);
+        const takenSuppl = Storage._get('suppl_' + Storage._dateKey(date), []);
         const supplAllDone = mySupplements.length > 0 && mySupplements.every(s => takenSuppl.some(t => t.id === s.id));
         const supplCount = takenSuppl.filter(t => mySupplements.some(s => s.id === t.id)).length;
 
@@ -207,7 +207,7 @@ const DashboardPage = {
                     ).join('')}
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
                         ${emptyMeals.map(([type]) => `
-                            <button onclick="App.navigate('search',{meal:'${type}'})" aria-label="Ajouter un aliment au ${mealNames[type]}" class="empty-meal-btn" style="display:flex;align-items:center;gap:8px;padding:14px 14px;font-size:14px">
+                            <button onclick="App.navigate('diary',{meal:'${type}'})" aria-label="Ajouter un aliment au ${mealNames[type]}" class="empty-meal-btn" style="display:flex;align-items:center;gap:8px;padding:14px 14px;font-size:14px">
                                 <span aria-hidden="true" style="font-size:18px">${mealIcons[type]}</span>
                                 <span style="font-weight:600">+ ${mealNames[type]}</span>
                             </button>
