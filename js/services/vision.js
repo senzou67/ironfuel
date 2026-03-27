@@ -39,7 +39,11 @@ Estime le poids de manière réaliste en te basant sur la taille apparente des p
             body: JSON.stringify({ image: base64Image })
         });
 
-        const data = await response.json();
+        const rawText = await response.text();
+        let data;
+        try { data = JSON.parse(rawText); } catch {
+            throw new Error('Erreur serveur — réessaie dans quelques secondes.');
+        }
         if (!response.ok) {
             throw new Error(data.error || `Erreur serveur: ${response.status}`);
         }
@@ -70,14 +74,18 @@ Estime le poids de manière réaliste en te basant sur la taille apparente des p
                     })
                 });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-                    if (text) return this._parseResponse(text);
+                const rawText = await response.text();
+                let data;
+                try { data = JSON.parse(rawText); } catch { lastError = `Réponse invalide (${model})`; continue; }
+
+                if (!response.ok) {
+                    lastError = data.error?.message || `Erreur API Gemini (${model}): ${response.status}`;
+                    continue;
                 }
 
-                const err = await response.json().catch(() => ({}));
-                lastError = err.error?.message || `Erreur API Gemini (${model}): ${response.status}`;
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+                if (text) return this._parseResponse(text);
+                lastError = `Réponse vide (${model})`;
             } catch (e) {
                 lastError = e.message;
             }
@@ -133,7 +141,10 @@ Estime le poids de manière réaliste en te basant sur la taille apparente des p
             }
         }
 
-        const result = JSON.parse(jsonStr);
+        let result;
+        try { result = JSON.parse(jsonStr); } catch {
+            throw new Error('L\'IA n\'a pas pu analyser cette image. Réessaie avec une photo plus claire.');
+        }
         return result.foods || [];
     }
 };

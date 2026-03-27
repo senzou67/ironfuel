@@ -1,3 +1,4 @@
+const { enrichFoods } = require('./nutrition-lookup');
 const ALLOWED_ORIGIN = process.env.URL || 'https://theironfuel.netlify.app';
 const admin = (() => {
     try {
@@ -61,24 +62,28 @@ exports.handler = async (event) => {
             };
         }
 
-        const prompt = `Analyse cette photo de nourriture. Pour chaque aliment visible, donne-moi les informations suivantes au format JSON strict.
+        const prompt = `Analyse cette photo de nourriture. Identifie chaque aliment visible.
 
 Reponds UNIQUEMENT avec un JSON valide, sans texte avant ou apres, au format:
 {
   "foods": [
     {
       "name": "nom de l'aliment en francais",
+      "name_en": "food name in English (for database lookup)",
       "weight_g": estimation du poids en grammes (nombre entier),
-      "calories": calories totales pour ce poids (nombre entier),
-      "protein": proteines en grammes (nombre avec 1 decimale),
-      "carbs": glucides en grammes (nombre avec 1 decimale),
-      "fat": lipides en grammes (nombre avec 1 decimale),
-      "fiber": fibres en grammes (nombre avec 1 decimale)
+      "calories": calories totales estimees pour ce poids (nombre entier),
+      "protein": proteines estimees en grammes (nombre avec 1 decimale),
+      "carbs": glucides estimes en grammes (nombre avec 1 decimale),
+      "fat": lipides estimes en grammes (nombre avec 1 decimale),
+      "fiber": fibres estimees en grammes (nombre avec 1 decimale)
     }
   ]
 }
 
-Estime le poids de maniere realiste en te basant sur la taille apparente des portions. Si tu vois une assiette, estime par rapport a la taille standard d'une assiette (26cm).`;
+Regles:
+- Estime le poids de maniere realiste en te basant sur la taille apparente des portions.
+- Si tu vois une assiette, estime par rapport a la taille standard d'une assiette (26cm).
+- name_en doit etre le nom generique de l'aliment en anglais (ex: "grilled chicken breast", "white rice", "banana").`;
 
         const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
         let text = null;
@@ -107,14 +112,24 @@ Estime le poids de maniere realiste en te basant sur la taille apparente des por
                     }
                 );
 
-                if (response.ok) {
-                    const data = await response.json();
-                    text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-                    if (text) break;
+                const rawText = await response.text();
+                let data;
+                try { data = JSON.parse(rawText); } catch { lastError = `Réponse invalide de Gemini (${model})`; continue; }
+
+                if (!response.ok) {
+                    lastError = data.error?.message || `Erreur Gemini (${model}): ${response.status}`;
+                    continue;
                 }
 
-                const err = await response.json().catch(() => ({}));
-                lastError = err.error?.message || `Erreur Gemini (${model}): ${response.status}`;
+                const candidate = data.candidates?.[0];
+                if (!candidate || candidate.finishReason === 'SAFETY') {
+                    lastError = 'Gemini a refusé l\'image (filtre de sécurité)';
+                    continue;
+                }
+
+                text = candidate.content?.parts?.[0]?.text?.trim();
+                if (text) break;
+                lastError = `Réponse vide de Gemini (${model})`;
             } catch (e) {
                 lastError = e.message;
             }
@@ -123,7 +138,7 @@ Estime le poids de maniere realiste en te basant sur la taille apparente des por
             return {
                 statusCode: 500,
                 headers,
-                body: JSON.stringify({ error: 'Pas de réponse de Gemini.' })
+                body: JSON.stringify({ error: lastError || 'Pas de réponse de Gemini.' })
             };
         }
 
@@ -143,12 +158,24 @@ Estime le poids de maniere realiste en te basant sur la taille apparente des por
             }
         }
 
-        const result = JSON.parse(jsonStr);
+        let result;
+        try {
+            result = JSON.parse(jsonStr);
+        } catch {
+            return {
+                statusCode: 500,
+                headers,
+                body: JSON.stringify({ error: 'Réponse IA mal formée. Réessaie.' })
+            };
+        }
+
+        // Enrich with verified nutrition data (USDA > Open Food Facts > Gemini estimate)
+        const enriched = await enrichFoods(result.foods || []);
 
         return {
             statusCode: 200,
             headers,
-            body: JSON.stringify({ foods: result.foods || [] })
+            body: JSON.stringify({ foods: enriched })
         };
 
     } catch (err) {
