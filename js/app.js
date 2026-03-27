@@ -632,12 +632,12 @@ const Onboarding = {
             <div class="starter-choice-grid" style="max-width:320px;margin:0 auto">
                 <div class="starter-card ${this._selectedStarter === 'fire' ? 'selected' : ''}" data-starter="fire" onclick="Onboarding.selectStarter('fire')">
                     ${firePreview}
-                    <div class="starter-name">Flamoussin</div>
+                    <div class="starter-name">Braisinge</div>
                     <div class="starter-type">🔥 Feu</div>
                 </div>
                 <div class="starter-card ${this._selectedStarter === 'plant' ? 'selected' : ''}" data-starter="plant" onclick="Onboarding.selectStarter('plant')">
                     ${plantPreview}
-                    <div class="starter-name">Herbachat</div>
+                    <div class="starter-name">Feuillard</div>
                     <div class="starter-type">🌿 Plante</div>
                 </div>
                 <div class="starter-card ${this._selectedStarter === 'water' ? 'selected' : ''}" data-starter="water" onclick="Onboarding.selectStarter('water')">

@@ -1,6 +1,4 @@
 const AvatarPage = {
-    _activeTab: 'equip',
-
     render() {
         const content = document.getElementById('page-content');
 
@@ -11,12 +9,11 @@ const AvatarPage = {
                     <div class="paywall-card">
                         <div style="font-size:64px;margin-bottom:12px">🐾</div>
                         <h2>Ta créature t'attend !</h2>
-                        <p style="margin-bottom:16px">Passe à Premium pour débloquer ta créature, la personnaliser et la faire évoluer.</p>
+                        <p style="margin-bottom:16px">Passe à Premium pour débloquer ta créature et la faire évoluer.</p>
                         <div class="paywall-features" style="margin-bottom:16px">
-                            <div class="paywall-feature">✅ Créature unique qui évolue</div>
-                            <div class="paywall-feature">✅ Cosmétiques & boutique</div>
-                            <div class="paywall-feature">✅ Auras, vêtements, ailes</div>
-                            <div class="paywall-feature">✅ Objectifs personnalisés</div>
+                            <div class="paywall-feature">Créature unique qui évolue</div>
+                            <div class="paywall-feature">4 formes d'évolution</div>
+                            <div class="paywall-feature">3 types : Feu, Plante, Eau</div>
                         </div>
                         <button class="btn btn-primary" onclick="App.navigate('settings')" style="width:100%;font-weight:700;font-size:16px;padding:14px">
                             Voir les offres Premium
@@ -29,13 +26,11 @@ const AvatarPage = {
 
         const data = Creature.getData();
         if (!data.chosen) {
-            // Show starter choice
             Creature._showStarterModal(() => AvatarPage.render());
             return;
         }
 
         const form = Creature.getForm();
-        const mp = Creature.getMuscleProgress();
         const speciesName = Creature.getSpeciesName(data.type, form);
         const playerName = Storage.getProfile().name || 'Dresseur';
         const pal = Creature.PALETTES[data.type];
@@ -59,7 +54,6 @@ const AvatarPage = {
             freezeIcons += i < streak.freezesOwned ? '❄️' : '<span style="opacity:0.2">❄️</span>';
         }
 
-        // Update page title to creature name
         document.getElementById('page-title').textContent = playerName;
 
         content.innerHTML = `
@@ -67,7 +61,7 @@ const AvatarPage = {
                 <!-- Type-themed gradient background -->
                 <div class="creature-scene" style="background:linear-gradient(180deg, ${pal.bg1} 0%, ${pal.bg2} 60%, var(--bg) 100%)">
                     <!-- Large creature -->
-                    <div class="creature-display${Storage.getEquippedItems().some(i => i.type === 'aura') ? ' has-svg-aura' : ''}" data-type="${data.type}">
+                    <div class="creature-display" data-type="${data.type}">
                         ${Creature.buildSVG(200)}
                     </div>
 
@@ -75,22 +69,6 @@ const AvatarPage = {
                     <div class="creature-identity">
                         <div class="creature-player-name">${playerName}</div>
                         <div class="creature-species">${Creature.TYPE_EMOJI[data.type]} ${speciesName}</div>
-                        ${(() => {
-                            const titleItem = Storage.getEquippedItems().find(i => i.type === 'title');
-                            if (!titleItem) return '';
-                            const titleData = ShopPage._findItem(titleItem.id);
-                            if (!titleData) return '';
-                            const titleStyles = {
-                                title_rookie: 'color:#9E9E9E',
-                                title_warrior: 'color:#E64A19;text-shadow:0 0 4px rgba(230,74,25,0.3)',
-                                title_champion: 'color:#FFB300;text-shadow:0 0 6px rgba(255,179,0,0.4)',
-                                title_legend: 'color:#FFD700;text-shadow:0 0 8px rgba(255,215,0,0.5),0 0 16px rgba(255,215,0,0.2)',
-                                title_titan: 'color:#B388FF;text-shadow:0 0 8px rgba(179,136,255,0.5),0 0 20px rgba(179,136,255,0.3)',
-                                title_god: 'background:linear-gradient(90deg,#FFD700,#FF8F00,#FFD700);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 6px rgba(255,215,0,0.6));font-weight:900'
-                            };
-                            const style = titleStyles[titleItem.id] || '';
-                            return '<div class="creature-title-badge" style="margin-top:4px;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;' + style + '">' + titleData.emoji + ' ' + titleData.name + '</div>';
-                        })()}
                     </div>
 
                     <!-- Stats -->
@@ -122,28 +100,32 @@ const AvatarPage = {
                     </div>
                 </div>
 
-                <!-- Tabs -->
-                <div class="creature-tabs">
-                    <button class="creature-tab ${this._activeTab === 'equip' ? 'active' : ''}" onclick="AvatarPage.switchTab('equip')">
-                        ⚔️ Équipement
-                    </button>
-                    <button class="creature-tab ${this._activeTab === 'shop' ? 'active' : ''}" onclick="AvatarPage.switchTab('shop')">
-                        🛒 Boutique
-                    </button>
-                </div>
-
-                <!-- Tab content -->
-                <div class="creature-tab-content" id="creature-tab-content">
-                    ${this._renderTabContent()}
+                <!-- Evolution preview -->
+                <div class="card" style="padding:14px 16px;margin:0 16px 12px">
+                    <div style="font-size:14px;font-weight:700;margin-bottom:10px">Évolutions</div>
+                    <div style="display:flex;gap:8px;justify-content:center;align-items:flex-end">
+                        ${[0,1,2,3].map(f => {
+                            const name = Creature.getSpeciesName(data.type, f);
+                            const isActive = f === form;
+                            const isLocked = f > form;
+                            return `
+                                <div style="text-align:center;opacity:${isLocked ? '0.35' : '1'};flex:1">
+                                    <div style="margin:0 auto;${isActive ? `border:2px solid ${pal.main};border-radius:12px;padding:4px;background:${pal.bg1}` : 'padding:6px'}">
+                                        ${Creature.buildSVG(isActive ? 64 : 48, { creatureData: { type: data.type, form: f, chosen: true }, mood: isActive ? 'happy' : 'encouraging' })}
+                                    </div>
+                                    <div style="font-size:10px;font-weight:${isActive ? '700' : '500'};color:${isActive ? pal.main : 'var(--text-secondary)'};margin-top:4px">${name}</div>
+                                    <div style="font-size:9px;color:var(--text-secondary)">${Creature.FORMS[f].label}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
                 </div>
             </div>
         `;
 
-        ShopPage._refreshCallback = () => this.render();
-
-        // Force-restart SVG animations (WebKit/iOS bug: innerHTML SVGs don't animate)
+        // Force-restart SVG animations (WebKit/iOS bug)
         requestAnimationFrame(() => {
-            document.querySelectorAll('.creature-display svg, .creature-card-svg svg').forEach(svg => {
+            document.querySelectorAll('.creature-display svg').forEach(svg => {
                 const parent = svg.parentNode;
                 if (parent) {
                     const clone = svg.cloneNode(true);
@@ -152,7 +134,6 @@ const AvatarPage = {
             });
         });
 
-        // Inject floating particles
         this._spawnParticles();
     },
 
@@ -163,7 +144,7 @@ const AvatarPage = {
         const colors = {
             fire: ['#FF6D3A', '#FFC107', '#FF9800'],
             water: ['#4FC3F7', '#0288D1', '#80DEEA'],
-            earth: ['#8BC34A', '#A5D6A7', '#CDDC39']
+            plant: ['#8BC34A', '#A5D6A7', '#CDDC39']
         };
         const palette = colors[data.type] || colors.fire;
         const container = document.createElement('div');
@@ -189,82 +170,5 @@ const AvatarPage = {
         scene.appendChild(container);
     },
 
-    switchTab(tab) {
-        this._activeTab = tab;
-        document.querySelectorAll('.creature-tab').forEach(t => t.classList.remove('active'));
-        document.querySelector(`.creature-tab:${tab === 'equip' ? 'first-child' : 'last-child'}`).classList.add('active');
-        const container = document.getElementById('creature-tab-content');
-        if (container) container.innerHTML = this._renderTabContent();
-        ShopPage._refreshCallback = () => this.render();
-    },
-
-    _renderTabContent() {
-        if (this._activeTab === 'shop') {
-            return `<div class="creature-shop-embed">${ShopPage.renderContent(true)}</div>`;
-        }
-        return this._renderEquipment();
-    },
-
-    _renderEquipment() {
-        const equipped = Storage.getEquippedItems();
-        const owned = Storage._get('owned_items', []);
-
-        const slots = [
-            { type: 'clothes', label: '👕 Vêtement', icon: '👕' },
-            { type: 'wings', label: '🪽 Ailes', icon: '🪽' },
-            { type: 'aura', label: '🔮 Aura', icon: '🔮' },
-            { type: 'pet', label: '🐾 Compagnon', icon: '🐾' },
-            { type: 'title', label: '🏷️ Titre', icon: '🏷️' }
-        ];
-
-        return `
-            <div class="equip-grid">
-                ${slots.map(slot => {
-                    const equippedItem = equipped.find(e => e.type === slot.type);
-                    const ownedOfType = owned.filter(o => o.type === slot.type);
-                    const itemData = equippedItem ? ShopPage._findItem(equippedItem.id) : null;
-
-                    return `
-                        <div class="equip-slot">
-                            <div class="equip-slot-header">
-                                <span>${slot.label}</span>
-                                ${equippedItem ? `<button class="equip-remove-btn" onclick="AvatarPage.unequipSlot('${slot.type}')">✕</button>` : ''}
-                            </div>
-                            <div class="equip-slot-content ${equippedItem ? 'filled' : 'empty'}">
-                                ${equippedItem && itemData
-                                    ? `<span class="equip-slot-emoji">${itemData.emoji}</span>
-                                       <span class="equip-slot-name">${itemData.name}</span>`
-                                    : `<span class="equip-slot-empty">Vide</span>`
-                                }
-                            </div>
-                            ${ownedOfType.length > 1 ? `
-                                <div class="equip-alternatives">
-                                    ${ownedOfType.filter(o => !equippedItem || o.id !== equippedItem.id).map(o => {
-                                        const d = ShopPage._findItem(o.id);
-                                        return d ? `<button class="equip-alt-btn" onclick="AvatarPage.equipItem('${o.id}','${o.type}')" title="${d.name}">${d.emoji}</button>` : '';
-                                    }).join('')}
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
-                }).join('')}
-            </div>
-        `;
-    },
-
-    unequipSlot(type) {
-        Storage.unequipItem(type);
-        App.showToast('Item retiré');
-        this.render();
-    },
-
-    equipItem(itemId, itemType) {
-        Storage.equipItem({ id: itemId, type: itemType });
-        App.showToast('Item équipé !');
-        this.render();
-    },
-
-    cleanup() {
-        ShopPage._refreshCallback = null;
-    }
+    cleanup() {}
 };
