@@ -1,8 +1,7 @@
 // ===== CREATURE SYSTEM =====
-// 3 starters (fire/plant/water) × 4 evolution forms, with progressive muscle
-// Pixel art sprite-based rendering
+// 3 starters (fire/plant/water) × 4 evolution forms
+// Pixel art PNG sprite-based rendering
 const Creature = {
-    // Evolution thresholds (day-based: active days logged)
     FORMS: [
         { minDays: 0, label: 'Bébé' },
         { minDays: 10, label: 'Juvénile' },
@@ -10,7 +9,6 @@ const Creature = {
         { minDays: 100, label: 'Ultime' }
     ],
 
-    // Species names per type per form
     NAMES: {
         fire:  ['Braisinge', 'Pyrosinge', 'Ignisinge', 'Volcanosinge'],
         plant: ['Feuillard', 'Foliarex', 'Sylvarex', 'Florasaure'],
@@ -25,7 +23,6 @@ const Creature = {
 
     TYPE_EMOJI: { fire: '🔥', plant: '🌿', water: '💧' },
 
-    // Motivational messages
     messages: {
         celebrating: [
             'MACHINE !', 'Objectif atteint ! 💪', 'Inarrêtable !',
@@ -41,18 +38,15 @@ const Creature = {
         ]
     },
 
-    // === DATA GETTERS ===
     getData() {
         return Storage.getCreature() || { type: 'fire', xp: 0, form: 1, chosen: false };
     },
 
-    // Get active days count (number of days with at least one logged meal)
     getActiveDays() {
         return (Storage.getLogDates() || []).length;
     },
 
-    getForm(xpOrDays) {
-        // Use active days for evolution
+    getForm() {
         const days = this.getActiveDays();
         if (days >= 100) return 3;
         if (days >= 40) return 2;
@@ -60,7 +54,7 @@ const Creature = {
         return 0;
     },
 
-    getMuscleProgress(xpOrDays) {
+    getMuscleProgress() {
         const days = this.getActiveDays();
         const form = this.getForm();
         const thresholds = [0, 10, 40, 100, 999];
@@ -78,7 +72,6 @@ const Creature = {
         return thresholds[form];
     },
 
-    // === MOOD ===
     getMood() {
         const goals = Storage.getGoals();
         const totals = Storage.getDayTotals();
@@ -95,7 +88,6 @@ const Creature = {
         return msgs[Math.floor(Math.random() * msgs.length)];
     },
 
-    // === XP & STREAK ===
     checkAndAwardXP() {
         if (!Storage.hasChosenStarter()) return;
         if (Storage.hasXPBeenAwardedToday()) return;
@@ -125,7 +117,6 @@ const Creature = {
 
         streak.lastActiveDate = today;
         if (streak.current > streak.best) streak.best = streak.current;
-        // Premium: 1 freeze every 10 days of streak (max 1 at a time)
         if (streak.current > 0 && streak.current % 10 === 0 && TrialService.isPaid() && streak.freezesOwned < 1) {
             streak.freezesOwned++;
             App.showToast('🧊 Freeze gagné ! Tu peux rater 1 jour sans perdre ton streak');
@@ -140,372 +131,21 @@ const Creature = {
     },
 
     // ============================================
-    // PIXEL ART SPRITE SYSTEM
+    // PIXEL ART SPRITE SYSTEM — PNG images
     // ============================================
-    // Color map: character -> color per type
-    // '.' = transparent, 'O' = outline, 'M' = main, 'L' = light, 'H' = highlight, 'D' = dark, 'W' = white, 'E' = eye/black
-    SPRITE_PALETTES: {
-        fire:  { O: '#222222', M: '#E64A19', L: '#FF8A50', H: '#FFD180', D: '#8B1A00', W: '#FFFFFF', E: '#111111' },
-        plant: { O: '#222222', M: '#4CAF50', L: '#81C784', H: '#C8E6C9', D: '#1B5E20', W: '#FFFFFF', E: '#111111' },
-        water: { O: '#222222', M: '#1E88E5', L: '#64B5F6', H: '#BBDEFB', D: '#0D47A1', W: '#FFFFFF', E: '#111111' }
-    },
-
-    PIXEL_SIZE: 3,
-
-    // ============================================
-    // SPRITE DEFINITIONS — 12 sprites (3 types × 4 forms)
-    // Each sprite is an array of strings, each string is a row
-    // ============================================
-    SPRITES: {
-        // ========== FIRE TYPE — Monkey theme ==========
-        fire: [
-            // Form 0: Braisinge — Tiny monkey, flame tail (12×14)
-            [
-                '....OHHHO...',
-                '...OHHLHO..',
-                '...OHHLLO..',
-                '..OOMMMOO..',
-                '..OMWEMEO..',
-                '..OMWEMEO..',
-                '..OMMMMMO..',
-                '..OMLLMMO..',
-                '...OMMMO...',
-                '...OMLMO...',
-                '..OOMLMOO..',
-                '..OM.OM.MO.',
-                '..OO.OO.OO.',
-                '........OHO',
-            ],
-            // Form 1: Pyrosinge — Bigger monkey, flame hair (16×18)
-            [
-                '.....OHHHHO.....',
-                '....OHHLLHHO....',
-                '....OHHLLLHO....',
-                '...OHHLLLLHO....',
-                '...OOMMMMMOO....',
-                '..OOMWEMWEMOO...',
-                '..OMMMMMMMMO....',
-                '..OMMMLLLMMO....',
-                '..OMMMMLMMMO....',
-                '...OMMMMMMO.....',
-                '...OMMLLMMO.....',
-                '..OOMMLMMOO.....',
-                '..OM.OMMMO.MO...',
-                '..OM..OMO..MO...',
-                '..OD..OMO..DO...',
-                '..OO..OOO..OO...',
-                '..........OHHHO.',
-                '...........OHO..',
-            ],
-            // Form 2: Ignisinge — Athletic ape, flame mane (20×22)
-            [
-                '......OHHHHHO..........',
-                '.....OHHLLLHHO.........',
-                '....OHHLLLLHHO.........',
-                '....OHHLLLLLHO.........',
-                '...OHHLLLLLHHO.........',
-                '...OOOMMMMMMOOO........',
-                '..OOOMWEMWEMOOO........',
-                '..OOMMMMMMMMMOO........',
-                '..OOMMMMLLLMMOO........',
-                '..OOMMMLLLMMOO.........',
-                '..OOMMMMMMMOO..........',
-                '.OOMMMLLLLMMOO.........',
-                '.ODOMMMLLLMMODO........',
-                '.OD.OMMMMMMO.DO........',
-                '.OD..OMMMMMO..DO.......',
-                '.OD..OMMLMMO..DO.......',
-                '.OD...OMMMO...DO.......',
-                '.OO...OM.MO...OO.......',
-                '......OD.DO.....OHHHO..',
-                '......OO.OO......OHHO..',
-            ],
-            // Form 3: Volcanosinge — Gorilla-like, full flame body (24×26)
-            [
-                '.......OHHHHHHO...............',
-                '......OHHLLLLHHO..............',
-                '.....OHHLLLLLHHHO.............',
-                '....OHHLLLLLLHHHO.............',
-                '....OHHLLLLLLLHHO.............',
-                '...OHHHLLLLLLLHHO.............',
-                '...OOOOMMMMMMOOOO.............',
-                '..OOOOMWWEMWWEMOOO............',
-                '..OOMMMMMMMMMMMOO.............',
-                '..OOMMMMMLLLMMMOO.............',
-                '..OOMMMMLLLLLMMOO.............',
-                '..OOMMMMMLLMMMMOO.............',
-                '.OOMMMMMMMMMMMMOO.............',
-                '.ODMMMMMLLLLMMMMDO............',
-                '.ODDMMMLLLLLMMMDO.............',
-                '.OD.DMMMMMMMMMD.DO............',
-                '.OD..DMMMMMMMD..DO............',
-                '.OD..OMMMMLMMO..DO............',
-                '.OD...OMMMMMMO...DO...........',
-                '.OD...OMM.MMMO...DO...........',
-                '.OO...ODD.DDO...OO...........',
-                '......OOO.OOO.....OHHHHO.....',
-                '......................OHHHO...',
-                '.......................OHHO...',
-            ],
-        ],
-
-        // ========== PLANT TYPE — Lizard theme ==========
-        plant: [
-            // Form 0: Feuillard — Tiny leaf-tail gecko (12×14)
-            [
-                '..OHO.OHO...',
-                '..OHOOHOO...',
-                '..OOMMMOO...',
-                '..OMWEMEO...',
-                '..OMWEMEO...',
-                '..OMMMMMO...',
-                '...OMLMO....',
-                '...OMLMO....',
-                '...OMMMO....',
-                '..OO.M.OO...',
-                '..OD.O.DO...',
-                '..OO.O.OO...',
-                '....OHHO....',
-                '.....OHO....',
-            ],
-            // Form 1: Foliarex — Lizard with leaf crest (16×18)
-            [
-                '...OHHHO..........',
-                '..OHHLHO..........',
-                '..OHLHHO..........',
-                '..OOMMMOO.........',
-                '..OOMMMOO.........',
-                '.OOMWEMWEOO.......',
-                '.OMMMMMMMMO.......',
-                '.OMMMLLLMMO.......',
-                '.OMMMLLMMMO.......',
-                '..OMMMMMMMO.......',
-                '..OMMMLMMMO.......',
-                '..OOMMMMOO........',
-                '..OD.OMMO.DO......',
-                '..OD..OO..DO......',
-                '..OO..OO..OO......',
-                '......OHHHO.......',
-                '.......OHHO.......',
-                '........OO........',
-            ],
-            // Form 2: Sylvarex — Bipedal reptile, leaf frill (20×22)
-            [
-                '....OHHHHO...........',
-                '...OHHLLHHO..........',
-                '...OHHLHHHO..........',
-                '..OHHLLLHHO..........',
-                '...OOOMMMMOOO........',
-                '..OOOMWEMWEOOO.......',
-                '..OOMMMMMMMMO........',
-                '..OOMMMLLMMOO........',
-                '..OOMMMLLLMOO........',
-                '..OOMMMMMMMOO........',
-                '.OOMMMMLLMMOO........',
-                '.ODOMMMLMMODO........',
-                '.OD.OMMMMMMO.DO......',
-                '.OD..OMMMMMO..DO.....',
-                '.OD...OMMMO...DO.....',
-                '.OD...OM.MO...DO.....',
-                '.OO...OD.DO...OO.....',
-                '......OO.OO..........',
-                '..........OHHHHO.....',
-                '...........OHHHO.....',
-                '............OHO......',
-            ],
-            // Form 3: Florasaure — Dragon-like with leaf wings (24×26)
-            [
-                '.....OHHHHHO..............',
-                '....OHHLLLHHO.............',
-                '...OHHLLLLHHO.............',
-                '...OHHLLLLLHO.............',
-                '..OHHHLLLHHHHO............',
-                '...OOOOMMMMOOO............',
-                '..OOOOMWEMWEMOOO..........',
-                '..OOMMMMMMMMMOO..........',
-                '..OOMMMMLLMMMOO..........',
-                '..OOMMMMLLLMMOO..........',
-                '..OOMMMMLLMMMOO..........',
-                '.OOHMMMMMMMMMHOO.........',
-                '.OHHMMMMLLMMMMHHO........',
-                '.OHHDMMLLLLLMDHHO........',
-                '.OHH.DMMMMMMMD.HHO......',
-                '.OHO..DMMMMMD..OHO......',
-                '.OO...OMMMLMMO...OO.....',
-                '......OMMMMMMO...........',
-                '......OMM.MMMO...........',
-                '......ODD.DDO............',
-                '......OOO.OOO............',
-                '...........OHHHHO........',
-                '............OHHHO........',
-                '.............OHHO........',
-                '..............OO.........',
-            ],
-        ],
-
-        // ========== WATER TYPE — Cat theme ==========
-        water: [
-            // Form 0: Aquarein — Tiny kitten with water drop ears (12×14)
-            [
-                '.OHO....OHO.',
-                '.OHMO..OMHO.',
-                '..OMO..OMO..',
-                '..OOMMMOO...',
-                '..OMWEMEO...',
-                '..OMWEMEO...',
-                '..OMMMMMO...',
-                '...OMLMO....',
-                '...OMLMO....',
-                '...OMMMO....',
-                '..OO.M.OO...',
-                '..OD.O.DO...',
-                '..OO...OO...',
-                '............',
-            ],
-            // Form 1: Torrentad — Bigger cat, water drop tail (16×18)
-            [
-                '.OHHO......OHHO.',
-                '.OHMMO....OMMHO.',
-                '..OMMO....OMMO..',
-                '..OOMMMMMMOO....',
-                '..OMMMMMMMMO....',
-                '.OOMWEMWEMOO....',
-                '.OMMMMMMMMMMO...',
-                '.OMMMLLLMMMO....',
-                '.OMMMLLMMMMO....',
-                '..OMMMMMMMMO....',
-                '..OMMMLLLMMO....',
-                '..OOMMMMMMOO....',
-                '..OD..OMO..DO...',
-                '..OD..OO...DO...',
-                '..OO..OO...OO...',
-                '........OHHO....',
-                '.........OHO....',
-                '.........OO.....',
-            ],
-            // Form 2: Marivigueur — Athletic cat, water flowing mane (20×22)
-            [
-                '..OHHO........OHHO..',
-                '..OHHMOO....OOMHHO..',
-                '...OMMMO....OMMMO...',
-                '..OHOOMMMMMMOOHHO...',
-                '..OHHOMMMMMMOHHHO...',
-                '..OHOOOMWEMWEOOOHO..',
-                '....OOMMMMMMMMOO....',
-                '....OOMMMLLLMMOO....',
-                '....OOMMMLLMMMOO....',
-                '....OOMMMMMMMMOO....',
-                '...OOMMMMLLMMMOO....',
-                '...ODOMMMLMMODO.....',
-                '...OD.OMMMMMMO.DO...',
-                '...OD..OMMMMMO..DO..',
-                '...OD...OMMMO...DO..',
-                '...OD...OM.MO...DO..',
-                '...OO...OD.DO...OO..',
-                '........OO.OO.......',
-                '...........OHHHO....',
-                '............OHHO....',
-                '............OHO.....',
-            ],
-            // Form 3: Oceanforce — Majestic water lion-cat (24×26)
-            [
-                '..OHHHO..........OHHHO..',
-                '..OHHMMOO......OOMMHHO..',
-                '...OHMMMO......OMMMHO...',
-                '..OHHOOMMMMMMMMOOHHO....',
-                '..OHHHOMMMMMMMMOHHHHO...',
-                '..OHHHOOMMMMMMOOHHHO....',
-                '..OHOOOOOMWEMWEOOOOHO...',
-                '....OOOMMMMMMMMMOOO.....',
-                '....OOOMMMMLLLMMOOO.....',
-                '....OOOMMMLLLLMMOOO.....',
-                '....OOMMMMMLLMMMMOO.....',
-                '...OOMMMMMMMMMMMOO......',
-                '...OHMMMMMLLLMMMMHO.....',
-                '..OHHDMMLLLLLLMDHHHO....',
-                '..OHH.DMMMMMMMD.HHHO...',
-                '..OHO..DMMMMMD..OHO....',
-                '..OO...OMMMLMMO...OO...',
-                '......OMMMMMMMO.........',
-                '......OMM.MMMO..........',
-                '......ODD.DDO...........',
-                '......OOO.OOO...........',
-                '............OHHHHO......',
-                '.............OHHHO......',
-                '..............OHHO......',
-                '...............OO.......',
-            ],
-        ],
-    },
-
-    // ============================================
-    // SPRITE RENDERER — converts sprite map to SVG <rect> elements
-    // ============================================
-    _renderSprite(type, form) {
-        const sprite = this.SPRITES[type]?.[form];
-        if (!sprite) return '';
-
-        const pal = this.SPRITE_PALETTES[type];
-        const ps = this.PIXEL_SIZE; // pixel size = 3
-        let rects = '';
-
-        // Calculate sprite dimensions to center it
-        const spriteH = sprite.length;
-        const spriteW = Math.max(...sprite.map(r => r.length));
-
-        // Center the sprite in the 32×32 grid
-        const offsetX = Math.floor((32 - spriteW) / 2);
-        const offsetY = Math.floor((32 - spriteH) / 2);
-
-        for (let y = 0; y < sprite.length; y++) {
-            const row = sprite[y];
-            for (let x = 0; x < row.length; x++) {
-                const ch = row[x];
-                if (ch === '.') continue;
-
-                let color = null;
-                switch (ch) {
-                    case 'O': color = pal.O; break;
-                    case 'M': color = pal.M; break;
-                    case 'L': color = pal.L; break;
-                    case 'H': color = pal.H; break;
-                    case 'D': color = pal.D; break;
-                    case 'W': color = pal.W; break;
-                    case 'E': color = pal.E; break;
-                    default: continue;
-                }
-
-                const px = (offsetX + x) * ps;
-                const py = (offsetY + y) * ps;
-                rects += `<rect x="${px}" y="${py}" width="${ps}" height="${ps}" fill="${color}"/>`;
-            }
-        }
-
-        return rects;
-    },
-
-    // === MAIN SVG BUILDER ===
     buildSVG(size, options = {}) {
         const data = options.creatureData || this.getData();
         const type = data.type || 'fire';
         const form = data.form !== undefined ? data.form : this.getForm();
         const mood = options.mood || this.getMood();
+        const src = '/assets/creatures/' + type + '_' + form + '.png';
 
-        let svg = `<svg viewBox="0 0 96 96" width="${size}" height="${size}" class="creature-svg ${mood === 'celebrating' ? 'creature-bounce' : ''}" style="overflow:visible">`;
-
-        // Idle breathing animation — subtle translateY
-        svg += `<g>`;
-        svg += `<animateTransform attributeName="transform" type="translate" values="0,0;0,-1;0,0" dur="2.5s" repeatCount="indefinite"/>`;
-
-        // Render the pixel sprite
-        svg += this._renderSprite(type, form);
-
-        svg += `</g>`;
-        svg += '</svg>';
-        return svg;
+        return '<svg viewBox="0 0 64 64" width="' + size + '" height="' + size + '" class="creature-svg ' + (mood === 'celebrating' ? 'creature-bounce' : '') + '" style="overflow:visible;image-rendering:pixelated">'
+            + '<g><animateTransform attributeName="transform" type="translate" values="0,0;0,-1;0,0" dur="2.5s" repeatCount="indefinite"/>'
+            + '<image href="' + src + '" x="0" y="0" width="64" height="64" style="image-rendering:pixelated"/>'
+            + '</g></svg>';
     },
 
-    // === DASHBOARD COMPACT CARD ===
     render() {
         const data = this.getData();
         if (!data.chosen) return '';
@@ -542,11 +182,10 @@ const Creature = {
             </div>`;
     },
 
-    // === STARTER CHOICE MODAL (for migration / fallback) ===
     _showStarterModal(callback) {
-        const firePreview = this.buildSVG(80, { creatureData: { type: 'fire', xp: 0, form: 1, chosen: true }, mood: 'happy', previewItems: [] });
-        const plantPreview = this.buildSVG(80, { creatureData: { type: 'plant', xp: 0, form: 1, chosen: true }, mood: 'happy', previewItems: [] });
-        const waterPreview = this.buildSVG(80, { creatureData: { type: 'water', xp: 0, form: 1, chosen: true }, mood: 'happy', previewItems: [] });
+        const firePreview = this.buildSVG(80, { creatureData: { type: 'fire', xp: 0, form: 0, chosen: true }, mood: 'happy' });
+        const plantPreview = this.buildSVG(80, { creatureData: { type: 'plant', xp: 0, form: 0, chosen: true }, mood: 'happy' });
+        const waterPreview = this.buildSVG(80, { creatureData: { type: 'water', xp: 0, form: 0, chosen: true }, mood: 'happy' });
 
         Modal.show(`
             <div style="text-align:center">
