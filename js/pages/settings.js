@@ -32,7 +32,8 @@ const SettingsPage = {
                             { key: 'motivation', label: '💪 Motivation' },
                             { key: 'supplements', label: '💊 Compléments' },
                             { key: 'gym', label: '🏋️ Salle' },
-                            { key: 'weight', label: '⚖️ Poids' }
+                            { key: 'weight', label: '⚖️ Poids' },
+                            { key: 'water', label: '💧 Eau' }
                         ];
                         return cats.map(c => {
                             const pref = prefs[c.key] || { enabled: false, time: '08:00' };
