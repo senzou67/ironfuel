@@ -77,17 +77,22 @@ Regles importantes:
                         })
                     }
                 );
-                if (response.ok) {
-                    const data = await response.json();
-                    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-                    if (raw) {
-                        let jsonStr = raw;
-                        const m = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
-                        if (m) jsonStr = m[1].trim();
-                        else { const s = raw.indexOf('{'), e = raw.lastIndexOf('}'); if (s !== -1 && e > s) jsonStr = raw.substring(s, e + 1); }
-                        result = JSON.parse(jsonStr);
-                        break;
-                    }
+                const rawText = await response.text();
+                let data;
+                try { data = JSON.parse(rawText); } catch { continue; }
+                if (!response.ok) continue;
+
+                const candidate = data.candidates?.[0];
+                if (!candidate || candidate.finishReason === 'SAFETY') continue;
+
+                const raw = candidate.content?.parts?.[0]?.text?.trim();
+                if (raw) {
+                    let jsonStr = raw;
+                    const m = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+                    if (m) jsonStr = m[1].trim();
+                    else { const s = raw.indexOf('{'), e = raw.lastIndexOf('}'); if (s !== -1 && e > s) jsonStr = raw.substring(s, e + 1); }
+                    try { result = JSON.parse(jsonStr); } catch { continue; }
+                    break;
                 }
             } catch {}
         }

@@ -107,14 +107,24 @@ Estime le poids de maniere realiste en te basant sur la taille apparente des por
                     }
                 );
 
-                if (response.ok) {
-                    const data = await response.json();
-                    text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-                    if (text) break;
+                const rawText = await response.text();
+                let data;
+                try { data = JSON.parse(rawText); } catch { lastError = `Réponse invalide de Gemini (${model})`; continue; }
+
+                if (!response.ok) {
+                    lastError = data.error?.message || `Erreur Gemini (${model}): ${response.status}`;
+                    continue;
                 }
 
-                const err = await response.json().catch(() => ({}));
-                lastError = err.error?.message || `Erreur Gemini (${model}): ${response.status}`;
+                const candidate = data.candidates?.[0];
+                if (!candidate || candidate.finishReason === 'SAFETY') {
+                    lastError = 'Gemini a refusé l\'image (filtre de sécurité)';
+                    continue;
+                }
+
+                text = candidate.content?.parts?.[0]?.text?.trim();
+                if (text) break;
+                lastError = `Réponse vide de Gemini (${model})`;
             } catch (e) {
                 lastError = e.message;
             }
@@ -123,7 +133,7 @@ Estime le poids de maniere realiste en te basant sur la taille apparente des por
             return {
                 statusCode: 500,
                 headers,
-                body: JSON.stringify({ error: 'Pas de réponse de Gemini.' })
+                body: JSON.stringify({ error: lastError || 'Pas de réponse de Gemini.' })
             };
         }
 
@@ -143,7 +153,16 @@ Estime le poids de maniere realiste en te basant sur la taille apparente des por
             }
         }
 
-        const result = JSON.parse(jsonStr);
+        let result;
+        try {
+            result = JSON.parse(jsonStr);
+        } catch {
+            return {
+                statusCode: 500,
+                headers,
+                body: JSON.stringify({ error: 'Réponse IA mal formée. Réessaie.' })
+            };
+        }
 
         return {
             statusCode: 200,
