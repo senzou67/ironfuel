@@ -124,7 +124,7 @@ const SyncService = {
 
             this._log('Gathered ' + Object.keys(dataFields).length + ' keys');
 
-            // Gather meal logs + gym logs
+            // Gather meal logs + gym logs + supplement logs
             const logDates = JSON.parse(localStorage.getItem('nutritrack_log_dates') || '[]');
             const logs = {};
             for (const date of logDates) {
@@ -133,6 +133,9 @@ const SyncService = {
                 // Also sync gym data for this date
                 const gymVal = localStorage.getItem('nutritrack_gym_' + date);
                 if (gymVal) logs['gym_' + date] = gymVal;
+                // Also sync supplement data for this date
+                const supplVal = localStorage.getItem('nutritrack_suppl_' + date);
+                if (supplVal) logs['suppl_' + date] = supplVal;
             }
             this._log(Object.keys(logs).length + ' meal+gym logs');
 
@@ -288,8 +291,8 @@ const SyncService = {
                     const docId = logDoc.name.split('/').pop();
                     if (logDoc.fields?.data?.stringValue) {
                         try {
-                            // Gym logs are stored as gym_YYYY-MM-DD, meal logs as YYYY-MM-DD
-                            const lsKey = docId.startsWith('gym_') ? 'nutritrack_' + docId : 'nutritrack_log_' + docId;
+                            // Gym logs: gym_YYYY-MM-DD, suppl logs: suppl_YYYY-MM-DD, meal logs: YYYY-MM-DD
+                            const lsKey = (docId.startsWith('gym_') || docId.startsWith('suppl_')) ? 'nutritrack_' + docId : 'nutritrack_log_' + docId;
                             localStorage.setItem(lsKey, logDoc.fields.data.stringValue);
                             logCount++;
                         } catch (e) {
@@ -312,6 +315,8 @@ const SyncService = {
         if (!this.isReady()) return;
         if (Date.now() - this._lastSyncTime < 3000) return; // 3s debounce for instant sync
         this._log('autoSync triggered');
+        // Update local sync timestamp
+        localStorage.setItem('nutritrack_last_sync_ts', new Date().toISOString());
         await this.saveAll();
     },
 
@@ -405,17 +410,28 @@ const SyncService = {
                 const doc = await res.json();
                 if (doc.fields?.data?.mapValue?.fields) {
                     const cloudKeys = Object.keys(doc.fields.data.mapValue.fields);
-                    this._log('onLogin: cloud has ' + cloudKeys.length + ' keys');
-
+                    const cloudTs = doc.fields?.updatedAt?.timestampValue;
+                    const localTs = localStorage.getItem('nutritrack_last_sync_ts');
                     const localProfile = localStorage.getItem('nutritrack_profile');
-                    const localLogDates = JSON.parse(localStorage.getItem('nutritrack_log_dates') || '[]');
-                    this._log('onLogin: local profile=' + !!localProfile + ' logs=' + localLogDates.length);
 
-                    if (!localProfile || localLogDates.length === 0) {
+                    this._log('onLogin: cloud=' + cloudKeys.length + ' keys, cloudTs=' + (cloudTs || 'none') + ', localTs=' + (localTs || 'none'));
+
+                    if (!localProfile) {
+                        // No local data at all → restore from cloud
                         this._log('Local empty → restoring from cloud');
                         await this.loadAll();
+                    } else if (cloudTs && localTs && new Date(cloudTs) > new Date(localTs)) {
+                        // Cloud is more recent → pull from cloud
+                        this._log('Cloud is newer → restoring from cloud');
+                        await this.loadAll();
+                        // Re-render current page with new data
+                        if (App.currentPage) {
+                            const pageConfig = App.pages[App.currentPage];
+                            if (pageConfig) pageConfig.render({});
+                        }
                     } else {
-                        this._log('Both have data → saving local to cloud');
+                        // Local is more recent or same → push to cloud
+                        this._log('Local is newer or equal → saving to cloud');
                         await this.saveAll();
                     }
                 } else {
