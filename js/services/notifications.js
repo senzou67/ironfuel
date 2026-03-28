@@ -189,8 +189,8 @@ const LocalNotificationScheduler = {
 
     getPreferences() {
         return Storage._get('notification_prefs', {
-            motivation: { enabled: true, time: '08:00' },
-            supplements: { enabled: false, time: '08:30' },
+            meals: { enabled: true, time: '08:00' },
+            supplements: { enabled: false, time: '09:00' },
             gym: { enabled: false, time: '17:00' },
             weight: { enabled: false, time: '07:30' },
             water: { enabled: false, time: '12:00' }
@@ -234,12 +234,60 @@ const LocalNotificationScheduler = {
         this._midnightTimer = setTimeout(() => this.rescheduleAll(), midnight - now);
     },
 
+    // Rotating messages per category
+    _messages: {
+        meals: [
+            'Nouvelle journée ! Commence par un bon petit-déj 🍳',
+            'C\'est parti ! N\'oublie pas de logger tes repas 📝',
+            'Ton corps a besoin de fuel — log ton premier repas ! 🔥',
+            'Bonne journée ! Pense à noter ce que tu manges 🍽️',
+            'Un repas loggé = un pas vers ton objectif 💪',
+            'Allez, on track ses macros aujourd\'hui ! 🎯',
+            'Chaque calorie compte — note tout ! 📊',
+        ],
+        supplements: [
+            'N\'oublie pas tes compléments ! 💊',
+            'Tes compléments t\'attendent 💊✨',
+            'Pense à ta routine suppléments du jour !',
+            'Créatine, vitamines... c\'est l\'heure ! ⚡',
+        ],
+        gym: [
+            'C\'est l\'heure de ta séance ! 🏋️',
+            'La salle t\'attend — go push ! 💪',
+            'No excuses — c\'est jour de training ! 🔥',
+            'Ton corps te remerciera après la séance 🏆',
+        ],
+        weight: [
+            'Pense à noter ton poids ! ⚖️',
+            'Pesée du jour — monte sur la balance ! ⚖️',
+            'Un suivi régulier = des résultats visibles 📈',
+        ],
+        water: [
+            'Hydrate-toi ! N\'oublie pas ton eau 💧',
+            'T\'as bu assez d\'eau ? Go boire un verre ! 💧',
+            'L\'eau c\'est la vie — hydrate-toi 🥤',
+            'Ton corps a besoin d\'eau — bois ! 💧',
+        ],
+    },
+
+    _getRotatingMessage(category) {
+        const msgs = this._messages[category];
+        if (!msgs) return { title: 'IronFuel 💪', body: 'C\'est parti !' };
+        const idx = new Date().getDate() % msgs.length;
+        const icons = { meals: '🍽️', supplements: '💊', gym: '🏋️', weight: '⚖️', water: '💧' };
+        return { title: 'IronFuel ' + (icons[category] || '💪'), body: msgs[idx] };
+    },
+
     _fire(category) {
         if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
 
         // Check if task already done today — skip notification if so
         const today = Storage._dateKey();
-        if (category === 'supplements') {
+        if (category === 'meals') {
+            const log = Storage.getDayLog();
+            const mealsLogged = Object.values(log.meals).filter(m => m.length > 0).length;
+            if (mealsLogged >= 2) return; // Already logged 2+ meals
+        } else if (category === 'supplements') {
             const mySupplements = Storage._get('my_supplements', []);
             const taken = Storage._get('suppl_' + today, []);
             if (mySupplements.length > 0 && mySupplements.every(s => taken.some(t => t.id === s.id))) return;
@@ -255,14 +303,7 @@ const LocalNotificationScheduler = {
             if (water >= goal) return;
         }
 
-        const messages = {
-            supplements: { title: 'IronFuel 💊', body: 'N\'oublie pas tes compléments !' },
-            gym: { title: 'IronFuel 🏋️', body: 'C\'est l\'heure de ta séance !' },
-            weight: { title: 'IronFuel ⚖️', body: 'Pense à noter ton poids !' },
-            water: { title: 'IronFuel 💧', body: 'Hydrate-toi ! N\'oublie pas ton eau 💧' },
-            motivation: { title: 'IronFuel 💪', body: 'Chaque repas compte. Allez, on track ! 🔥' }
-        };
-        const msg = messages[category] || messages.motivation;
+        const msg = this._getRotatingMessage(category);
         try {
             if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
                 navigator.serviceWorker.ready.then(reg => {

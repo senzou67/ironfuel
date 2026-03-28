@@ -29,7 +29,7 @@ const SettingsPage = {
                     ${settings.notifications !== false && typeof Notification !== 'undefined' && Notification.permission === 'granted' ? (() => {
                         const prefs = typeof LocalNotificationScheduler !== 'undefined' ? LocalNotificationScheduler.getPreferences() : {};
                         const cats = [
-                            { key: 'motivation', label: '💪 Motivation' },
+                            { key: 'meals', label: '🍽️ Repas' },
                             { key: 'supplements', label: '💊 Compléments' },
                             { key: 'gym', label: '🏋️ Salle' },
                             { key: 'weight', label: '⚖️ Poids' },
