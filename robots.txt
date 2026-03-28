@@ -2,5 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /.netlify/
 Disallow: /assets/creatures/
+Disallow: /admin.html
 
 Sitemap: https://theironfuel.netlify.app/sitemap.xml

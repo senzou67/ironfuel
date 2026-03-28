@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>IronFuel Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f0f0f; color: #e0e0e0; min-height: 100vh; }
+        .login { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .login-card { background: #1a1a1a; padding: 32px; border-radius: 16px; width: 90%; max-width: 360px; }
+        .login-card h1 { font-size: 20px; margin-bottom: 16px; color: #E64A19; }
+        .login-card input { width: 100%; padding: 12px; border: 1px solid #333; border-radius: 8px; background: #222; color: #fff; font-size: 14px; margin-bottom: 12px; }
+        .login-card button { width: 100%; padding: 12px; border: none; border-radius: 8px; background: #E64A19; color: white; font-weight: 700; font-size: 14px; cursor: pointer; }
+        .login-card button:hover { background: #d84315; }
+        .dashboard { display: none; padding: 16px; max-width: 1200px; margin: 0 auto; }
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #222; }
+        .header h1 { font-size: 22px; color: #E64A19; }
+        .header button { padding: 8px 16px; border: 1px solid #444; border-radius: 8px; background: transparent; color: #aaa; cursor: pointer; font-size: 12px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 24px; }
+        .stat-card { background: #1a1a1a; border-radius: 12px; padding: 16px; border: 1px solid #222; }
+        .stat-card .label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .stat-card .value { font-size: 28px; font-weight: 800; color: #fff; }
+        .stat-card .value.accent { color: #E64A19; }
+        .stat-card .value.green { color: #4CAF50; }
+        .stat-card .value.blue { color: #1E88E5; }
+        .stat-card .value.gold { color: #FFB300; }
+        .section { background: #1a1a1a; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #222; }
+        .section h2 { font-size: 15px; font-weight: 700; margin-bottom: 12px; color: #ccc; }
+        .section h2 span { font-size: 11px; color: #666; font-weight: 400; margin-left: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th { text-align: left; padding: 8px; color: #888; border-bottom: 1px solid #222; font-weight: 600; }
+        td { padding: 8px; border-bottom: 1px solid #1a1a1a; }
+        tr:hover td { background: #222; }
+        .badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; }
+        .badge.premium { background: #E64A1930; color: #FF8A50; }
+        .badge.free { background: #33333380; color: #888; }
+        .badge.active { background: #4CAF5030; color: #81C784; }
+        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .action-card { background: #222; border-radius: 10px; padding: 14px; cursor: pointer; border: 1px solid #333; transition: border-color 0.2s; }
+        .action-card:hover { border-color: #E64A19; }
+        .action-card h3 { font-size: 13px; margin-bottom: 4px; }
+        .action-card p { font-size: 11px; color: #888; }
+        .broadcast-form { display: none; margin-top: 12px; }
+        .broadcast-form input, .broadcast-form textarea { width: 100%; padding: 10px; border: 1px solid #333; border-radius: 8px; background: #222; color: #fff; font-size: 13px; margin-bottom: 8px; font-family: inherit; }
+        .broadcast-form textarea { min-height: 60px; resize: vertical; }
+        .broadcast-form button { padding: 10px 20px; border: none; border-radius: 8px; background: #E64A19; color: white; font-weight: 700; cursor: pointer; font-size: 13px; }
+        .error-list { max-height: 300px; overflow-y: auto; }
+        .error-item { padding: 8px; border-bottom: 1px solid #222; font-size: 11px; font-family: monospace; }
+        .error-item .msg { color: #ef5350; }
+        .error-item .meta { color: #666; margin-top: 2px; }
+        .loading { text-align: center; padding: 40px; color: #666; }
+        @media (max-width: 600px) { .stats-grid { grid-template-columns: 1fr 1fr; } .actions { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="login" id="login">
+        <div class="login-card">
+            <h1>IronFuel Admin</h1>
+            <input type="password" id="pwd" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')login()">
+            <button onclick="login()">Connexion</button>
+        </div>
+    </div>
+
+    <div class="dashboard" id="dashboard">
+        <div class="header">
+            <h1>IronFuel Admin</h1>
+            <div>
+                <button onclick="refresh()">Rafraîchir</button>
+                <button onclick="logout()">Déconnexion</button>
+            </div>
+        </div>
+
+        <div class="stats-grid" id="stats">
+            <div class="loading">Chargement...</div>
+        </div>
+
+        <div class="section">
+            <h2>Actions rapides</h2>
+            <div class="actions">
+                <div class="action-card" onclick="toggleBroadcast()">
+                    <h3>📢 Notification broadcast</h3>
+                    <p>Envoyer une notif push à tous les utilisateurs</p>
+                </div>
+                <div class="action-card" onclick="window.open('https://app.netlify.com','_blank')">
+                    <h3>🚀 Déployer une MAJ</h3>
+                    <p>Ouvrir Netlify pour trigger un deploy</p>
+                </div>
+                <div class="action-card" onclick="window.open('https://dashboard.stripe.com','_blank')">
+                    <h3>💳 Dashboard Stripe</h3>
+                    <p>Paiements, abonnements, revenus</p>
+                </div>
+                <div class="action-card" onclick="window.open('https://sentry.io','_blank')">
+                    <h3>🐛 Sentry Errors</h3>
+                    <p>Erreurs en production</p>
+                </div>
+                <div class="action-card" onclick="window.open('https://console.firebase.google.com/project/ironfuel-422fe','_blank')">
+                    <h3>🔥 Firebase Console</h3>
+                    <p>Auth, Firestore, FCM</p>
+                </div>
+                <div class="action-card" onclick="window.open('https://search.google.com/search-console','_blank')">
+                    <h3>🔍 Search Console</h3>
+                    <p>SEO, indexation, performance</p>
+                </div>
+            </div>
+            <div class="broadcast-form" id="broadcast-form">
+                <h3 style="margin-bottom:8px;font-size:13px">Envoyer une notification</h3>
+                <input type="text" id="bc-title" placeholder="Titre (ex: IronFuel 🔥)">
+                <textarea id="bc-body" placeholder="Message (ex: Nouvelle mise à jour disponible !)"></textarea>
+                <button onclick="sendBroadcast()">Envoyer à tous</button>
+                <span id="bc-result" style="margin-left:8px;font-size:12px;color:#888"></span>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Utilisateurs <span id="user-count"></span></h2>
+            <div id="users-table" class="loading">Chargement...</div>
+        </div>
+    </div>
+
+    <script>
+        let KEY = '';
+        const API = '/.netlify/functions/admin-api';
+
+        function login() {
+            KEY = document.getElementById('pwd').value;
+            fetch(API + '?action=stats', { headers: { 'X-Admin-Key': KEY } })
+                .then(r => { if (!r.ok) throw new Error('Bad password'); return r.json(); })
+                .then(() => {
+                    sessionStorage.setItem('admin_key', KEY);
+                    document.getElementById('login').style.display = 'none';
+                    document.getElementById('dashboard').style.display = 'block';
+                    refresh();
+                })
+                .catch(() => alert('Mot de passe incorrect'));
+        }
+
+        function logout() {
+            sessionStorage.removeItem('admin_key');
+            KEY = '';
+            document.getElementById('login').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+        }
+
+        function api(action, opts) {
+            return fetch(API + '?action=' + action, { ...opts, headers: { 'X-Admin-Key': KEY, 'Content-Type': 'application/json', ...(opts?.headers || {}) } }).then(r => r.json());
+        }
+
+        async function refresh() {
+            // Stats
+            const stats = await api('stats');
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-card"><div class="label">Utilisateurs</div><div class="value accent">${stats.users.total}</div></div>
+                <div class="stat-card"><div class="label">Premium</div><div class="value green">${stats.users.premium}</div></div>
+                <div class="stat-card"><div class="label">Actifs (7j)</div><div class="value blue">${stats.users.activeLastWeek}</div></div>
+                <div class="stat-card"><div class="label">Notifs activées</div><div class="value">${stats.users.withFcm}</div></div>
+                <div class="stat-card"><div class="label">Abos actifs</div><div class="value green">${stats.subscriptions.active}</div></div>
+                <div class="stat-card"><div class="label">Abos résiliés</div><div class="value">${stats.subscriptions.cancelled}</div></div>
+                <div class="stat-card"><div class="label">Dons</div><div class="value gold">${stats.donations.total}€</div></div>
+                <div class="stat-card"><div class="label">Nb dons</div><div class="value">${stats.donations.count}</div></div>
+            `;
+
+            // Users
+            const data = await api('users');
+            document.getElementById('user-count').textContent = '(' + data.users.length + ')';
+            if (data.users.length === 0) {
+                document.getElementById('users-table').innerHTML = '<p style="color:#666;font-size:13px">Aucun utilisateur</p>';
+                return;
+            }
+            document.getElementById('users-table').innerHTML = `
+                <table>
+                    <tr><th>Nom</th><th>Email</th><th>Statut</th><th>Plan</th><th>Notifs</th><th>Dernière activité</th></tr>
+                    ${data.users.map(u => `
+                        <tr>
+                            <td>${u.name}</td>
+                            <td style="color:#888">${u.email}</td>
+                            <td><span class="badge ${u.paid ? 'premium' : 'free'}">${u.paid ? 'Premium' : 'Free'}</span></td>
+                            <td>${u.plan}</td>
+                            <td>${u.hasFcm ? '<span class="badge active">ON</span>' : '—'}</td>
+                            <td style="color:#666;font-size:11px">${u.updatedAt !== '—' ? new Date(u.updatedAt).toLocaleDateString('fr-FR') : '—'}</td>
+                        </tr>
+                    `).join('')}
+                </table>
+            `;
+        }
+
+        function toggleBroadcast() {
+            const f = document.getElementById('broadcast-form');
+            f.style.display = f.style.display === 'none' ? 'block' : 'none';
+        }
+
+        async function sendBroadcast() {
+            const title = document.getElementById('bc-title').value.trim();
+            const body = document.getElementById('bc-body').value.trim();
+            if (!title || !body) return alert('Remplis le titre et le message');
+            if (!confirm('Envoyer à TOUS les utilisateurs ?')) return;
+            const res = await api('broadcast', { method: 'POST', body: JSON.stringify({ title, body }) });
+            document.getElementById('bc-result').textContent = `Envoyé: ${res.sent}, Échoué: ${res.failed}`;
+        }
+
+        // Auto-login if session key exists
+        window.onload = () => {
+            const saved = sessionStorage.getItem('admin_key');
+            if (saved) { KEY = saved; document.getElementById('pwd').value = saved; login(); }
+        };
+    </script>
+</body>
+</html>
