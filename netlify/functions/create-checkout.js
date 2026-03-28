@@ -88,7 +88,7 @@ exports.handler = async (event) => {
 
             const price = await stripe.prices.create({
                 product: product.id,
-                unit_amount: isMonthly ? 125 : 1499, // 1.25€/month or 14.99€/year
+                unit_amount: isMonthly ? 299 : 1499, // 2.99€/month or 14.99€/year
                 currency: 'eur',
                 recurring: {
                     interval: isMonthly ? 'month' : 'year'
