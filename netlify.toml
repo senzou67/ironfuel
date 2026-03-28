@@ -68,6 +68,6 @@
   [headers.values]
     Cache-Control = "public, max-age=604800"
 
-# Scheduled function for daily motivation notifications (8:00 AM Paris = 7:00 UTC)
+# Smart notification scheduler — runs every 30 min, sends per-user per-category FCM
 [functions."daily-notification"]
-  schedule = "0 7 * * *"
+  schedule = "*/30 * * * *"

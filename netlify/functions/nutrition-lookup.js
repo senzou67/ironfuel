@@ -4,6 +4,14 @@
 
 const USDA_KEY = process.env.USDA_API_KEY || 'DEMO_KEY';
 
+// In-memory cache (survives across warm invocations, ~5-10min on Netlify)
+const _cache = {};
+function _cached(key, ttlMs, fn) {
+    const entry = _cache[key];
+    if (entry && Date.now() - entry.ts < ttlMs) return Promise.resolve(entry.val);
+    return fn().then(val => { _cache[key] = { val, ts: Date.now() }; return val; });
+}
+
 // Search USDA FoodData Central for a food by English name
 async function searchUSDA(query) {
     try {
@@ -70,9 +78,9 @@ async function enrichFood(food) {
     const weight = food.weight_g || 100;
     const factor = weight / 100;
 
-    // 1. Try USDA (most accurate, English name)
+    // 1. Try USDA (most accurate, English name) — cached 1h
     if (food.name_en) {
-        const usda = await searchUSDA(food.name_en);
+        const usda = await _cached('usda:' + food.name_en.toLowerCase(), 3600000, () => searchUSDA(food.name_en));
         if (usda && usda.per100g.calories > 0) {
             return {
                 name: food.name,
@@ -87,8 +95,8 @@ async function enrichFood(food) {
         }
     }
 
-    // 2. Try Open Food Facts (French name)
-    const off = await searchOFF(food.name);
+    // 2. Try Open Food Facts (French name) — cached 1h
+    const off = await _cached('off:' + food.name.toLowerCase(), 3600000, () => searchOFF(food.name));
     if (off && off.per100g.calories > 0) {
         return {
             name: food.name,
