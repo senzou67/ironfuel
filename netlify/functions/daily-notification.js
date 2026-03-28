@@ -126,8 +126,8 @@ exports.handler = async (event) => {
                 try {
                     await admin.messaging().send({
                         token,
-                        data: { title: msg.title, body: msg.body, tag: 'ironfuel-' + category },
-                        webpush: { fcm_options: { link: '/' } }
+                        notification: { title: msg.title, body: msg.body },
+                        webpush: { notification: { icon: '/assets/icons/icon-192.png', tag: 'ironfuel-' + category }, fcm_options: { link: '/' } }
                     });
                     totalSent++;
                 } catch (e) {
