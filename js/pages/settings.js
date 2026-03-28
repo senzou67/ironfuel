@@ -193,7 +193,7 @@ const SettingsPage = {
                         <span style="color:var(--text-secondary)">3.1.0</span>
                     </div>
                     <div class="settings-item">
-                        <span>IronFuel</span>
+                        <span>OneFood</span>
                         <span style="color:var(--text-secondary)">Nutrition & Musculation</span>
                     </div>
                     <button class="settings-item" onclick="window.open('mailto:iron.fuel@outlook.com')">
@@ -286,7 +286,7 @@ const SettingsPage = {
 
         const a = document.createElement('a');
         a.href = url;
-        a.download = `ironfuel-export-${new Date().toISOString().split('T')[0]}.json`;
+        a.download = `onefood-export-${new Date().toISOString().split('T')[0]}.json`;
         a.click();
         URL.revokeObjectURL(url);
         App.showToast('Données exportées');
@@ -334,7 +334,7 @@ const SettingsPage = {
         Modal.show(`
             <div style="text-align:center">
                 <div style="font-size:48px;margin-bottom:12px">❤️</div>
-                <div class="modal-title">Soutenir IronFuel</div>
+                <div class="modal-title">Soutenir OneFood</div>
                 <p style="color:var(--text-secondary);font-size:14px;margin-bottom:16px;line-height:1.5">
                     Un petit geste aide à continuer le développement !
                 </p>
@@ -599,7 +599,7 @@ const SettingsPage = {
             </div>
             <div style="display:flex;flex-direction:column;gap:8px">
                 <button class="btn btn-outline" onclick="window.open('https://billing.stripe.com/p/login/dRmcMXcr4bNCaKWci65c400','_blank');Modal.close()" style="width:100%;font-size:13px">💳 Portail Stripe (factures, résiliation)</button>
-                <button class="btn btn-outline" onclick="window.open('mailto:iron.fuel@outlook.com?subject=Abonnement%20IronFuel','_blank');Modal.close()" style="width:100%;font-size:13px">📧 Contacter le support</button>
+                <button class="btn btn-outline" onclick="window.open('mailto:iron.fuel@outlook.com?subject=Abonnement%20OneFood','_blank');Modal.close()" style="width:100%;font-size:13px">📧 Contacter le support</button>
             </div>
         `);
     },

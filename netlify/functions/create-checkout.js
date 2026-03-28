@@ -3,7 +3,7 @@ const STRIPE_KEY = process.env.STRIPE_SECRET_KEY;
 if (!STRIPE_KEY) console.error('STRIPE_SECRET_KEY is not set');
 const stripe = STRIPE_KEY ? require('stripe')(STRIPE_KEY) : null;
 
-const ALLOWED_ORIGIN = process.env.URL || 'https://theironfuel.netlify.app';
+const ALLOWED_ORIGIN = process.env.URL || 'https://theonefood.netlify.app';
 
 exports.handler = async (event) => {
     const headers = {
@@ -25,7 +25,7 @@ exports.handler = async (event) => {
             return { statusCode: 500, headers, body: JSON.stringify({ error: 'Stripe not configured' }) };
         }
         const { userId, email, skipTrial, plan, mode, amount, message } = JSON.parse(event.body || '{}');
-        const siteUrl = process.env.URL || 'https://theironfuel.netlify.app';
+        const siteUrl = process.env.URL || 'https://theonefood.netlify.app';
 
         // === DONATION (one-time payment) ===
         if (mode === 'donation') {
@@ -47,7 +47,7 @@ exports.handler = async (event) => {
                     price_data: {
                         currency: 'eur',
                         product_data: {
-                            name: `Don IronFuel — ${donationAmount}€`,
+                            name: `Don OneFood — ${donationAmount}€`,
                             description: 'Merci pour votre soutien ❤️'
                         },
                         unit_amount: amountCents
@@ -57,7 +57,7 @@ exports.handler = async (event) => {
                 mode: 'payment',
                 customer_email: email || undefined,
                 payment_intent_data: {
-                    statement_descriptor: 'IRONFUEL',
+                    statement_descriptor: 'ONEFOOD',
                     statement_descriptor_suffix: 'DON'
                 },
                 metadata: { userId: userId || 'anonymous', type: 'donation', amount: String(donationAmount), message: (message || '').substring(0, 500) },
@@ -80,7 +80,7 @@ exports.handler = async (event) => {
 
         if (!priceId) {
             // Create the product + price on the fly
-            const productName = isMonthly ? 'IronFuel Premium Mensuel' : 'IronFuel Premium Annuel';
+            const productName = isMonthly ? 'OneFood Premium Mensuel' : 'OneFood Premium Annuel';
             const product = await stripe.products.create({
                 name: productName,
                 description: 'Suivi nutrition, Photo IA, Avatar, Boutique — Accès complet.'
@@ -112,15 +112,15 @@ exports.handler = async (event) => {
             cancel_url: `${siteUrl}/?payment=cancel`,
             metadata: {
                 userId: userId || 'anonymous',
-                app: 'ironfuel',
+                app: 'onefood',
                 plan: plan || 'annual'
             },
             subscription_data: {
                 trial_period_days: skipTrial ? undefined : 14,
-                description: 'IronFuel Premium',
+                description: 'OneFood Premium',
                 metadata: {
                     userId: userId || 'anonymous',
-                    app: 'ironfuel',
+                    app: 'onefood',
                     plan: plan || 'annual'
                 }
             }

@@ -319,11 +319,11 @@ const AuthService = {
                 <div class="login-card">
                     <div class="login-logo">
                         <svg width="64" height="64" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="45" fill="#E64A19"/>
+                            <circle cx="50" cy="50" r="45" fill="#C62828"/>
                             <text x="50" y="58" text-anchor="middle" fill="white" font-size="28" font-weight="bold">IF</text>
                         </svg>
                     </div>
-                    <h1 class="login-title">IronFuel</h1>
+                    <h1 class="login-title">OneFood</h1>
                     <p class="login-subtitle">Ton coach nutrition pour la muscu</p>
 
                     <div class="login-methods" id="login-methods">
@@ -370,7 +370,7 @@ const AuthService = {
                     <div style="margin:12px 0 8px;display:flex;align-items:flex-start;gap:8px">
                         <input type="checkbox" id="login-newsletter" checked style="margin-top:3px;accent-color:var(--primary);width:16px;height:16px;flex-shrink:0">
                         <label for="login-newsletter" style="font-size:12px;color:var(--text-secondary);line-height:1.4;cursor:pointer">
-                            J'accepte de recevoir des emails d'IronFuel (conseils nutrition, mises à jour). Désabonnement possible à tout moment.
+                            J'accepte de recevoir des emails d'OneFood (conseils nutrition, mises à jour). Désabonnement possible à tout moment.
                         </label>
                     </div>
                     <p class="login-legal">En continuant, tu acceptes les <a href="/terms.html" target="_blank" style="color:var(--primary)">CGU</a> et la <a href="/privacy.html" target="_blank" style="color:var(--primary)">politique de confidentialité</a></p>

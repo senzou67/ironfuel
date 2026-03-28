@@ -100,7 +100,7 @@ const PayPalService = {
                                     <div style="font-size:56px;margin-bottom:12px">💝</div>
                                     <h3 style="margin-bottom:8px">Merci infiniment !</h3>
                                     <p style="color:var(--text-secondary);font-size:14px;line-height:1.5;margin-bottom:16px">
-                                        Ton soutien via PayPal aide à faire grandir IronFuel.<br>
+                                        Ton soutien via PayPal aide à faire grandir OneFood.<br>
                                         Chaque don compte, merci d'y croire ! 🙏
                                     </p>
                                     <button class="btn btn-primary" onclick="Modal.close()" style="width:100%">Fermer</button>
@@ -155,7 +155,7 @@ const PayPalService = {
                     plan_id: this.PLAN_ID,
                     custom_id: AuthService.isLoggedIn() ? AuthService.getCurrentUser().uid : Storage._get('device_id', ''),
                     application_context: {
-                        brand_name: 'IronFuel',
+                        brand_name: 'OneFood',
                         locale: 'fr-FR',
                         user_action: 'SUBSCRIBE_NOW'
                     }

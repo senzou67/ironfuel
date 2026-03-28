@@ -13,10 +13,10 @@ function getClientIP(event) {
 function hashIP(ip) {
     // SHA-256 hash to avoid storing raw IPs
     const crypto = require('crypto');
-    return 'ip_' + crypto.createHash('sha256').update(ip + (process.env.IP_HASH_SALT || 'ironfuel')).digest('hex').substring(0, 16);
+    return 'ip_' + crypto.createHash('sha256').update(ip + (process.env.IP_HASH_SALT || 'onefood')).digest('hex').substring(0, 16);
 }
 
-const ALLOWED_ORIGIN = process.env.URL || 'https://theironfuel.netlify.app';
+const ALLOWED_ORIGIN = process.env.URL || 'https://theonefood.netlify.app';
 
 exports.handler = async (event, context) => {
     const headers = {

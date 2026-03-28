@@ -2,7 +2,7 @@
 const STRIPE_KEY = process.env.STRIPE_SECRET_KEY;
 const stripe = STRIPE_KEY ? require('stripe')(STRIPE_KEY) : null;
 
-const ALLOWED_ORIGIN = process.env.URL || 'https://theironfuel.netlify.app';
+const ALLOWED_ORIGIN = process.env.URL || 'https://theonefood.netlify.app';
 const headers = {
     'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
     'Access-Control-Allow-Headers': 'Content-Type',

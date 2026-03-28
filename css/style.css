@@ -1,8 +1,8 @@
 :root {
-    --primary: #E64A19;
-    --primary-dark: #BF360C;
-    --primary-light: #FBE9E7;
-    --accent: #FFC107;
+    --primary: #C62828;
+    --primary-dark: #B71C1C;
+    --primary-light: #FFEBEE;
+    --accent: #FF5252;
     --danger: #f44336;
     --bg: #f5f5f5;
     --surface: #ffffff;
@@ -70,7 +70,7 @@
 
 /* Dark mode overrides for elements with hardcoded colors */
 [data-theme="dark"] header,
-:root:not([data-theme="light"]) header { background: linear-gradient(135deg, #BF360C, #8B2500); }
+:root:not([data-theme="light"]) header { background: linear-gradient(135deg, #B71C1C, #8B2500); }
 
 [data-theme="dark"] nav,
 :root:not([data-theme="light"]) nav { background: var(--surface); border-top-color: var(--border); }
@@ -281,7 +281,7 @@ body::before {
 .fab-circle {
     width: 54px;
     height: 54px;
-    background: linear-gradient(135deg, var(--primary), #FF6D3A);
+    background: linear-gradient(135deg, var(--primary), #EF5350);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -1278,7 +1278,7 @@ body::before {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--primary), #FF6D3A);
+    background: linear-gradient(135deg, var(--primary), #EF5350);
     color: white;
     width: 100%;
     box-shadow: 0 4px 16px rgba(230,74,25,0.3);
@@ -2947,7 +2947,7 @@ body::before {
         /* Dark mode scene handled by inline gradient */
     }
     :root:not([data-theme="light"]) header {
-        background: linear-gradient(135deg, #BF360C, #8B2500);
+        background: linear-gradient(135deg, #B71C1C, #8B2500);
     }
     :root:not([data-theme="light"]) nav {
         background: var(--surface);
@@ -3076,7 +3076,7 @@ body::before {
 }
 .paywall-promo-badge {
     display: inline-block;
-    background: linear-gradient(135deg, #E64A19, #FF6D00);
+    background: linear-gradient(135deg, #C62828, #E53935);
     color: white;
     font-size: 12px;
     font-weight: 800;
@@ -3538,7 +3538,7 @@ body::before {
     width: 80px;
     height: 80px;
     border-radius: 22px;
-    background: linear-gradient(135deg, var(--primary), #FF6D3A);
+    background: linear-gradient(135deg, var(--primary), #EF5350);
     display: flex;
     align-items: center;
     justify-content: center;

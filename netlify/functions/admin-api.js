@@ -17,7 +17,7 @@ function checkAuth(event) {
 
 exports.handler = async (event) => {
     const headers = {
-        'Access-Control-Allow-Origin': process.env.URL || 'https://theironfuel.netlify.app',
+        'Access-Control-Allow-Origin': process.env.URL || 'https://theonefood.netlify.app',
         'Access-Control-Allow-Headers': 'Content-Type, X-Admin-Key',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Content-Type': 'application/json'

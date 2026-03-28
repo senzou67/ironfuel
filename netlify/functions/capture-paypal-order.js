@@ -39,7 +39,7 @@ async function getAccessToken() {
     return data.access_token;
 }
 
-const ALLOWED_ORIGIN = process.env.URL || 'https://theironfuel.netlify.app';
+const ALLOWED_ORIGIN = process.env.URL || 'https://theonefood.netlify.app';
 
 exports.handler = async (event) => {
     const headers = {

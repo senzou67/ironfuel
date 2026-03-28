@@ -78,7 +78,7 @@ const App = {
     },
 
     pages: {
-        dashboard: { title: 'IronFuel', render: () => DashboardPage.render(), nav: true },
+        dashboard: { title: 'OneFood', render: () => DashboardPage.render(), nav: true },
         diary: { title: 'Journal', render: (p) => DiaryPage.render(p), nav: true },
         search: { title: 'Rechercher', render: (p) => SearchPage.render(p), nav: false },
         camera: { title: 'Photo IA', render: () => CameraPage.render(), nav: false, cleanup: () => CameraPage.cleanup() },
@@ -361,7 +361,7 @@ const App = {
                     <h3 style="font-size:18px;font-weight:700;margin:8px 0 4px">Protection de vos données</h3>
                 </div>
                 <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">
-                    IronFuel collecte des <strong>données de santé</strong> (poids, alimentation, objectifs nutritionnels) pour fonctionner.
+                    OneFood collecte des <strong>données de santé</strong> (poids, alimentation, objectifs nutritionnels) pour fonctionner.
                     Ces données sont stockées localement sur votre appareil et, si vous activez la synchronisation, sur nos serveurs sécurisés (Firebase).
                 </p>
                 <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">
@@ -447,7 +447,7 @@ const App = {
             { icon: '🏋️', title: 'Salle de sport', desc: 'Planifie tes séances Push/Pull/Legs et suis ton calendrier. (Premium)' },
             { icon: '⚖️', title: 'Suivi du poids', desc: 'Note ton poids régulièrement pour voir ta courbe de progression. (Premium)' },
             { icon: '🐣', title: 'Ta créature', desc: 'Plus tu es régulier, plus elle gagne d\'XP et évolue. Débloque des cosmétiques ! (Premium)' },
-            { icon: '⭐', title: 'IronFuel Premium', desc: 'Débloque la créature, les compléments, la salle, le poids et bien plus !' }
+            { icon: '⭐', title: 'OneFood Premium', desc: 'Débloque la créature, les compléments, la salle, le poids et bien plus !' }
         ];
 
         let currentStep = 0;

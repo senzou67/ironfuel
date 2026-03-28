@@ -16,7 +16,7 @@ const Creature = {
     },
 
     PALETTES: {
-        fire:  { main: '#E64A19', light: '#FF8A50', accent: '#FFAB00', dark: '#BF360C', belly: '#FFCCBC', bg1: '#FBE9E7', bg2: '#FFCCBC' },
+        fire:  { main: '#C62828', light: '#FF8A50', accent: '#FFAB00', dark: '#B71C1C', belly: '#FFCDD2', bg1: '#FFEBEE', bg2: '#FFCDD2' },
         plant: { main: '#4CAF50', light: '#81C784', accent: '#C8E6C9', dark: '#2E7D32', belly: '#E8F5E9', bg1: '#E8F5E9', bg2: '#C8E6C9' },
         water: { main: '#1E88E5', light: '#64B5F6', accent: '#90CAF9', dark: '#0D47A1', belly: '#E1F5FE', bg1: '#E3F2FD', bg2: '#BBDEFB' }
     },

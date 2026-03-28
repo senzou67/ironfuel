@@ -101,7 +101,7 @@ const DashboardPage = {
         // This prevents false "Essai gratuit" banners for paying users
         const adBanner = premiumStillChecking ? '' :
             !isPremium && !TrialService.isTrialActive() ? `
-            <div class="trial-banner" onclick="App.navigate('settings')" style="background:linear-gradient(135deg,var(--primary),#FF6D3A);color:white;padding:10px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+            <div class="trial-banner" onclick="App.navigate('settings')" style="background:linear-gradient(135deg,var(--primary),#EF5350);color:white;padding:10px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">
                 <span style="font-size:13px;font-weight:600">⭐ Passe Premium — Photo IA, créature, micro-nutriments</span>
                 <span style="font-size:12px;opacity:0.9">Voir →</span>
             </div>
@@ -414,7 +414,7 @@ const DashboardPage = {
             Modal.show(`
                 <div style="text-align:center">
                     <div style="font-size:48px;margin-bottom:12px">📲</div>
-                    <h3 style="margin-bottom:8px">Installer IronFuel</h3>
+                    <h3 style="margin-bottom:8px">Installer OneFood</h3>
                     <p style="color:var(--text-secondary);font-size:14px;line-height:1.5;margin-bottom:16px">${msg}</p>
                     <button class="btn btn-primary" onclick="Modal.close()" style="width:100%">Compris</button>
                 </div>

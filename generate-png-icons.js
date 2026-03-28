@@ -9,8 +9,8 @@ const svgPath = path.join(iconsDir, 'icon-512.svg');
 const cleanSVG = (size) => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 512 512">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#E64A19"/>
-      <stop offset="100%" stop-color="#BF360C"/>
+      <stop offset="0%" stop-color="#C62828"/>
+      <stop offset="100%" stop-color="#B71C1C"/>
     </linearGradient>
   </defs>
   <rect width="512" height="512" rx="113" fill="url(#bg)"/>
@@ -22,8 +22,8 @@ const cleanSVG = (size) => `<svg xmlns="http://www.w3.org/2000/svg" width="${siz
 const maskableSVG = (size) => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 512 512">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#E64A19"/>
-      <stop offset="100%" stop-color="#BF360C"/>
+      <stop offset="0%" stop-color="#C62828"/>
+      <stop offset="100%" stop-color="#B71C1C"/>
     </linearGradient>
   </defs>
   <rect width="512" height="512" fill="url(#bg)"/>
@@ -34,13 +34,13 @@ const maskableSVG = (size) => `<svg xmlns="http://www.w3.org/2000/svg" width="${
 const ogSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#E64A19"/>
-      <stop offset="100%" stop-color="#BF360C"/>
+      <stop offset="0%" stop-color="#C62828"/>
+      <stop offset="100%" stop-color="#B71C1C"/>
     </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
   <rect x="60" y="60" width="1080" height="510" rx="40" fill="rgba(255,255,255,0.1)"/>
-  <text x="600" y="280" font-family="Arial,Helvetica,sans-serif" font-size="160" font-weight="bold" fill="white" text-anchor="middle">IronFuel</text>
+  <text x="600" y="280" font-family="Arial,Helvetica,sans-serif" font-size="160" font-weight="bold" fill="white" text-anchor="middle">OneFood</text>
   <text x="600" y="380" font-family="Arial,Helvetica,sans-serif" font-size="42" fill="rgba(255,255,255,0.85)" text-anchor="middle">Suivi Nutrition &amp; Musculation Intelligent</text>
   <text x="600" y="450" font-family="Arial,Helvetica,sans-serif" font-size="30" fill="#FFC107" text-anchor="middle">Photo IA  |  500+ aliments  |  Gamification</text>
 </svg>`;

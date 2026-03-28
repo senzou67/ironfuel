@@ -3,7 +3,7 @@ const STRIPE_KEY = process.env.STRIPE_SECRET_KEY;
 if (!STRIPE_KEY) console.error('STRIPE_SECRET_KEY is not set');
 const stripe = STRIPE_KEY ? require('stripe')(STRIPE_KEY) : null;
 
-const ALLOWED_ORIGIN = process.env.URL || 'https://theironfuel.netlify.app';
+const ALLOWED_ORIGIN = process.env.URL || 'https://theonefood.netlify.app';
 
 const admin = (() => {
     try {

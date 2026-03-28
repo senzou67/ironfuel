@@ -28,7 +28,7 @@ const Charts = {
             colors = ['#2196F3', '#FF9800', '#f44336', '#e0e0e0'];
         } else {
             const remaining = Math.max(goal - consumed, 0);
-            const color = consumed > goal ? '#f44336' : '#E64A19';
+            const color = consumed > goal ? '#f44336' : '#C62828';
             data = [consumed, remaining];
             colors = [color, '#e0e0e0'];
         }
@@ -74,7 +74,7 @@ const Charts = {
                 datasets: [{
                     label: 'Calories',
                     data: data.map(d => d.calories),
-                    backgroundColor: data.map(d => d.calories > goal ? '#f4433690' : '#E64A1990'),
+                    backgroundColor: data.map(d => d.calories > goal ? '#f4433690' : '#C6282890'),
                     borderRadius: 6,
                     borderSkipped: false
                 }]
@@ -168,12 +168,12 @@ const Charts = {
                 datasets: [{
                     label: 'Poids (kg)',
                     data: data.map(d => d.weight),
-                    borderColor: '#E64A19',
-                    backgroundColor: '#E64A1920',
+                    borderColor: '#C62828',
+                    backgroundColor: '#C6282820',
                     fill: true,
                     tension: 0.4,
                     pointRadius: 4,
-                    pointBackgroundColor: '#E64A19'
+                    pointBackgroundColor: '#C62828'
                 }]
             },
             options: {
