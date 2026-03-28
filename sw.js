@@ -36,12 +36,20 @@ if (FCM_CONFIG.messagingSenderId && FCM_CONFIG.appId) {
     console.log('[SW] FCM not configured — set messagingSenderId & appId in sw.js');
 }
 
-const CACHE_NAME = 'ironfuel-v99';
-const SW_VERSION = 99;
+const CACHE_NAME = 'ironfuel-v100';
+const SW_VERSION = 100;
 const ASSETS = [
     '/',
     '/index.html',
+    '/css/fonts.css',
     '/css/style.css',
+    '/lib/chart.min.js',
+    '/lib/html5-qrcode.min.js',
+    '/assets/fonts/inter-400.woff2',
+    '/assets/fonts/inter-500.woff2',
+    '/assets/fonts/inter-600.woff2',
+    '/assets/fonts/inter-700.woff2',
+    '/assets/fonts/inter-800.woff2',
     '/js/app.js',
     '/js/db.js',
     '/js/storage.js',
