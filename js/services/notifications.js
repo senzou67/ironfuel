@@ -168,9 +168,14 @@ const NotificationService = {
         if (!this._messaging) return;
 
         this._messaging.onMessage((payload) => {
+            // Data-only messages: show notification manually
+            if (payload.data?.title) {
+                App.showToast(payload.data.body || payload.data.title);
+                return;
+            }
+            // Legacy notification field messages
             const { title, body } = payload.notification || {};
             if (title) {
-                // Show in-app toast instead of system notification (app is already open)
                 App.showToast(body || title);
             }
         });

@@ -130,8 +130,8 @@ exports.handler = async (event) => {
                 try {
                     await admin.messaging().send({
                         token,
-                        notification: { title, body: msgBody },
-                        webpush: { notification: { icon: '/assets/icons/icon-192.png', tag: 'admin-broadcast', vibrate: [200, 100, 200] }, fcm_options: { link: '/' } }
+                        data: { title, body: msgBody, tag: 'admin-broadcast' },
+                        webpush: { fcm_options: { link: '/' } }
                     });
                     sent++;
                 } catch { failed++; }
