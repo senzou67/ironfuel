@@ -27,7 +27,7 @@ async function getAccessToken() {
     return data.access_token;
 }
 
-const ALLOWED_ORIGIN = process.env.URL || 'https://theironfuel.netlify.app';
+const ALLOWED_ORIGIN = process.env.URL || 'https://theonefood.netlify.app';
 
 exports.handler = async (event) => {
     const headers = {
@@ -72,17 +72,17 @@ exports.handler = async (event) => {
                             currency_code: 'EUR',
                             value: donationAmount.toFixed(2)
                         },
-                        description: 'Don IronFuel',
+                        description: 'Don OneFood',
                         custom_id: userId || 'anonymous',
-                        soft_descriptor: 'IRONFUEL'
+                        soft_descriptor: 'ONEFOOD'
                     }],
                     application_context: {
-                        brand_name: 'IronFuel',
+                        brand_name: 'OneFood',
                         locale: 'fr-FR',
                         landing_page: 'NO_PREFERENCE',
                         user_action: 'PAY_NOW',
-                        return_url: `${process.env.URL || 'https://ironfuel.netlify.app'}/?payment=paypal_success`,
-                        cancel_url: `${process.env.URL || 'https://ironfuel.netlify.app'}/?payment=cancel`
+                        return_url: `${process.env.URL || 'https://onefood.netlify.app'}/?payment=paypal_success`,
+                        cancel_url: `${process.env.URL || 'https://onefood.netlify.app'}/?payment=cancel`
                     }
                 })
             });

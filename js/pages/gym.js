@@ -4,7 +4,7 @@ const GymPage = {
 
     // Workout types
     WORKOUT_TYPES: [
-        { id: 'push', name: 'Push', icon: '🏋️', color: '#E64A19' },
+        { id: 'push', name: 'Push', icon: '🏋️', color: '#C62828' },
         { id: 'pull', name: 'Pull', icon: '💪', color: '#1E88E5' },
         { id: 'legs', name: 'Legs', icon: '🦵', color: '#4CAF50' },
         { id: 'cardio', name: 'Cardio', icon: '🏃', color: '#FF9800' },

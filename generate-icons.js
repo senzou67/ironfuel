@@ -1,5 +1,5 @@
 // Run with: node generate-icons.js
-// Generates SVG icons for IronFuel PWA
+// Generates SVG icons for OneFood PWA
 
 const fs = require('fs');
 const path = require('path');
@@ -17,8 +17,8 @@ function createSVG(size) {
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#E64A19"/>
-      <stop offset="100%" stop-color="#BF360C"/>
+      <stop offset="0%" stop-color="#C62828"/>
+      <stop offset="100%" stop-color="#B71C1C"/>
     </linearGradient>
   </defs>
   <rect width="${size}" height="${size}" rx="${r}" fill="url(#bg)"/>
@@ -40,4 +40,4 @@ sizes.forEach(size => {
 fs.writeFileSync(path.join(dir, 'apple-touch-icon.svg'), createSVG(180));
 console.log('Created apple-touch-icon.svg');
 
-console.log('\nDone! IronFuel SVG icons created in assets/icons/');
+console.log('\nDone! OneFood SVG icons created in assets/icons/');

@@ -1,1 +1,1 @@
-{"name":"ironfuel","version":"1.0.0","private":true,"dependencies":{"stripe":"^20.4.1","@netlify/blobs":"^8.0.0","firebase-admin":"^12.0.0"}}
+{"name":"onefood","version":"1.0.0","private":true,"dependencies":{"stripe":"^20.4.1","@netlify/blobs":"^8.0.0","firebase-admin":"^12.0.0"}}

@@ -71,7 +71,7 @@ const NotificationService = {
                 LocalNotificationScheduler._syncPrefsToCloud(LocalNotificationScheduler.getPreferences());
 
                 // Show test notification
-                new Notification('IronFuel 💪', {
+                new Notification('OneFood 💪', {
                     body: 'Les notifications sont activées ! Tu recevras une motivation chaque jour à 8h.',
                     icon: '/assets/icons/icon-192.png',
                     tag: 'notification-test'
@@ -289,10 +289,10 @@ const LocalNotificationScheduler = {
 
     _getRotatingMessage(category) {
         const msgs = this._messages[category];
-        if (!msgs) return { title: 'IronFuel 💪', body: 'C\'est parti !' };
+        if (!msgs) return { title: 'OneFood 💪', body: 'C\'est parti !' };
         const idx = new Date().getDate() % msgs.length;
         const icons = { meals: '🍽️', supplements: '💊', gym: '🏋️', weight: '⚖️', water: '💧' };
-        return { title: 'IronFuel ' + (icons[category] || '💪'), body: msgs[idx] };
+        return { title: 'OneFood ' + (icons[category] || '💪'), body: msgs[idx] };
     },
 
     _fire(category) {
@@ -328,12 +328,12 @@ const LocalNotificationScheduler = {
                         body: msg.body,
                         icon: '/assets/icons/icon-192.png',
                         badge: '/assets/icons/icon-96.svg',
-                        tag: 'ironfuel-' + category,
+                        tag: 'onefood-' + category,
                         vibrate: [200, 100, 200]
                     });
                 });
             } else {
-                new Notification(msg.title, { body: msg.body, icon: '/assets/icons/icon-192.png', tag: 'ironfuel-' + category });
+                new Notification(msg.title, { body: msg.body, icon: '/assets/icons/icon-192.png', tag: 'onefood-' + category });
             }
         } catch(e) {}
     }

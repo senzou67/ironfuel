@@ -61,7 +61,7 @@ function getMessage(category) {
     const msgs = MESSAGES[category];
     if (!msgs) return null;
     const idx = new Date().getDate() % msgs.length;
-    return { title: 'IronFuel ' + (ICONS[category] || '💪'), body: msgs[idx] };
+    return { title: 'OneFood ' + (ICONS[category] || '💪'), body: msgs[idx] };
 }
 
 // Check if current time (Paris timezone) matches a scheduled time within ±15 min window
@@ -127,7 +127,7 @@ exports.handler = async (event) => {
                     await admin.messaging().send({
                         token,
                         notification: { title: msg.title, body: msg.body },
-                        webpush: { notification: { icon: '/assets/icons/icon-192.png', tag: 'ironfuel-' + category }, fcm_options: { link: '/' } }
+                        webpush: { notification: { icon: '/assets/icons/icon-192.png', tag: 'onefood-' + category }, fcm_options: { link: '/' } }
                     });
                     totalSent++;
                 } catch (e) {

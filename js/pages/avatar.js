@@ -142,7 +142,7 @@ const AvatarPage = {
         if (!scene) return;
         const data = Creature.getData();
         const colors = {
-            fire: ['#FF6D3A', '#FFC107', '#FF9800'],
+            fire: ['#EF5350', '#FFC107', '#FF9800'],
             water: ['#4FC3F7', '#0288D1', '#80DEEA'],
             plant: ['#8BC34A', '#A5D6A7', '#CDDC39']
         };

@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IronFuel — Mise à jour</title>
+<title>OneFood — Mise à jour</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; background: #1a1a2e; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
 .container { text-align: center; padding: 32px; max-width: 400px; }
-.logo { font-size: 48px; font-weight: 900; color: #E64A19; margin-bottom: 8px; }
+.logo { font-size: 48px; font-weight: 900; color: #C62828; margin-bottom: 8px; }
 h1 { font-size: 20px; margin-bottom: 16px; }
 .status { font-size: 14px; color: #aaa; margin-bottom: 24px; line-height: 1.6; }
 .progress { width: 200px; height: 4px; background: #333; border-radius: 4px; margin: 0 auto 16px; overflow: hidden; }
-.progress-bar { height: 100%; background: #E64A19; border-radius: 4px; width: 0%; transition: width 0.3s; }
-.step { font-size: 13px; color: #E64A19; font-weight: 600; }
+.progress-bar { height: 100%; background: #C62828; border-radius: 4px; width: 0%; transition: width 0.3s; }
+.step { font-size: 13px; color: #C62828; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -61,7 +61,7 @@ h1 { font-size: 20px; margin-bottom: 16px; }
         if (indexedDB.databases) {
             const dbs = await indexedDB.databases();
             for (const db of dbs) {
-                if (db.name && db.name !== 'ironfuel_premium') {
+                if (db.name && db.name !== 'onefood_premium') {
                     indexedDB.deleteDatabase(db.name);
                 }
             }

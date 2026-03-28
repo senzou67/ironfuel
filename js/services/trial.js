@@ -460,7 +460,7 @@ const TrialService = {
             <div class="paywall-overlay fade-in">
                 <div class="paywall-card">
                     <div class="paywall-icon">🚀</div>
-                    <h2>Passe à IronFuel Premium</h2>
+                    <h2>Passe à OneFood Premium</h2>
                     <p>Débloque toutes les fonctionnalités pour atteindre tes objectifs.</p>
 
                     <div class="paywall-features">
@@ -582,7 +582,7 @@ const TrialService = {
                             <div style="font-size:56px;margin-bottom:12px">💝</div>
                             <h3 style="margin-bottom:8px">Merci infiniment !</h3>
                             <p style="color:var(--text-secondary);font-size:14px;line-height:1.5;margin-bottom:16px">
-                                Ton soutien aide à faire grandir IronFuel.<br>
+                                Ton soutien aide à faire grandir OneFood.<br>
                                 Chaque don compte, merci d'y croire ! 🙏
                             </p>
                             <button class="btn btn-primary" onclick="Modal.close()" style="width:100%">Fermer</button>

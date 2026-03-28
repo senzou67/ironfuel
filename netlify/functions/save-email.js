@@ -18,7 +18,7 @@ function getDb() {
     try { return admin.firestore(); } catch { return null; }
 }
 
-const ALLOWED_ORIGIN = process.env.URL || 'https://theironfuel.netlify.app';
+const ALLOWED_ORIGIN = process.env.URL || 'https://theonefood.netlify.app';
 
 exports.handler = async (event) => {
     const headers = {

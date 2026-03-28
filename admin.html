@@ -4,25 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title>IronFuel Admin</title>
+    <title>OneFood Admin</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f0f0f; color: #e0e0e0; min-height: 100vh; }
         .login { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
         .login-card { background: #1a1a1a; padding: 32px; border-radius: 16px; width: 90%; max-width: 360px; }
-        .login-card h1 { font-size: 20px; margin-bottom: 16px; color: #E64A19; }
+        .login-card h1 { font-size: 20px; margin-bottom: 16px; color: #C62828; }
         .login-card input { width: 100%; padding: 12px; border: 1px solid #333; border-radius: 8px; background: #222; color: #fff; font-size: 14px; margin-bottom: 12px; }
-        .login-card button { width: 100%; padding: 12px; border: none; border-radius: 8px; background: #E64A19; color: white; font-weight: 700; font-size: 14px; cursor: pointer; }
+        .login-card button { width: 100%; padding: 12px; border: none; border-radius: 8px; background: #C62828; color: white; font-weight: 700; font-size: 14px; cursor: pointer; }
         .login-card button:hover { background: #d84315; }
         .dashboard { display: none; padding: 16px; max-width: 1200px; margin: 0 auto; }
         .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #222; }
-        .header h1 { font-size: 22px; color: #E64A19; }
+        .header h1 { font-size: 22px; color: #C62828; }
         .header button { padding: 8px 16px; border: 1px solid #444; border-radius: 8px; background: transparent; color: #aaa; cursor: pointer; font-size: 12px; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 24px; }
         .stat-card { background: #1a1a1a; border-radius: 12px; padding: 16px; border: 1px solid #222; }
         .stat-card .label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
         .stat-card .value { font-size: 28px; font-weight: 800; color: #fff; }
-        .stat-card .value.accent { color: #E64A19; }
+        .stat-card .value.accent { color: #C62828; }
         .stat-card .value.green { color: #4CAF50; }
         .stat-card .value.blue { color: #1E88E5; }
         .stat-card .value.gold { color: #FFB300; }
@@ -34,18 +34,18 @@
         td { padding: 8px; border-bottom: 1px solid #1a1a1a; }
         tr:hover td { background: #222; }
         .badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; }
-        .badge.premium { background: #E64A1930; color: #FF8A50; }
+        .badge.premium { background: #C6282830; color: #FF8A50; }
         .badge.free { background: #33333380; color: #888; }
         .badge.active { background: #4CAF5030; color: #81C784; }
         .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .action-card { background: #222; border-radius: 10px; padding: 14px; cursor: pointer; border: 1px solid #333; transition: border-color 0.2s; }
-        .action-card:hover { border-color: #E64A19; }
+        .action-card:hover { border-color: #C62828; }
         .action-card h3 { font-size: 13px; margin-bottom: 4px; }
         .action-card p { font-size: 11px; color: #888; }
         .broadcast-form { display: none; margin-top: 12px; }
         .broadcast-form input, .broadcast-form textarea { width: 100%; padding: 10px; border: 1px solid #333; border-radius: 8px; background: #222; color: #fff; font-size: 13px; margin-bottom: 8px; font-family: inherit; }
         .broadcast-form textarea { min-height: 60px; resize: vertical; }
-        .broadcast-form button { padding: 10px 20px; border: none; border-radius: 8px; background: #E64A19; color: white; font-weight: 700; cursor: pointer; font-size: 13px; }
+        .broadcast-form button { padding: 10px 20px; border: none; border-radius: 8px; background: #C62828; color: white; font-weight: 700; cursor: pointer; font-size: 13px; }
         .error-list { max-height: 300px; overflow-y: auto; }
         .error-item { padding: 8px; border-bottom: 1px solid #222; font-size: 11px; font-family: monospace; }
         .error-item .msg { color: #ef5350; }
@@ -57,7 +57,7 @@
 <body>
     <div class="login" id="login">
         <div class="login-card">
-            <h1>IronFuel Admin</h1>
+            <h1>OneFood Admin</h1>
             <input type="password" id="pwd" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')login()">
             <button onclick="login()">Connexion</button>
         </div>
@@ -65,7 +65,7 @@
 
     <div class="dashboard" id="dashboard">
         <div class="header">
-            <h1>IronFuel Admin</h1>
+            <h1>OneFood Admin</h1>
             <div>
                 <button onclick="refresh()">Rafraîchir</button>
                 <button onclick="logout()">Déconnexion</button>
@@ -106,7 +106,7 @@
             </div>
             <div class="broadcast-form" id="broadcast-form">
                 <h3 style="margin-bottom:8px;font-size:13px">Envoyer une notification</h3>
-                <input type="text" id="bc-title" placeholder="Titre (ex: IronFuel 🔥)">
+                <input type="text" id="bc-title" placeholder="Titre (ex: OneFood 🔥)">
                 <textarea id="bc-body" placeholder="Message (ex: Nouvelle mise à jour disponible !)"></textarea>
                 <button onclick="sendBroadcast()">Envoyer à tous</button>
                 <span id="bc-result" style="margin-left:8px;font-size:12px;color:#888"></span>

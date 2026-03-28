@@ -17,7 +17,7 @@ function getDb() {
     try { return admin.firestore(); } catch { return null; }
 }
 
-const ALLOWED_ORIGIN = process.env.URL || 'https://theironfuel.netlify.app';
+const ALLOWED_ORIGIN = process.env.URL || 'https://theonefood.netlify.app';
 
 exports.handler = async (event) => {
     const headers = {
@@ -71,7 +71,7 @@ exports.handler = async (event) => {
         // Send to all tokens
         const message = {
             notification: {
-                title: title || 'IronFuel 💪',
+                title: title || 'OneFood 💪',
                 body: body || 'Ton suivi nutrition t\'attend !'
             },
             webpush: {
@@ -81,7 +81,7 @@ exports.handler = async (event) => {
                     tag: 'daily-motivation',
                     vibrate: [200, 100, 200],
                     actions: [
-                        { action: 'open', title: 'Ouvrir IronFuel' }
+                        { action: 'open', title: 'Ouvrir OneFood' }
                     ]
                 },
                 fcm_options: {
