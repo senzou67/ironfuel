@@ -67,6 +67,8 @@ const NotificationService = {
             if (token) {
                 await this._saveToken(token);
                 this._token = token;
+                // Sync default preferences to cloud for FCM server
+                LocalNotificationScheduler._syncPrefsToCloud(LocalNotificationScheduler.getPreferences());
 
                 // Show test notification
                 new Notification('IronFuel 💪', {
@@ -202,6 +204,23 @@ const LocalNotificationScheduler = {
         prefs[category] = { enabled, time: time || prefs[category]?.time || '08:00' };
         Storage._set('notification_prefs', prefs);
         this.rescheduleAll();
+        // Sync prefs to Firestore for server-side FCM notifications
+        this._syncPrefsToCloud(prefs);
+    },
+
+    async _syncPrefsToCloud(prefs) {
+        if (!AuthService.isLoggedIn()) return;
+        try {
+            const user = AuthService.getCurrentUser();
+            const token = await user.getIdToken();
+            const projectId = 'ironfuel-422fe';
+            const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${user.uid}?updateMask.fieldPaths=notifPrefs`;
+            await fetch(url, {
+                method: 'PATCH',
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fields: { notifPrefs: { stringValue: JSON.stringify(prefs) } } })
+            });
+        } catch {}
     },
 
     rescheduleAll() {
