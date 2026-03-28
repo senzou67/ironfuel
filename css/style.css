@@ -1822,7 +1822,7 @@ body::before {
 
 /* Barcode Page */
 .barcode-container {
-    padding: 16px;
+    padding: 8px 16px;
     text-align: center;
 }
 

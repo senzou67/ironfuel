@@ -11,9 +11,8 @@ const BarcodePage = {
         const content = document.getElementById('page-content');
         content.innerHTML = `
             <div class="barcode-container fade-in">
-                <h2 style="font-size:20px;margin-bottom:8px">Scanner de code-barres</h2>
-                <p style="color:var(--text-secondary);font-size:14px;margin-bottom:16px">
-                    Scannez le code-barres d'un produit alimentaire
+                <p style="color:var(--text-secondary);font-size:13px;margin-bottom:10px">
+                    Scannez le code-barres d'un produit
                 </p>
 
                 <div class="barcode-scanner" id="barcode-scanner">
