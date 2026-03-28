@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /.netlify/
+Disallow: /assets/creatures/
+
+Sitemap: https://theironfuel.netlify.app/sitemap.xml

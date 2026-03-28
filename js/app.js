@@ -1,3 +1,19 @@
+// === GLOBAL ERROR TRACKING ===
+window.onerror = function(msg, src, line, col, err) {
+    const error = { msg, src: src?.split('/').pop(), line, col, stack: err?.stack?.substring(0, 300), ts: new Date().toISOString() };
+    const errors = JSON.parse(localStorage.getItem('ironfuel_errors') || '[]');
+    errors.push(error);
+    if (errors.length > 20) errors.shift();
+    localStorage.setItem('ironfuel_errors', JSON.stringify(errors));
+};
+window.addEventListener('unhandledrejection', function(e) {
+    const error = { msg: 'Promise: ' + (e.reason?.message || e.reason || 'unknown'), ts: new Date().toISOString() };
+    const errors = JSON.parse(localStorage.getItem('ironfuel_errors') || '[]');
+    errors.push(error);
+    if (errors.length > 20) errors.shift();
+    localStorage.setItem('ironfuel_errors', JSON.stringify(errors));
+});
+
 const App = {
     currentPage: 'dashboard',
     previousPage: null,
