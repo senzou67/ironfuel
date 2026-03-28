@@ -168,16 +168,9 @@ const NotificationService = {
         if (!this._messaging) return;
 
         this._messaging.onMessage((payload) => {
-            // Data-only messages: show notification manually
-            if (payload.data?.title) {
-                App.showToast(payload.data.body || payload.data.title);
-                return;
-            }
-            // Legacy notification field messages
-            const { title, body } = payload.notification || {};
-            if (title) {
-                App.showToast(body || title);
-            }
+            const title = payload.notification?.title || payload.data?.title;
+            const body = payload.notification?.body || payload.data?.body;
+            if (body || title) App.showToast(body || title);
         });
     },
 

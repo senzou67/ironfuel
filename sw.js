@@ -16,26 +16,14 @@ const FCM_CONFIG = {
 if (FCM_CONFIG.messagingSenderId && FCM_CONFIG.appId) {
     firebase.initializeApp(FCM_CONFIG);
     const messaging = firebase.messaging();
-    messaging.onBackgroundMessage((payload) => {
-        // FCM with notification field auto-shows — only handle data-only messages
-        if (payload.notification) return;
-        const { title, body, tag } = payload.data || {};
-        if (title) {
-            self.registration.showNotification(title, {
-                body: body || '',
-                icon: '/assets/icons/icon-192.png',
-                badge: '/assets/icons/icon-96.svg',
-                tag: tag || 'ironfuel',
-                vibrate: [200, 100, 200]
-            });
-        }
-    });
+    // FCM with notification field auto-displays — SW does NOT show again
+    messaging.onBackgroundMessage(() => {});
 } else {
     console.log('[SW] FCM not configured — set messagingSenderId & appId in sw.js');
 }
 
-const CACHE_NAME = 'ironfuel-v108';
-const SW_VERSION = 108;
+const CACHE_NAME = 'ironfuel-v109';
+const SW_VERSION = 109;
 const ASSETS = [
     '/',
     '/index.html',
