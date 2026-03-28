@@ -103,16 +103,15 @@ const SettingsPage = {
                             </div>
                             <div class="settings-plan-card" id="settings-plan-monthly" onclick="SettingsPage._selectPlan('monthly')" style="flex:1;padding:12px;border:2px solid var(--border);border-radius:10px;text-align:center;cursor:pointer">
                                 <div style="font-size:10px;font-weight:700;color:transparent;margin-bottom:4px">.</div>
-                                <div style="font-weight:800;font-size:18px">1,25€</div>
-                                <div style="font-size:11px;color:var(--text-secondary)">/mois (14,99€/an)</div>
+                                <div style="font-weight:800;font-size:18px">2,99€</div>
+                                <div style="font-size:11px;color:var(--text-secondary)">/mois</div>
                             </div>
                         </div>
 
                         <button class="btn btn-primary" id="settings-sub-btn" onclick="SettingsPage._subscribe()" style="width:100%;font-weight:700;font-size:16px;padding:14px">
                             S'abonner — 14,99€/an
                         </button>
-                        <div id="paypal-subscribe-btn" style="margin-top:6px"></div>
-                        <p style="font-size:11px;color:var(--text-secondary);text-align:center">🔒 Stripe (annuel) · PayPal (mensuel) — Paiement sécurisé</p>
+                        <p style="font-size:11px;color:var(--text-secondary);text-align:center">🔒 Paiement sécurisé via Stripe</p>
                         <p style="font-size:11px;color:var(--primary);text-align:center;font-weight:600">🚫 Sans engagement — Résiliable à tout moment</p>
                     </div>
                 </div>
@@ -217,20 +216,6 @@ const SettingsPage = {
             </div>
         `;
 
-        // Render PayPal subscribe button for monthly plan if configured
-        if (typeof PayPalService !== 'undefined' && PayPalService.isConfigured() && !TrialService.isPaid()) {
-            setTimeout(() => {
-                PayPalService.renderSubscribeButton('paypal-subscribe-btn');
-            }, 200);
-        } else if (!TrialService.isPaid()) {
-            // Fallback: simple PayPal.me button for subscription
-            setTimeout(() => {
-                const container = document.getElementById('paypal-subscribe-btn');
-                if (container) {
-                    container.innerHTML = `<button class="btn btn-outline" onclick="window.open('https://paypal.me/ironfuel/1.25','_blank')" style="width:100%;font-weight:600;font-size:13px;padding:10px;color:#0070ba;border-color:#0070ba">💳 Mensuel via PayPal — 1,25€/mois</button>`;
-                }
-            }, 100);
-        }
     },
 
     async toggleNotifications() {
@@ -367,8 +352,7 @@ const SettingsPage = {
                 <button class="btn btn-primary" id="donate-action-btn" onclick="SettingsPage._confirmDonate()" style="width:100%;font-weight:700;font-size:16px;padding:12px;margin-bottom:8px">
                     💝 Donner
                 </button>
-                <div id="paypal-donate-btn" style="margin-bottom:8px"></div>
-                <p style="font-size:11px;color:var(--text-secondary)">🔒 PayPal (< 10€) · Stripe (10€+) — automatique selon le montant</p>
+                <p style="font-size:11px;color:var(--text-secondary)">🔒 Paiement sécurisé via Stripe</p>
             </div>
         `);
 
@@ -379,23 +363,6 @@ const SettingsPage = {
             if (inp) inp.addEventListener('input', () => this._updateDonateButton());
         }, 50);
 
-        // Render PayPal donate button for < 10€
-        if (typeof PayPalService !== 'undefined' && PayPalService.isConfigured()) {
-            setTimeout(() => {
-                PayPalService.renderDonateButton('paypal-donate-btn', () => {
-                    const inp = document.getElementById('donate-custom-amount');
-                    return parseFloat(inp ? inp.value : '5');
-                });
-            }, 100);
-        } else {
-            // Fallback: simple PayPal.me link
-            setTimeout(() => {
-                const container = document.getElementById('paypal-donate-btn');
-                if (container) {
-                    container.innerHTML = `<button class="btn btn-outline" onclick="window.open('https://paypal.me/ironfuel','_blank')" style="width:100%;font-weight:600;font-size:14px;padding:10px;color:#0070ba;border-color:#0070ba">💳 PayPal (< 10€)</button>`;
-                }
-            }, 50);
-        }
     },
 
     _setDonateAmount(amount) {
@@ -407,17 +374,9 @@ const SettingsPage = {
     _updateDonateButton() {
         const input = document.getElementById('donate-custom-amount');
         const btn = document.getElementById('donate-action-btn');
-        const paypalContainer = document.getElementById('paypal-donate-btn');
         if (!btn) return;
         const amount = parseFloat(input ? input.value : '5');
-        if (amount >= 10) {
-            btn.textContent = '💳 Donner ' + amount + '€ via Stripe';
-            btn.style.display = '';
-            if (paypalContainer) paypalContainer.style.display = 'none';
-        } else {
-            btn.style.display = 'none';
-            if (paypalContainer) paypalContainer.style.display = '';
-        }
+        btn.textContent = '💝 Donner ' + amount + '€';
     },
 
     _confirmDonate() {
@@ -427,12 +386,6 @@ const SettingsPage = {
             App.showToast('Minimum 1€');
             return;
         }
-        if (amount < 10) {
-            // Small donations (<10€) go through PayPal — show PayPal button
-            App.showToast('Utilise le bouton PayPal pour les dons de moins de 10€');
-            return;
-        }
-        // 10€+ goes through Stripe
         this.donate(amount);
     },
 
@@ -465,7 +418,7 @@ const SettingsPage = {
         }
         const btn = document.getElementById('settings-sub-btn');
         if (btn) {
-            btn.textContent = plan === 'annual' ? 'S\'abonner — 14,99€/an' : 'S\'abonner — 1,25€/mois';
+            btn.textContent = plan === 'annual' ? 'S\'abonner — 14,99€/an' : 'S\'abonner — 2,99€/mois';
         }
         TrialService._selectedPlan = plan;
     },
@@ -621,7 +574,7 @@ const SettingsPage = {
         const trialData = Storage._get('trial', {});
         const daysLeft = TrialService.subscriptionDaysLeft();
         const paidDate = trialData.paidDate ? new Date(trialData.paidDate).toLocaleDateString('fr-FR') : '—';
-        const plan = trialData.plan === 'monthly' ? 'Mensuel (1,25€/mois)' : 'Annuel (14,99€/an)';
+        const plan = trialData.plan === 'monthly' ? 'Mensuel (2,99€/mois)' : 'Annuel (14,99€/an)';
         const expiryDate = trialData.paidDate ? new Date(new Date(trialData.paidDate).getTime() + (trialData.plan === 'monthly' ? 31 : 365) * 86400000).toLocaleDateString('fr-FR') : '—';
 
         Modal.show(`

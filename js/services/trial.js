@@ -5,7 +5,7 @@ const TrialService = {
     TRIAL_DAYS: 14,
     SUBSCRIPTION_DAYS: 365,
     PRICE_ANNUAL: '14,99€',
-    PRICE_MONTHLY: '1,25€',
+    PRICE_MONTHLY: '2,99€',
     _serverChecked: false,
     _premiumVerified: false,   // true once async checks finish
     _premiumPromise: null,     // resolves when all premium checks done
@@ -490,12 +490,12 @@ const TrialService = {
                                 <span class="paywall-amount">14,99€</span>
                                 <span class="paywall-period">/an</span>
                             </div>
-                            <div class="paywall-plan-detail">Soit 1,25€/mois</div>
+                            <div class="paywall-plan-detail">Soit 2,99€/mois</div>
                         </div>
                         <div class="paywall-plan" id="plan-monthly" onclick="TrialService._selectPlan('monthly')">
                             <div class="paywall-plan-name">Mensuel</div>
                             <div class="paywall-plan-price">
-                                <span class="paywall-amount">1,25€</span>
+                                <span class="paywall-amount">2,99€</span>
                                 <span class="paywall-period">/mois</span>
                             </div>
                             <div class="paywall-plan-detail">15€/an</div>
@@ -525,7 +525,7 @@ const TrialService = {
         if (btn) {
             btn.textContent = plan === 'annual'
                 ? 'S\'abonner — 14,99€/an'
-                : 'S\'abonner — 1,25€/mois';
+                : 'S\'abonner — 2,99€/mois';
         }
     },
 
@@ -590,28 +590,6 @@ const TrialService = {
                     `);
                 } else {
                     App.showToast('Merci pour ton soutien ! ❤️');
-                }
-            }, 500);
-            window.history.replaceState({}, '', window.location.pathname + window.location.hash);
-            return true;
-        }
-        if (params.get('payment') === 'paypal_success') {
-            // PayPal donation return
-            setTimeout(() => {
-                if (typeof Modal !== 'undefined') {
-                    Modal.show(`
-                        <div style="text-align:center">
-                            <div style="font-size:56px;margin-bottom:12px">💝</div>
-                            <h3 style="margin-bottom:8px">Merci via PayPal !</h3>
-                            <p style="color:var(--text-secondary);font-size:14px;line-height:1.5;margin-bottom:16px">
-                                Ton soutien aide à faire grandir IronFuel.<br>
-                                Merci d'y croire ! 🙏
-                            </p>
-                            <button class="btn btn-primary" onclick="Modal.close()" style="width:100%">Fermer</button>
-                        </div>
-                    `);
-                } else {
-                    App.showToast('Merci pour ton soutien PayPal ! ❤️');
                 }
             }, 500);
             window.history.replaceState({}, '', window.location.pathname + window.location.hash);

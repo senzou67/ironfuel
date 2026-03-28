@@ -49,7 +49,7 @@
     <!-- Force cache bust — fetches /version.json DIRECTLY from server bypassing SW -->
     <script>
         (function(){
-            var LOCAL_V = 100; // Must match version.json
+            var LOCAL_V = 101; // Must match version.json
             var lsWorks = true;
             try {
                 localStorage.setItem('_test', '1');
@@ -228,7 +228,6 @@
     <script defer src="js/services/trial.js?v=74"></script>
     <script defer src="js/services/sync.js?v=74"></script>
     <script defer src="js/services/notifications.js?v=74"></script>
-    <script defer src="js/services/paypal.js?v=74"></script>
     <script defer src="js/services/micronutrients.js?v=74"></script>
     <script defer src="js/components/navbar.js?v=74"></script>
     <script defer src="js/components/modal.js?v=74"></script>
