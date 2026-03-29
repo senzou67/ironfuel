@@ -314,9 +314,21 @@ const AuthService = {
         document.getElementById('bottom-nav').style.display = 'none';
         document.getElementById('app-header').style.display = 'none';
 
+        // Detect in-app browsers (WhatsApp, Instagram, Facebook, etc.)
+        const ua = navigator.userAgent || '';
+        const isInApp = /FBAN|FBAV|Instagram|WhatsApp|Snapchat|Twitter|LinkedIn|Line\//i.test(ua);
+        const inAppBanner = isInApp ? `
+            <div style="background:#FFF3E0;color:#E65100;padding:12px 16px;border-radius:12px;margin-bottom:16px;font-size:13px;line-height:1.5;text-align:center">
+                <strong>Ouvre dans ton navigateur</strong><br>
+                La connexion Google ne fonctionne pas dans ce navigateur intégré.<br>
+                <span style="font-size:12px;opacity:0.8">Copie le lien et ouvre-le dans Chrome ou Safari.</span>
+            </div>
+        ` : '';
+
         content.innerHTML = `
             <div class="login-screen fade-in">
                 <div class="login-card">
+                    ${inAppBanner}
                     <div class="login-logo">
                         <svg width="64" height="64" viewBox="0 0 100 100">
                             <circle cx="50" cy="50" r="45" fill="#C62828"/>
