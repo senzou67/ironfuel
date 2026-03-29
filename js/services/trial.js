@@ -82,26 +82,33 @@ const TrialService = {
 
     // Layer 3: IndexedDB — independent from localStorage, survives cache nuke
     _saveToIDB(paid, plan, paidDate) {
-        if (!paid) return;
+        if (!paid || typeof indexedDB === 'undefined') return;
         try {
             const req = indexedDB.open('ironfuel_premium', 1);
             req.onupgradeneeded = (e) => { e.target.result.createObjectStore('status'); };
             req.onsuccess = (e) => {
-                const db = e.target.result;
-                const tx = db.transaction('status', 'readwrite');
-                tx.objectStore('status').put({ paid: true, plan: plan || 'annual', paidDate: paidDate || new Date().toISOString() }, 'premium');
+                try {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('status')) return;
+                    const tx = db.transaction('status', 'readwrite');
+                    tx.objectStore('status').put({ paid: true, plan: plan || 'annual', paidDate: paidDate || new Date().toISOString() }, 'premium');
+                } catch {}
             };
-        } catch(e) {}
+            req.onerror = () => {};
+        } catch {}
     },
 
     _restoreFromIDB() {
         return new Promise((resolve) => {
+            if (typeof indexedDB === 'undefined') return resolve(null);
             try {
                 const req = indexedDB.open('ironfuel_premium', 1);
                 req.onupgradeneeded = (e) => { e.target.result.createObjectStore('status'); };
+                req.onerror = () => resolve(null);
                 req.onsuccess = (e) => {
-                    const db = e.target.result;
                     try {
+                        const db = e.target.result;
+                        if (!db.objectStoreNames.contains('status')) return resolve(null);
                         const tx = db.transaction('status', 'readonly');
                         const get = tx.objectStore('status').get('premium');
                         get.onsuccess = () => {
