@@ -19,7 +19,7 @@
         .login-card button { width: 100%; padding: 14px; border: none; border-radius: 10px; background: #C62828; color: white; font-weight: 700; font-size: 15px; cursor: pointer; }
 
         /* Dashboard */
-        .dashboard { display: none; padding: 12px; padding-top: env(safe-area-inset-top, 12px); padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 70px); max-width: 600px; margin: 0 auto; }
+        .dashboard { display: none; padding: 12px; padding-top: env(safe-area-inset-top, 12px); padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 70px); max-width: 900px; margin: 0 auto; }
 
         /* Header */
         .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding: 8px 0; }
@@ -42,9 +42,12 @@
         .section h2 { font-size: 14px; font-weight: 700; margin-bottom: 10px; color: #ccc; display: flex; align-items: center; gap: 6px; }
         .section h2 span { font-size: 10px; color: #555; font-weight: 400; }
 
-        /* Actions — scrollable row on mobile */
-        .actions-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+        /* Actions — scroll on mobile, grid on desktop */
+        .actions-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; scrollbar-width: none; flex-wrap: nowrap; }
         .actions-scroll::-webkit-scrollbar { display: none; }
+        @media (min-width: 600px) {
+            .actions-scroll { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); overflow-x: visible; flex-wrap: wrap; }
+        }
         .action-chip { flex-shrink: 0; background: #222; border-radius: 10px; padding: 10px 14px; cursor: pointer; border: 1px solid #2a2a2a; text-align: center; min-width: 90px; }
         .action-chip:active { background: #333; }
         .action-chip .icon { font-size: 20px; display: block; margin-bottom: 4px; }
@@ -241,7 +244,8 @@
             loadNotes();
 
             const pay = await api('payments');
-            document.getElementById('payments-table').innerHTML = pay.payments?.length ? `<table><tr><th>Type</th><th>Email</th><th>Détail</th><th>Date</th></tr>${pay.payments.map(p => `<tr><td><span class="badge ${p.type==='abo'?'premium':'active'}">${p.type==='abo'?'⭐':'💝'}</span></td><td style="color:#888;max-width:120px;overflow:hidden;text-overflow:ellipsis">${p.email}</td><td>${p.type==='abo'?p.plan:p.amount+'€'}</td><td style="color:#555;font-size:10px">${p.date!=='—'?new Date(p.date).toLocaleDateString('fr-FR'):'—'}</td></tr>`).join('')}</table>` : '<p style="color:#444;font-size:12px">Aucun paiement</p>';
+            const debugHtml = pay.debug ? `<p style="font-size:10px;color:#444;margin-bottom:8px">DB: ${pay.debug.subsDocs} abos, ${pay.debug.donDocs} dons, ${pay.debug.premiumUsers} premium users${pay.debug.subsError ? ' | Err: '+pay.debug.subsError : ''}</p>` : '';
+            document.getElementById('payments-table').innerHTML = debugHtml + (pay.payments?.length ? `<table><tr><th>Type</th><th>Email</th><th>Détail</th><th>Date</th></tr>${pay.payments.map(p => `<tr><td><span class="badge ${p.type==='abo'?'premium':'active'}">${p.type==='abo'?'⭐':'💝'}</span></td><td style="color:#888;max-width:120px;overflow:hidden;text-overflow:ellipsis">${p.email}</td><td>${p.type==='abo'?(p.plan+(p.status?' · '+p.status:'')):p.amount+'€'}</td><td style="color:#555;font-size:10px">${p.date!=='—'?new Date(p.date).toLocaleDateString('fr-FR'):'—'}</td></tr>`).join('')}</table>` : '<p style="color:#444;font-size:12px">Aucun paiement trouvé dans les collections</p>');
 
             const data = await api('users');
             document.getElementById('user-count').textContent = '(' + data.users.length + ')';
