@@ -23,6 +23,23 @@ function getDb() {
 }
 
 const ALLOWED_ORIGIN = process.env.URL || 'https://1food.fr';
+const ADMIN_UID = process.env.ADMIN_UID || '';
+
+// Send FCM notification to admin on payment events
+async function notifyAdmin(db, title, body) {
+    if (!db || !ADMIN_UID) return;
+    try {
+        const doc = await db.collection('users').doc(ADMIN_UID).get();
+        const token = doc.data()?.fcmToken;
+        if (token) {
+            await admin.messaging().send({
+                token,
+                notification: { title, body },
+                webpush: { notification: { icon: '/assets/icons/icon-192.png', tag: 'admin-payment' }, fcm_options: { link: '/admin.html' } }
+            });
+        }
+    } catch {}
+}
 
 exports.handler = async (event) => {
     const headers = {
@@ -81,6 +98,7 @@ exports.handler = async (event) => {
                             createdAt: admin.firestore.FieldValue.serverTimestamp()
                         });
                         console.log('✅ Donation saved to Firestore');
+                        await notifyAdmin(db, '💝 Don reçu !', `${amount}€ de ${email || 'anonyme'}`);
                     }
 
                     // Save email to emails collection
@@ -112,6 +130,7 @@ exports.handler = async (event) => {
                         updatedAt: admin.firestore.FieldValue.serverTimestamp()
                     }, { merge: true });
                     console.log('✅ Subscription saved to Firestore');
+                    await notifyAdmin(db, '⭐ Nouvel abonnement !', `${meta.plan || 'annual'} — ${email || 'anonyme'}`);
                 }
 
                 // Save email
