@@ -2288,13 +2288,17 @@ body::before {
 /* ========== BARCODE READER OVERRIDES ========== */
 #barcode-reader {
     width: 100%;
-    min-height: 250px;
     border-radius: 12px;
     overflow: hidden;
 }
 
 #barcode-reader video {
     border-radius: 12px;
+    object-fit: cover;
+}
+
+#barcode-reader #qr-shaded-region {
+    border-color: rgba(255,255,255,0.5) !important;
 }
 
 #barcode-reader img[alt="Info icon"] {
