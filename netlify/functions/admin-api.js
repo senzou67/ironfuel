@@ -67,10 +67,10 @@ exports.handler = async (event) => {
                 const subsSnap = await db.collection('subscriptions').get();
                 subsSnap.forEach(doc => {
                     const d = doc.data();
-                    if (d.status === 'active' || d.status === 'paid') activeSubscriptions++;
-                    else if (d.status === 'cancelled') cancelledSubscriptions++;
+                    if (d.status === 'cancelled' || d.status === 'canceled') cancelledSubscriptions++;
+                    else activeSubscriptions++; // Count all non-cancelled as active
                 });
-            } catch {}
+            } catch (e) { console.error('Stats subs error:', e.message); }
 
             // Count donations
             let totalDonations = 0, donationAmount = 0;
@@ -132,19 +132,21 @@ exports.handler = async (event) => {
         if (action === 'payments') {
             const payments = [];
             try {
-                const subsSnap = await db.collection('subscriptions').orderBy('createdAt', 'desc').limit(50).get();
+                const subsSnap = await db.collection('subscriptions').get();
                 subsSnap.forEach(doc => {
                     const d = doc.data();
-                    payments.push({ type: 'abo', email: d.email || '—', plan: d.plan || '—', status: d.status || 'active', date: d.createdAt?._seconds ? new Date(d.createdAt._seconds * 1000).toISOString() : '—' });
+                    const ts = d.createdAt?._seconds || d.createdAt?.seconds || 0;
+                    payments.push({ type: 'abo', email: d.email || '—', plan: d.plan || '—', status: d.status || 'active', date: ts ? new Date(ts * 1000).toISOString() : '—' });
                 });
-            } catch {}
+            } catch (e) { console.error('Subscriptions error:', e.message); }
             try {
-                const donSnap = await db.collection('donations').orderBy('createdAt', 'desc').limit(50).get();
+                const donSnap = await db.collection('donations').get();
                 donSnap.forEach(doc => {
                     const d = doc.data();
-                    payments.push({ type: 'don', email: d.email || '—', amount: d.amount || 0, date: d.createdAt?._seconds ? new Date(d.createdAt._seconds * 1000).toISOString() : '—' });
+                    const ts = d.createdAt?._seconds || d.createdAt?.seconds || 0;
+                    payments.push({ type: 'don', email: d.email || '—', amount: d.amount || 0, date: ts ? new Date(ts * 1000).toISOString() : '—' });
                 });
-            } catch {}
+            } catch (e) { console.error('Donations error:', e.message); }
             payments.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
             return { statusCode: 200, headers, body: JSON.stringify({ payments }) };
         }
