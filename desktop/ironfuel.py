@@ -16,7 +16,7 @@ from PyQt6.QtCore import QUrl, Qt, QTimer
 from PyQt6.QtGui import QIcon
 
 APP_NAME = "IronFuel"
-APP_URL = "https://theironfuel.netlify.app"
+APP_URL = "https://1food.fr"
 APP_WIDTH = 420
 APP_HEIGHT = 820
 
