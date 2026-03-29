@@ -2,62 +2,104 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="robots" content="noindex, nofollow">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>OneFood Admin</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f0f0f; color: #e0e0e0; min-height: 100vh; }
-        .login { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        .login-card { background: #1a1a1a; padding: 32px; border-radius: 16px; width: 90%; max-width: 360px; }
-        .login-card h1 { font-size: 20px; margin-bottom: 16px; color: #C62828; }
-        .login-card input { width: 100%; padding: 12px; border: 1px solid #333; border-radius: 8px; background: #222; color: #fff; font-size: 14px; margin-bottom: 12px; }
-        .login-card button { width: 100%; padding: 12px; border: none; border-radius: 8px; background: #C62828; color: white; font-weight: 700; font-size: 14px; cursor: pointer; }
-        .login-card button:hover { background: #d84315; }
-        .dashboard { display: none; padding: 16px; max-width: 1200px; margin: 0 auto; }
-        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #222; }
-        .header h1 { font-size: 22px; color: #C62828; }
-        .header button { padding: 8px 16px; border: 1px solid #444; border-radius: 8px; background: transparent; color: #aaa; cursor: pointer; font-size: 12px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 24px; }
-        .stat-card { background: #1a1a1a; border-radius: 12px; padding: 16px; border: 1px solid #222; }
-        .stat-card .label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-        .stat-card .value { font-size: 28px; font-weight: 800; color: #fff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0a0a; color: #e0e0e0; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+        /* Login */
+        .login { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        .login-card { background: #1a1a1a; padding: 28px; border-radius: 16px; width: 100%; max-width: 360px; }
+        .login-card h1 { font-size: 20px; margin-bottom: 16px; color: #C62828; text-align: center; }
+        .login-card input { width: 100%; padding: 14px; border: 1px solid #333; border-radius: 10px; background: #222; color: #fff; font-size: 16px; margin-bottom: 12px; }
+        .login-card button { width: 100%; padding: 14px; border: none; border-radius: 10px; background: #C62828; color: white; font-weight: 700; font-size: 15px; cursor: pointer; }
+
+        /* Dashboard */
+        .dashboard { display: none; padding: 12px; padding-top: env(safe-area-inset-top, 12px); padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 70px); max-width: 600px; margin: 0 auto; }
+
+        /* Header */
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding: 8px 0; }
+        .header h1 { font-size: 18px; color: #C62828; }
+        .header-btns { display: flex; gap: 6px; }
+        .header-btns button { padding: 6px 12px; border: 1px solid #333; border-radius: 8px; background: transparent; color: #aaa; cursor: pointer; font-size: 11px; }
+
+        /* Stats grid — 2x2 on mobile */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+        .stat-card { background: #1a1a1a; border-radius: 12px; padding: 12px; border: 1px solid #1e1e1e; }
+        .stat-card .label { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+        .stat-card .value { font-size: 24px; font-weight: 800; }
         .stat-card .value.accent { color: #C62828; }
         .stat-card .value.green { color: #4CAF50; }
         .stat-card .value.blue { color: #1E88E5; }
         .stat-card .value.gold { color: #FFB300; }
-        .section { background: #1a1a1a; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #222; }
-        .section h2 { font-size: 15px; font-weight: 700; margin-bottom: 12px; color: #ccc; }
-        .section h2 span { font-size: 11px; color: #666; font-weight: 400; margin-left: 8px; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        th { text-align: left; padding: 8px; color: #888; border-bottom: 1px solid #222; font-weight: 600; }
-        td { padding: 8px; border-bottom: 1px solid #1a1a1a; }
-        tr:hover td { background: #222; }
-        .badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; }
-        .badge.premium { background: #C6282830; color: #FF8A50; }
-        .badge.free { background: #33333380; color: #888; }
-        .badge.active { background: #4CAF5030; color: #81C784; }
-        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .action-card { background: #222; border-radius: 10px; padding: 14px; cursor: pointer; border: 1px solid #333; transition: border-color 0.2s; }
-        .action-card:hover { border-color: #C62828; }
-        .action-card h3 { font-size: 13px; margin-bottom: 4px; }
-        .action-card p { font-size: 11px; color: #888; }
-        .broadcast-form { display: none; margin-top: 12px; }
-        .broadcast-form input, .broadcast-form textarea { width: 100%; padding: 10px; border: 1px solid #333; border-radius: 8px; background: #222; color: #fff; font-size: 13px; margin-bottom: 8px; font-family: inherit; }
-        .broadcast-form textarea { min-height: 60px; resize: vertical; }
-        .broadcast-form button { padding: 10px 20px; border: none; border-radius: 8px; background: #C62828; color: white; font-weight: 700; cursor: pointer; font-size: 13px; }
-        .error-list { max-height: 300px; overflow-y: auto; }
-        .error-item { padding: 8px; border-bottom: 1px solid #222; font-size: 11px; font-family: monospace; }
-        .error-item .msg { color: #ef5350; }
-        .error-item .meta { color: #666; margin-top: 2px; }
-        .loading { text-align: center; padding: 40px; color: #666; }
-        @media (max-width: 600px) { .stats-grid { grid-template-columns: 1fr 1fr; } .actions { grid-template-columns: 1fr; } }
+
+        /* Sections */
+        .section { background: #1a1a1a; border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid #1e1e1e; }
+        .section h2 { font-size: 14px; font-weight: 700; margin-bottom: 10px; color: #ccc; display: flex; align-items: center; gap: 6px; }
+        .section h2 span { font-size: 10px; color: #555; font-weight: 400; }
+
+        /* Actions — scrollable row on mobile */
+        .actions-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+        .actions-scroll::-webkit-scrollbar { display: none; }
+        .action-chip { flex-shrink: 0; background: #222; border-radius: 10px; padding: 10px 14px; cursor: pointer; border: 1px solid #2a2a2a; text-align: center; min-width: 90px; }
+        .action-chip:active { background: #333; }
+        .action-chip .icon { font-size: 20px; display: block; margin-bottom: 4px; }
+        .action-chip .text { font-size: 10px; color: #aaa; font-weight: 600; }
+
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        th { text-align: left; padding: 6px; color: #555; border-bottom: 1px solid #222; font-weight: 600; font-size: 10px; text-transform: uppercase; }
+        td { padding: 8px 6px; border-bottom: 1px solid #151515; }
+        .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+        /* Badges */
+        .badge { padding: 2px 7px; border-radius: 8px; font-size: 9px; font-weight: 700; white-space: nowrap; }
+        .badge.premium { background: #C6282825; color: #EF5350; }
+        .badge.free { background: #22222280; color: #666; }
+        .badge.active { background: #4CAF5025; color: #81C784; }
+
+        /* Broadcast form */
+        .broadcast-form { display: none; margin-top: 10px; }
+        .broadcast-form input, .broadcast-form textarea { width: 100%; padding: 10px; border: 1px solid #333; border-radius: 8px; background: #222; color: #fff; font-size: 14px; margin-bottom: 8px; font-family: inherit; }
+        .broadcast-form textarea { min-height: 50px; resize: vertical; }
+
+        /* Notes */
+        #admin-notes { width: 100%; min-height: 120px; padding: 12px; border: 1px solid #2a2a2a; border-radius: 10px; background: #151515; color: #ddd; font-size: 13px; font-family: inherit; resize: vertical; line-height: 1.5; }
+
+        /* Buttons */
+        .btn-sm { padding: 8px 14px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px; }
+        .btn-red { background: #C62828; color: white; }
+        .btn-green { background: #4CAF50; color: white; }
+        .btn-outline { background: transparent; border: 1px solid #333; color: #aaa; }
+
+        /* Test tabs */
+        .test-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+        .test-tab { flex: 1; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px; text-align: center; border: 2px solid #333; background: transparent; color: #666; }
+        .test-tab.active-premium { border-color: #4CAF50; background: #4CAF5015; color: #4CAF50; }
+        .test-tab.active-free { border-color: #EF5350; background: #EF535015; color: #EF5350; }
+
+        /* Loading */
+        .loading { text-align: center; padding: 30px; color: #444; font-size: 12px; }
+
+        /* Bottom nav */
+        .admin-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #111; border-top: 1px solid #222; display: flex; padding: 6px 0; padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); z-index: 100; }
+        .admin-nav button { flex: 1; background: none; border: none; color: #555; cursor: pointer; padding: 6px 0; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 9px; font-weight: 600; }
+        .admin-nav button.active { color: #C62828; }
+        .admin-nav button .nav-icon { font-size: 18px; }
+
+        /* Tab panels */
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
     </style>
 </head>
 <body>
     <div class="login" id="login">
         <div class="login-card">
-            <h1>OneFood Admin</h1>
+            <h1>🔴 OneFood Admin</h1>
             <input type="password" id="pwd" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')login()">
             <button onclick="login()">Connexion</button>
         </div>
@@ -65,101 +107,104 @@
 
     <div class="dashboard" id="dashboard">
         <div class="header">
-            <h1>OneFood Admin</h1>
-            <div>
-                <button onclick="refresh()">Rafraîchir</button>
-                <button onclick="logout()">Déconnexion</button>
+            <h1>🔴 Admin</h1>
+            <div class="header-btns">
+                <button onclick="refresh()">🔄</button>
+                <button onclick="logout()">Déco</button>
             </div>
         </div>
 
-        <div class="stats-grid" id="stats">
-            <div class="loading">Chargement...</div>
-        </div>
+        <!-- TAB: Dashboard -->
+        <div class="tab-panel active" id="panel-dashboard">
+            <div class="stats-grid" id="stats"><div class="loading">Chargement...</div></div>
 
-        <div class="section">
-            <h2>Actions rapides</h2>
-            <div class="actions">
-                <div class="action-card" onclick="toggleBroadcast()">
-                    <h3>📢 Notification broadcast</h3>
-                    <p>Envoyer une notif push à tous les utilisateurs</p>
+            <div class="section">
+                <h2>⚡ Actions</h2>
+                <div class="actions-scroll">
+                    <div class="action-chip" onclick="toggleBroadcast()"><span class="icon">📢</span><span class="text">Broadcast</span></div>
+                    <div class="action-chip" onclick="window.open('https://app.netlify.com','_blank')"><span class="icon">🚀</span><span class="text">Deploy</span></div>
+                    <div class="action-chip" onclick="window.open('https://dashboard.stripe.com','_blank')"><span class="icon">💳</span><span class="text">Stripe</span></div>
+                    <div class="action-chip" onclick="window.open('https://sentry.io','_blank')"><span class="icon">🐛</span><span class="text">Sentry</span></div>
+                    <div class="action-chip" onclick="window.open('https://console.firebase.google.com/project/ironfuel-422fe','_blank')"><span class="icon">🔥</span><span class="text">Firebase</span></div>
+                    <div class="action-chip" onclick="window.open('https://search.google.com/search-console','_blank')"><span class="icon">🔍</span><span class="text">SEO</span></div>
+                    <div class="action-chip" onclick="window.open('mailto:contact@1food.fr','_blank')"><span class="icon">📧</span><span class="text">Support</span></div>
                 </div>
-                <div class="action-card" onclick="window.open('https://app.netlify.com','_blank')">
-                    <h3>🚀 Déployer une MAJ</h3>
-                    <p>Ouvrir Netlify pour trigger un deploy</p>
+                <div class="broadcast-form" id="broadcast-form">
+                    <input type="text" id="bc-title" placeholder="Titre (ex: OneFood 🔥)">
+                    <textarea id="bc-body" placeholder="Message..."></textarea>
+                    <div style="display:flex;gap:8px;align-items:center">
+                        <button class="btn-sm btn-red" onclick="sendBroadcast()">Envoyer à tous</button>
+                        <span id="bc-result" style="font-size:11px;color:#666"></span>
+                    </div>
                 </div>
-                <div class="action-card" onclick="window.open('https://dashboard.stripe.com','_blank')">
-                    <h3>💳 Dashboard Stripe</h3>
-                    <p>Paiements, abonnements, revenus</p>
-                </div>
-                <div class="action-card" onclick="window.open('https://sentry.io','_blank')">
-                    <h3>🐛 Sentry Errors</h3>
-                    <p>Erreurs en production</p>
-                </div>
-                <div class="action-card" onclick="window.open('https://console.firebase.google.com/project/ironfuel-422fe','_blank')">
-                    <h3>🔥 Firebase Console</h3>
-                    <p>Auth, Firestore, FCM</p>
-                </div>
-                <div class="action-card" onclick="window.open('https://search.google.com/search-console','_blank')">
-                    <h3>🔍 Search Console</h3>
-                    <p>SEO, indexation, performance</p>
-                </div>
-                <div class="action-card" onclick="window.open('mailto:contact@1food.fr','_blank')">
-                    <h3>📧 Mail Support</h3>
-                    <p>contact@1food.fr</p>
-                </div>
-            </div>
-            <div class="broadcast-form" id="broadcast-form">
-                <h3 style="margin-bottom:8px;font-size:13px">Envoyer une notification</h3>
-                <input type="text" id="bc-title" placeholder="Titre (ex: OneFood 🔥)">
-                <textarea id="bc-body" placeholder="Message (ex: Nouvelle mise à jour disponible !)"></textarea>
-                <button onclick="sendBroadcast()">Envoyer à tous</button>
-                <span id="bc-result" style="margin-left:8px;font-size:12px;color:#888"></span>
             </div>
         </div>
 
-        <div class="section">
-            <h2>Test App <span style="font-size:11px;color:#666;font-weight:400">(sans login, données locales à l'iframe)</span></h2>
-            <div style="display:flex;gap:8px;margin-bottom:12px">
-                <button onclick="showTestTab('premium')" id="tab-premium" style="flex:1;padding:12px;border:2px solid #4CAF50;border-radius:8px;background:#4CAF5020;color:#4CAF50;font-weight:700;cursor:pointer;font-size:13px">⭐ Premium — tout débloqué</button>
-                <button onclick="showTestTab('free')" id="tab-free" style="flex:1;padding:12px;border:2px solid #444;border-radius:8px;background:transparent;color:#888;font-weight:700;cursor:pointer;font-size:13px">🔒 Gratuit — features verrouillées</button>
+        <!-- TAB: Users -->
+        <div class="tab-panel" id="panel-users">
+            <div class="section">
+                <h2>👥 Utilisateurs <span id="user-count"></span></h2>
+                <div class="table-scroll" id="users-table"><div class="loading">Chargement...</div></div>
             </div>
-            <div style="display:flex;gap:8px;margin-bottom:8px">
-                <button onclick="reloadTest()" style="padding:6px 14px;border:1px solid #444;border-radius:6px;background:transparent;color:#aaa;cursor:pointer;font-size:11px">🔄 Rafraîchir</button>
-                <button onclick="window.open('/?admin_mode=premium','_blank')" style="padding:6px 14px;border:1px solid #444;border-radius:6px;background:transparent;color:#aaa;cursor:pointer;font-size:11px">↗ Ouvrir en plein écran</button>
-            </div>
-            <div style="background:#111;border-radius:12px;overflow:hidden;border:1px solid #333;max-width:420px;margin:0 auto">
-                <iframe id="test-frame" src="/?admin_mode=premium" style="width:100%;height:750px;border:none;border-radius:12px"></iframe>
+            <div class="section">
+                <h2>💰 Paiements</h2>
+                <div class="table-scroll" id="payments-table"><div class="loading">Chargement...</div></div>
             </div>
         </div>
 
-        <div class="section">
-            <h2>Notes & MAJ</h2>
-            <textarea id="admin-notes" placeholder="Écris tes bugs, demandes d'évolution, notes de MAJ ici..." style="width:100%;min-height:150px;padding:12px;border:1px solid #333;border-radius:8px;background:#222;color:#fff;font-size:13px;font-family:inherit;resize:vertical;margin-bottom:8px"></textarea>
-            <div style="display:flex;gap:8px">
-                <button onclick="saveNotes()" style="padding:8px 16px;border:none;border-radius:8px;background:#4CAF50;color:white;font-weight:700;cursor:pointer;font-size:13px">💾 Sauvegarder</button>
-                <span id="notes-status" style="font-size:12px;color:#666;align-self:center"></span>
+        <!-- TAB: Test -->
+        <div class="tab-panel" id="panel-test">
+            <div class="section">
+                <div class="test-tabs">
+                    <button class="test-tab active-premium" onclick="showTestTab('premium')" id="tab-premium">⭐ Premium</button>
+                    <button class="test-tab" onclick="showTestTab('free')" id="tab-free">🔒 Gratuit</button>
+                </div>
+                <div style="display:flex;gap:6px;margin-bottom:8px">
+                    <button class="btn-sm btn-outline" onclick="reloadTest()">🔄 Refresh</button>
+                    <button class="btn-sm btn-outline" onclick="window.open('/?admin_mode=premium','_blank')">↗ Plein écran</button>
+                </div>
+                <div style="background:#000;border-radius:12px;overflow:hidden;border:1px solid #222">
+                    <iframe id="test-frame" src="/?admin_mode=premium" style="width:100%;height:600px;border:none"></iframe>
+                </div>
             </div>
         </div>
 
-        <div class="section">
-            <h2>Paiements & Dons</h2>
-            <div id="payments-table" class="loading">Chargement...</div>
+        <!-- TAB: Notes -->
+        <div class="tab-panel" id="panel-notes">
+            <div class="section">
+                <h2>📝 Notes & MAJ</h2>
+                <textarea id="admin-notes" placeholder="Bugs, évolutions, notes de MAJ..."></textarea>
+                <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+                    <button class="btn-sm btn-green" onclick="saveNotes()">💾 Sauvegarder</button>
+                    <span id="notes-status" style="font-size:11px;color:#555"></span>
+                </div>
+            </div>
         </div>
 
-        <div class="section">
-            <h2>Utilisateurs <span id="user-count"></span></h2>
-            <div id="users-table" class="loading">Chargement...</div>
-        </div>
+        <!-- Bottom nav -->
+        <nav class="admin-nav">
+            <button class="active" onclick="switchTab('dashboard')" id="nav-dashboard"><span class="nav-icon">📊</span>Dashboard</button>
+            <button onclick="switchTab('users')" id="nav-users"><span class="nav-icon">👥</span>Users</button>
+            <button onclick="switchTab('test')" id="nav-test"><span class="nav-icon">🧪</span>Test</button>
+            <button onclick="switchTab('notes')" id="nav-notes"><span class="nav-icon">📝</span>Notes</button>
+        </nav>
     </div>
 
     <script>
         let KEY = '';
         const API = '/.netlify/functions/admin-api';
 
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.admin-nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById('panel-' + tab).classList.add('active');
+            document.getElementById('nav-' + tab).classList.add('active');
+        }
+
         function login() {
             KEY = document.getElementById('pwd').value;
             fetch(API + '?action=stats', { headers: { 'X-Admin-Key': KEY } })
-                .then(r => { if (!r.ok) throw new Error('Bad password'); return r.json(); })
+                .then(r => { if (!r.ok) throw new Error(); return r.json(); })
                 .then(() => {
                     sessionStorage.setItem('admin_key', KEY);
                     document.getElementById('login').style.display = 'none';
@@ -181,69 +226,31 @@
         }
 
         async function refresh() {
-            // Stats
             const stats = await api('stats');
             document.getElementById('stats').innerHTML = `
-                <div class="stat-card"><div class="label">Utilisateurs</div><div class="value accent">${stats.users.total}</div></div>
+                <div class="stat-card"><div class="label">Users</div><div class="value accent">${stats.users.total}</div></div>
                 <div class="stat-card"><div class="label">Premium</div><div class="value green">${stats.users.premium}</div></div>
-                <div class="stat-card"><div class="label">Actifs (7j)</div><div class="value blue">${stats.users.activeLastWeek}</div></div>
-                <div class="stat-card"><div class="label">Notifs activées</div><div class="value">${stats.users.withFcm}</div></div>
-                <div class="stat-card"><div class="label">Abos actifs</div><div class="value green">${stats.subscriptions.active}</div></div>
-                <div class="stat-card"><div class="label">Abos résiliés</div><div class="value">${stats.subscriptions.cancelled}</div></div>
+                <div class="stat-card"><div class="label">Actifs 7j</div><div class="value blue">${stats.users.activeLastWeek}</div></div>
+                <div class="stat-card"><div class="label">Notifs</div><div class="value">${stats.users.withFcm}</div></div>
+                <div class="stat-card"><div class="label">Abos</div><div class="value green">${stats.subscriptions.active}</div></div>
+                <div class="stat-card"><div class="label">Résiliés</div><div class="value">${stats.subscriptions.cancelled}</div></div>
                 <div class="stat-card"><div class="label">Dons</div><div class="value gold">${stats.donations.total}€</div></div>
                 <div class="stat-card"><div class="label">Nb dons</div><div class="value">${stats.donations.count}</div></div>
             `;
 
-            // Notes
             loadNotes();
 
-            // Payments
             const pay = await api('payments');
-            if (pay.payments && pay.payments.length > 0) {
-                document.getElementById('payments-table').innerHTML = `
-                    <table>
-                        <tr><th>Type</th><th>Email</th><th>Détail</th><th>Date</th></tr>
-                        ${pay.payments.map(p => `
-                            <tr>
-                                <td><span class="badge ${p.type === 'abo' ? 'premium' : 'active'}">${p.type === 'abo' ? '⭐ Abo' : '💝 Don'}</span></td>
-                                <td style="color:#888">${p.email}</td>
-                                <td>${p.type === 'abo' ? p.plan : p.amount + '€'}</td>
-                                <td style="color:#666;font-size:11px">${p.date !== '—' ? new Date(p.date).toLocaleDateString('fr-FR') : '—'}</td>
-                            </tr>
-                        `).join('')}
-                    </table>
-                `;
-            } else {
-                document.getElementById('payments-table').innerHTML = '<p style="color:#666;font-size:13px">Aucun paiement</p>';
-            }
+            document.getElementById('payments-table').innerHTML = pay.payments?.length ? `<table><tr><th>Type</th><th>Email</th><th>Détail</th><th>Date</th></tr>${pay.payments.map(p => `<tr><td><span class="badge ${p.type==='abo'?'premium':'active'}">${p.type==='abo'?'⭐':'💝'}</span></td><td style="color:#888;max-width:120px;overflow:hidden;text-overflow:ellipsis">${p.email}</td><td>${p.type==='abo'?p.plan:p.amount+'€'}</td><td style="color:#555;font-size:10px">${p.date!=='—'?new Date(p.date).toLocaleDateString('fr-FR'):'—'}</td></tr>`).join('')}</table>` : '<p style="color:#444;font-size:12px">Aucun paiement</p>';
 
-            // Users
             const data = await api('users');
             document.getElementById('user-count').textContent = '(' + data.users.length + ')';
-            if (data.users.length === 0) {
-                document.getElementById('users-table').innerHTML = '<p style="color:#666;font-size:13px">Aucun utilisateur</p>';
-                return;
-            }
-            document.getElementById('users-table').innerHTML = `
-                <table>
-                    <tr><th>Nom</th><th>Email</th><th>Statut</th><th>Plan</th><th>Notifs</th><th>Dernière activité</th></tr>
-                    ${data.users.map(u => `
-                        <tr>
-                            <td>${u.name}</td>
-                            <td style="color:#888">${u.email}</td>
-                            <td><span class="badge ${u.paid ? 'premium' : 'free'}">${u.paid ? 'Premium' : 'Free'}</span></td>
-                            <td>${u.plan}</td>
-                            <td>${u.hasFcm ? '<span class="badge active">ON</span>' : '—'}</td>
-                            <td style="color:#666;font-size:11px">${u.updatedAt !== '—' ? new Date(u.updatedAt).toLocaleDateString('fr-FR') : '—'}</td>
-                        </tr>
-                    `).join('')}
-                </table>
-            `;
+            document.getElementById('users-table').innerHTML = data.users.length ? `<table><tr><th>Nom</th><th>Email</th><th>Statut</th><th>Actif</th></tr>${data.users.map(u => `<tr><td style="font-weight:600;font-size:12px">${u.name}</td><td style="color:#666;max-width:100px;overflow:hidden;text-overflow:ellipsis;font-size:11px">${u.email}</td><td><span class="badge ${u.paid?'premium':'free'}">${u.paid?'PRO':'Free'}</span></td><td style="color:#555;font-size:10px">${u.updatedAt!=='—'?new Date(u.updatedAt).toLocaleDateString('fr-FR'):'—'}</td></tr>`).join('')}</table>` : '<p style="color:#444;font-size:12px">Aucun utilisateur</p>';
         }
 
         function toggleBroadcast() {
             const f = document.getElementById('broadcast-form');
-            f.style.display = f.style.display === 'none' ? 'block' : 'none';
+            f.style.display = f.style.display === 'none' || !f.style.display ? 'block' : 'none';
         }
 
         async function sendBroadcast() {
@@ -252,7 +259,7 @@
             if (!title || !body) return alert('Remplis le titre et le message');
             if (!confirm('Envoyer à TOUS les utilisateurs ?')) return;
             const res = await api('broadcast', { method: 'POST', body: JSON.stringify({ title, body }) });
-            document.getElementById('bc-result').textContent = `Envoyé: ${res.sent}, Échoué: ${res.failed}`;
+            document.getElementById('bc-result').textContent = `✓ ${res.sent} envoyé(s)`;
         }
 
         async function loadNotes() {
@@ -264,27 +271,18 @@
         async function saveNotes() {
             const notes = document.getElementById('admin-notes')?.value || '';
             await api('save-notes', { method: 'POST', body: JSON.stringify({ notes }) });
-            document.getElementById('notes-status').textContent = 'Sauvegardé ✓';
+            document.getElementById('notes-status').textContent = '✓ Sauvegardé';
             setTimeout(() => { document.getElementById('notes-status').textContent = ''; }, 2000);
         }
 
-        function reloadTest() {
-            const frame = document.getElementById('test-frame');
-            frame.src = frame.src;
-        }
+        function reloadTest() { document.getElementById('test-frame').src = document.getElementById('test-frame').src; }
 
         function showTestTab(mode) {
-            const frame = document.getElementById('test-frame');
-            frame.src = '/?admin_mode=' + mode;
-            document.getElementById('tab-premium').style.borderColor = mode === 'premium' ? '#4CAF50' : '#444';
-            document.getElementById('tab-premium').style.background = mode === 'premium' ? '#4CAF5020' : 'transparent';
-            document.getElementById('tab-premium').style.color = mode === 'premium' ? '#4CAF50' : '#888';
-            document.getElementById('tab-free').style.borderColor = mode === 'free' ? '#FF5252' : '#444';
-            document.getElementById('tab-free').style.background = mode === 'free' ? '#FF525220' : 'transparent';
-            document.getElementById('tab-free').style.color = mode === 'free' ? '#FF5252' : '#888';
+            document.getElementById('test-frame').src = '/?admin_mode=' + mode;
+            document.getElementById('tab-premium').className = 'test-tab' + (mode === 'premium' ? ' active-premium' : '');
+            document.getElementById('tab-free').className = 'test-tab' + (mode === 'free' ? ' active-free' : '');
         }
 
-        // Auto-login if session key exists
         window.onload = () => {
             const saved = sessionStorage.getItem('admin_key');
             if (saved) { KEY = saved; document.getElementById('pwd').value = saved; login(); }
