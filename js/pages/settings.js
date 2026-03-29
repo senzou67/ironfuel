@@ -196,9 +196,9 @@ const SettingsPage = {
                         <span>OneFood</span>
                         <span style="color:var(--text-secondary)">Nutrition & Musculation</span>
                     </div>
-                    <button class="settings-item" onclick="window.open('mailto:iron.fuel@outlook.com')">
+                    <button class="settings-item" onclick="window.open('mailto:contact@1food.fr')">
                         <span>📧 Contact</span>
-                        <span style="color:var(--text-secondary);font-size:12px">iron.fuel@outlook.com</span>
+                        <span style="color:var(--text-secondary);font-size:12px">contact@1food.fr</span>
                     </button>
                 </div>
 
@@ -537,10 +537,10 @@ const SettingsPage = {
             if (data.url) {
                 window.location.href = data.url;
             } else {
-                App.showToast('Impossible de charger le portail. Contacte iron.fuel@outlook.com');
+                App.showToast('Impossible de charger le portail. Contacte contact@1food.fr');
             }
         } catch (err) {
-            App.showToast('Erreur réseau. Réessaie ou contacte iron.fuel@outlook.com');
+            App.showToast('Erreur réseau. Réessaie ou contacte contact@1food.fr');
         }
     },
 
@@ -599,7 +599,7 @@ const SettingsPage = {
             </div>
             <div style="display:flex;flex-direction:column;gap:8px">
                 <button class="btn btn-outline" onclick="window.open('https://billing.stripe.com/p/login/dRmcMXcr4bNCaKWci65c400','_blank');Modal.close()" style="width:100%;font-size:13px">💳 Portail Stripe (factures, résiliation)</button>
-                <button class="btn btn-outline" onclick="window.open('mailto:iron.fuel@outlook.com?subject=Abonnement%20OneFood','_blank');Modal.close()" style="width:100%;font-size:13px">📧 Contacter le support</button>
+                <button class="btn btn-outline" onclick="window.open('mailto:contact@1food.fr?subject=Abonnement%20OneFood','_blank');Modal.close()" style="width:100%;font-size:13px">📧 Contacter le support</button>
             </div>
         `);
     },

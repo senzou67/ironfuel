@@ -619,7 +619,7 @@ const TrialService = {
                 });
                 const data = await res.json();
                 if (!data.paid && !data.subscription) {
-                    App.showToast('Vérification du paiement échouée. Contacte iron.fuel@outlook.com');
+                    App.showToast('Vérification du paiement échouée. Contacte contact@1food.fr');
                     return;
                 }
             } catch (err) {
