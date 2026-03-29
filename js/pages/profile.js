@@ -178,10 +178,62 @@ const ProfilePage = {
             activity: document.getElementById('p-activity').value,
             goal: document.getElementById('p-goal').value
         };
-        Storage.setProfile(profile);
-        Modal.close();
-        App.showToast('Profil mis à jour');
-        this.render();
+
+        // Check if nutrition-impacting fields changed
+        const old = Storage.getProfile();
+        const changed = old.weight !== profile.weight || old.height !== profile.height || old.activity !== profile.activity || old.goal !== profile.goal || old.sex !== profile.sex || old.age !== profile.age;
+
+        Storage._set('profile', profile);
+        Storage._triggerSync();
+
+        if (changed) {
+            const auto = NutritionService.calculateDailyNeeds(profile);
+            const goals = Storage.getGoals();
+            Modal.close();
+            // Show comparison and ask user
+            Modal.show(`
+                <div class="modal-title">Mettre à jour les objectifs ?</div>
+                <p style="color:var(--text-secondary);font-size:13px;margin-bottom:12px">
+                    Ton profil a changé. Voici les nouveaux objectifs recommandés :
+                </p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+                    <div style="text-align:center">
+                        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Actuels</div>
+                        <div style="font-size:22px;font-weight:800">${goals.calories}</div>
+                        <div style="font-size:11px;color:var(--text-secondary)">kcal</div>
+                        <div style="font-size:11px;margin-top:4px">P ${goals.protein}g · G ${goals.carbs}g · L ${goals.fat}g</div>
+                    </div>
+                    <div style="text-align:center;background:var(--primary-light);border-radius:10px;padding:8px">
+                        <div style="font-size:11px;color:var(--primary);font-weight:600;margin-bottom:4px">Recommandés</div>
+                        <div style="font-size:22px;font-weight:800;color:var(--primary)">${auto.calories}</div>
+                        <div style="font-size:11px;color:var(--text-secondary)">kcal</div>
+                        <div style="font-size:11px;margin-top:4px">P ${auto.protein}g · G ${auto.carbs}g · L ${auto.fat}g</div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px">
+                    <button class="btn btn-outline" onclick="Modal.close();ProfilePage.render()" style="flex:1;padding:12px;font-size:13px">Garder les actuels</button>
+                    <button class="btn btn-primary" onclick="ProfilePage._applyAutoGoals();Modal.close();ProfilePage.render()" style="flex:1;padding:12px;font-size:13px">Mettre à jour</button>
+                </div>
+            `);
+        } else {
+            Modal.close();
+            App.showToast('Profil mis à jour');
+            this.render();
+        }
+    },
+
+    _applyAutoGoals() {
+        const profile = Storage.getProfile();
+        const auto = NutritionService.calculateDailyNeeds(profile);
+        const goals = Storage.getGoals();
+        goals.calories = auto.calories;
+        goals.protein = auto.protein;
+        goals.carbs = auto.carbs;
+        goals.fat = auto.fat;
+        goals.fiber = auto.fiber || 25;
+        goals.custom = false;
+        Storage.setGoals(goals);
+        App.showToast('Objectifs mis à jour ! 🎯');
     },
 
     editGoals() {
