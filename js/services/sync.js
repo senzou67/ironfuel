@@ -303,6 +303,13 @@ const SyncService = {
             }
 
             this._log('loadAll COMPLETE: ' + restored + ' keys + ' + logCount + ' logs');
+
+            // Re-apply theme after cloud restore (prevents theme reset)
+            const theme = Storage.getTheme();
+            if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+            else if (theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+            else document.documentElement.removeAttribute('data-theme');
+
             return restored > 0;
         } catch (e) {
             this._log('loadAll FAILED: ' + e.message, true);

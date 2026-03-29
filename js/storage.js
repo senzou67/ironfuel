@@ -281,6 +281,7 @@ const Storage = {
 
     setSettings(settings) {
         this._set('settings', settings);
+        this._triggerSync();
     },
 
     getApiKey() {
