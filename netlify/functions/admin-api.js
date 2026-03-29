@@ -118,6 +118,37 @@ exports.handler = async (event) => {
             return { statusCode: 200, headers, body: JSON.stringify({ users }) };
         }
 
+        if (action === 'notes') {
+            const doc = await db.collection('admin').doc('notes').get();
+            return { statusCode: 200, headers, body: JSON.stringify({ notes: doc.exists ? doc.data().content || '' : '' }) };
+        }
+
+        if (action === 'save-notes' && event.httpMethod === 'POST') {
+            const { notes } = JSON.parse(event.body || '{}');
+            await db.collection('admin').doc('notes').set({ content: notes || '', updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+            return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
+        }
+
+        if (action === 'payments') {
+            const payments = [];
+            try {
+                const subsSnap = await db.collection('subscriptions').orderBy('createdAt', 'desc').limit(50).get();
+                subsSnap.forEach(doc => {
+                    const d = doc.data();
+                    payments.push({ type: 'abo', email: d.email || '—', plan: d.plan || '—', status: d.status || 'active', date: d.createdAt?._seconds ? new Date(d.createdAt._seconds * 1000).toISOString() : '—' });
+                });
+            } catch {}
+            try {
+                const donSnap = await db.collection('donations').orderBy('createdAt', 'desc').limit(50).get();
+                donSnap.forEach(doc => {
+                    const d = doc.data();
+                    payments.push({ type: 'don', email: d.email || '—', amount: d.amount || 0, date: d.createdAt?._seconds ? new Date(d.createdAt._seconds * 1000).toISOString() : '—' });
+                });
+            } catch {}
+            payments.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+            return { statusCode: 200, headers, body: JSON.stringify({ payments }) };
+        }
+
         if (action === 'broadcast' && event.httpMethod === 'POST') {
             const { title, body: msgBody } = JSON.parse(event.body || '{}');
             if (!title || !msgBody) return { statusCode: 400, headers, body: JSON.stringify({ error: 'title and body required' }) };

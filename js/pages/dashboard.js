@@ -409,8 +409,8 @@ const DashboardPage = {
             // Show manual instructions
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
             const msg = isIOS
-                ? 'Appuie sur le bouton Partager (📤) puis "Sur l\'écran d\'accueil"'
-                : 'Appuie sur les 3 points (⋮) en haut puis "Installer l\'application"';
+                ? '1. Appuie sur le bouton Partager (📤) en haut à droite<br>2. Défile et appuie sur <b>"Sur l\'écran d\'accueil"</b>'
+                : 'Appuie sur les 3 points (⋮) en haut à droite puis <b>"Installer l\'application"</b>';
             Modal.show(`
                 <div style="text-align:center">
                     <div style="font-size:48px;margin-bottom:12px">📲</div>
