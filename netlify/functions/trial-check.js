@@ -16,7 +16,7 @@ function hashIP(ip) {
     return 'ip_' + crypto.createHash('sha256').update(ip + (process.env.IP_HASH_SALT || 'onefood')).digest('hex').substring(0, 16);
 }
 
-const ALLOWED_ORIGIN = process.env.URL || 'https://theonefood.netlify.app';
+const ALLOWED_ORIGIN = process.env.URL || 'https://1food.fr';
 
 exports.handler = async (event, context) => {
     const headers = {

@@ -3,7 +3,7 @@ const STRIPE_KEY = process.env.STRIPE_SECRET_KEY;
 if (!STRIPE_KEY) console.error('STRIPE_SECRET_KEY is not set');
 const stripe = STRIPE_KEY ? require('stripe')(STRIPE_KEY) : null;
 
-const ALLOWED_ORIGIN = process.env.URL || 'https://theonefood.netlify.app';
+const ALLOWED_ORIGIN = process.env.URL || 'https://1food.fr';
 
 exports.handler = async (event) => {
     const headers = {
@@ -25,7 +25,7 @@ exports.handler = async (event) => {
             return { statusCode: 500, headers, body: JSON.stringify({ error: 'Stripe not configured' }) };
         }
         const { userId, email, skipTrial, plan, mode, amount, message } = JSON.parse(event.body || '{}');
-        const siteUrl = process.env.URL || 'https://theonefood.netlify.app';
+        const siteUrl = process.env.URL || 'https://1food.fr';
 
         // === DONATION (one-time payment) ===
         if (mode === 'donation') {

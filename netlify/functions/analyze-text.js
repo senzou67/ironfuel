@@ -1,5 +1,5 @@
 const { enrichFoods } = require('./nutrition-lookup');
-const ALLOWED_ORIGIN = process.env.URL || 'https://theonefood.netlify.app';
+const ALLOWED_ORIGIN = process.env.URL || 'https://1food.fr';
 const admin = (() => {
     try {
         const a = require('firebase-admin');

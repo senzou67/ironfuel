@@ -22,8 +22,8 @@ if (FCM_CONFIG.messagingSenderId && FCM_CONFIG.appId) {
     console.log('[SW] FCM not configured — set messagingSenderId & appId in sw.js');
 }
 
-const CACHE_NAME = 'onefood-v111';
-const SW_VERSION = 111;
+const CACHE_NAME = 'onefood-v112';
+const SW_VERSION = 112;
 const ASSETS = [
     '/',
     '/index.html',
