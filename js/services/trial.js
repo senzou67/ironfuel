@@ -7,7 +7,7 @@ const TrialService = {
     PRICE_ANNUAL: '14,99€',
     PRICE_MONTHLY: '2,99€',
     _serverChecked: false,
-    _premiumVerified: false,   // true once async checks finish
+    _premiumVerified: (() => { try { return !!new URLSearchParams(window.location.search).get('admin_mode'); } catch { return false; } })(),
     _premiumPromise: null,     // resolves when all premium checks done
 
     // === PREMIUM FEATURES (locked after trial for free users) ===
@@ -220,7 +220,14 @@ const TrialService = {
         Storage._set('trial', data);
     },
 
+    // Admin mode override via URL param (?admin_mode=premium|free)
+    _adminMode: (() => {
+        try { return new URLSearchParams(window.location.search).get('admin_mode'); } catch { return null; }
+    })(),
+
     isPaid() {
+        if (this._adminMode === 'premium') return true;
+        if (this._adminMode === 'free') return false;
         const data = this._getData();
         if (!data.paid) return false;
         if (!data.paidDate) return true;
@@ -272,6 +279,8 @@ const TrialService = {
     },
 
     isTrialActive() {
+        if (this._adminMode === 'premium') return true;
+        if (this._adminMode === 'free') return false;
         return this.daysLeft() > 0;
     },
 
