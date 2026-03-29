@@ -135,8 +135,13 @@ const App = {
         Navbar.init();
 
         // Wait for Firebase auth state, then route
+        const adminMode = new URLSearchParams(window.location.search).get('admin_mode');
         AuthService.waitForAuth().then(async () => {
-            if (!AuthService.isLoggedIn()) {
+            if (adminMode) {
+                // Admin test mode — skip login, go straight to app
+                this._dismissSplash();
+                this._renderPage('dashboard', {}, false);
+            } else if (!AuthService.isLoggedIn()) {
                 // Not logged in → show login screen
                 this._dismissSplash();
                 AuthService.showLoginScreen();
