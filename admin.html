@@ -114,6 +114,18 @@
         </div>
 
         <div class="section">
+            <h2>Test App</h2>
+            <div style="display:flex;gap:8px;margin-bottom:12px">
+                <button class="test-tab active" onclick="showTestTab('premium')" id="tab-premium" style="flex:1;padding:10px;border:2px solid #4CAF50;border-radius:8px;background:#4CAF5020;color:#4CAF50;font-weight:700;cursor:pointer;font-size:13px">⭐ Mode Premium</button>
+                <button class="test-tab" onclick="showTestTab('free')" id="tab-free" style="flex:1;padding:10px;border:2px solid #888;border-radius:8px;background:transparent;color:#888;font-weight:700;cursor:pointer;font-size:13px">🔒 Mode Gratuit</button>
+            </div>
+            <div style="background:#111;border-radius:12px;overflow:hidden;border:1px solid #333">
+                <iframe id="test-frame" src="/?admin_mode=premium" style="width:100%;height:700px;border:none;border-radius:12px"></iframe>
+            </div>
+            <p style="font-size:11px;color:#666;margin-top:8px;text-align:center">L'app tourne dans un iframe avec simulation premium/gratuit</p>
+        </div>
+
+        <div class="section">
             <h2>Utilisateurs <span id="user-count"></span></h2>
             <div id="users-table" class="loading">Chargement...</div>
         </div>
@@ -197,6 +209,17 @@
             if (!confirm('Envoyer à TOUS les utilisateurs ?')) return;
             const res = await api('broadcast', { method: 'POST', body: JSON.stringify({ title, body }) });
             document.getElementById('bc-result').textContent = `Envoyé: ${res.sent}, Échoué: ${res.failed}`;
+        }
+
+        function showTestTab(mode) {
+            const frame = document.getElementById('test-frame');
+            frame.src = '/?admin_mode=' + mode;
+            document.getElementById('tab-premium').style.borderColor = mode === 'premium' ? '#4CAF50' : '#444';
+            document.getElementById('tab-premium').style.background = mode === 'premium' ? '#4CAF5020' : 'transparent';
+            document.getElementById('tab-premium').style.color = mode === 'premium' ? '#4CAF50' : '#888';
+            document.getElementById('tab-free').style.borderColor = mode === 'free' ? '#FF5252' : '#444';
+            document.getElementById('tab-free').style.background = mode === 'free' ? '#FF525220' : 'transparent';
+            document.getElementById('tab-free').style.color = mode === 'free' ? '#FF5252' : '#888';
         }
 
         // Auto-login if session key exists
