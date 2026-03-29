@@ -104,145 +104,234 @@ const Creature = {
 
     _buildFire(form, p, mood) {
         let s = '';
-        const cx = 50, sc = [0.7, 0.85, 0.95, 1][form];
-        // Tail flame
-        const ty = 55 + (3-form)*3, tx = cx + 15 + form*3;
-        s += `<path d="M${cx+8} ${ty} Q${tx} ${ty-5} ${tx+3} ${ty-12-form*4} Q${tx-2} ${ty-6} ${tx-4} ${ty-14-form*3} Q${tx-5} ${ty-4} ${cx+8} ${ty}" fill="${p.accent}"><animate attributeName="d" dur="0.8s" repeatCount="indefinite" values="M${cx+8} ${ty} Q${tx} ${ty-5} ${tx+3} ${ty-12-form*4} Q${tx-2} ${ty-6} ${tx-4} ${ty-14-form*3} Q${tx-5} ${ty-4} ${cx+8} ${ty};M${cx+8} ${ty} Q${tx+2} ${ty-6} ${tx+5} ${ty-14-form*4} Q${tx} ${ty-8} ${tx-2} ${ty-12-form*3} Q${tx-3} ${ty-3} ${cx+8} ${ty};M${cx+8} ${ty} Q${tx} ${ty-5} ${tx+3} ${ty-12-form*4} Q${tx-2} ${ty-6} ${tx-4} ${ty-14-form*3} Q${tx-5} ${ty-4} ${cx+8} ${ty}"/></path>`;
-        s += `<path d="M${cx+8} ${ty} Q${tx-2} ${ty-4} ${tx} ${ty-8-form*2} Q${tx-3} ${ty-3} ${cx+8} ${ty}" fill="${p.light}"><animate attributeName="opacity" dur="0.6s" repeatCount="indefinite" values="0.8;1;0.8"/></path>`;
-        // Body
-        const bw = 12+form*3, bh = 14+form*4, by = 48+form*2;
-        s += `<ellipse cx="${cx}" cy="${by}" rx="${bw*sc}" ry="${bh*sc}" fill="${p.main}" stroke="${p.dark}" stroke-width="1"/>`;
-        // Belly
-        s += `<ellipse cx="${cx}" cy="${by+2}" rx="${bw*sc*0.6}" ry="${bh*sc*0.55}" fill="${p.belly}"/>`;
-        // Head
-        const hr = 10+form*2, hy = by - bh*sc + hr*0.3;
-        s += `<circle cx="${cx}" cy="${hy}" r="${hr}" fill="${p.main}" stroke="${p.dark}" stroke-width="1"/>`;
-        // Flame hair
-        for (let i = 0; i < 3+form; i++) {
-            const fx = cx - 4 - form + i * (4+form*0.5);
-            const fh = 6 + form*2 + Math.random()*2;
-            s += `<path d="M${fx} ${hy-hr+2} Q${fx+1} ${hy-hr-fh} ${fx+3} ${hy-hr+1}" fill="${p.accent}" stroke="${p.light}" stroke-width="0.3"><animate attributeName="d" dur="${0.6+i*0.1}s" repeatCount="indefinite" values="M${fx} ${hy-hr+2} Q${fx+1} ${hy-hr-fh} ${fx+3} ${hy-hr+1};M${fx} ${hy-hr+2} Q${fx+2} ${hy-hr-fh-2} ${fx+3} ${hy-hr+1};M${fx} ${hy-hr+2} Q${fx+1} ${hy-hr-fh} ${fx+3} ${hy-hr+1}"/></path>`;
+        const cx = 50;
+        if (form === 0) {
+            // Bébé chimp assis — mignon, gros yeux, petite flamme
+            s += `<path d="M${cx+6} 62 Q${cx+14} 58 ${cx+16} 50 Q${cx+13} 54 ${cx+10} 48 Q${cx+12} 56 ${cx+6} 62" fill="${p.accent}"><animate attributeName="d" dur="0.7s" repeatCount="indefinite" values="M${cx+6} 62 Q${cx+14} 58 ${cx+16} 50 Q${cx+13} 54 ${cx+10} 48 Q${cx+12} 56 ${cx+6} 62;M${cx+6} 62 Q${cx+15} 57 ${cx+17} 48 Q${cx+14} 52 ${cx+11} 46 Q${cx+13} 55 ${cx+6} 62;M${cx+6} 62 Q${cx+14} 58 ${cx+16} 50 Q${cx+13} 54 ${cx+10} 48 Q${cx+12} 56 ${cx+6} 62"/></path>`;
+            s += `<ellipse cx="${cx}" cy="58" rx="10" ry="12" fill="${p.main}" stroke="${p.dark}" stroke-width="0.8"/>`;
+            s += `<ellipse cx="${cx}" cy="60" rx="6" ry="7" fill="${p.belly}"/>`;
+            s += `<circle cx="${cx}" cy="42" r="11" fill="${p.main}" stroke="${p.dark}" stroke-width="0.8"/>`;
+            s += `<path d="M${cx-3} 31 Q${cx-1} 25 ${cx+1} 31" fill="${p.accent}"/><path d="M${cx} 30 Q${cx+2} 24 ${cx+4} 31" fill="${p.light}"/>`;
+            s += this._eyes(cx, 41, 3, mood);
+            s += `<ellipse cx="${cx-9}" cy="37" rx="3" ry="3.5" fill="${p.light}" stroke="${p.dark}" stroke-width="0.4"/>`;
+            s += `<ellipse cx="${cx+9}" cy="37" rx="3" ry="3.5" fill="${p.light}" stroke="${p.dark}" stroke-width="0.4"/>`;
+            s += `<path d="M${cx-10} 54 Q${cx-16} 58 ${cx-14} 63" stroke="${p.main}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+            s += `<path d="M${cx+10} 54 Q${cx+16} 58 ${cx+14} 63" stroke="${p.main}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+            s += `<ellipse cx="${cx-5}" cy="70" rx="4" ry="2" fill="${p.dark}"/><ellipse cx="${cx+5}" cy="70" rx="4" ry="2" fill="${p.dark}"/>`;
+        } else if (form === 1) {
+            // Jeune singe debout — mohawk flamme, bras plus longs
+            s += `<path d="M${cx+8} 58 Q${cx+18} 52 ${cx+20} 42 Q${cx+16} 48 ${cx+14} 40 Q${cx+16} 50 ${cx+8} 58" fill="${p.accent}"><animate attributeName="d" dur="0.7s" repeatCount="indefinite" values="M${cx+8} 58 Q${cx+18} 52 ${cx+20} 42 Q${cx+16} 48 ${cx+14} 40 Q${cx+16} 50 ${cx+8} 58;M${cx+8} 58 Q${cx+19} 50 ${cx+22} 40 Q${cx+17} 46 ${cx+15} 38 Q${cx+17} 49 ${cx+8} 58;M${cx+8} 58 Q${cx+18} 52 ${cx+20} 42 Q${cx+16} 48 ${cx+14} 40 Q${cx+16} 50 ${cx+8} 58"/></path>`;
+            s += `<ellipse cx="${cx}" cy="52" rx="12" ry="16" fill="${p.main}" stroke="${p.dark}" stroke-width="0.8"/>`;
+            s += `<ellipse cx="${cx}" cy="54" rx="7" ry="9" fill="${p.belly}"/>`;
+            s += `<circle cx="${cx}" cy="32" r="12" fill="${p.main}" stroke="${p.dark}" stroke-width="0.8"/>`;
+            for (let i = 0; i < 4; i++) { const fx = cx-5+i*3.5; s += `<path d="M${fx} 21 Q${fx+1} ${13-i} ${fx+3} 20" fill="${p.accent}"><animate attributeName="d" dur="${0.5+i*0.1}s" repeatCount="indefinite" values="M${fx} 21 Q${fx+1} ${13-i} ${fx+3} 20;M${fx} 21 Q${fx+2} ${11-i} ${fx+3} 20;M${fx} 21 Q${fx+1} ${13-i} ${fx+3} 20"/></path>`; }
+            s += this._eyes(cx, 31, 2.8, mood);
+            s += `<ellipse cx="${cx-10}" cy="27" rx="3" ry="4" fill="${p.light}" stroke="${p.dark}" stroke-width="0.4"/>`;
+            s += `<ellipse cx="${cx+10}" cy="27" rx="3" ry="4" fill="${p.light}" stroke="${p.dark}" stroke-width="0.4"/>`;
+            s += `<path d="M${cx-12} 48 Q${cx-22} 50 ${cx-19} 58" stroke="${p.main}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+            s += `<path d="M${cx+12} 48 Q${cx+22} 50 ${cx+19} 58" stroke="${p.main}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+            s += `<circle cx="${cx-19}" cy="58" r="2.5" fill="${p.light}"/><circle cx="${cx+19}" cy="58" r="2.5" fill="${p.light}"/>`;
+            s += `<path d="M${cx-5} 67 L${cx-8} 78" stroke="${p.main}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+            s += `<path d="M${cx+5} 67 L${cx+8} 78" stroke="${p.main}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+            s += `<ellipse cx="${cx-8}" cy="79" rx="4" ry="2" fill="${p.dark}"/><ellipse cx="${cx+8}" cy="79" rx="4" ry="2" fill="${p.dark}"/>`;
+        } else if (form === 2) {
+            // Singe musclé — torse large, crinière flammes, poings, féroce
+            s += `<path d="M${cx+10} 52 Q${cx+22} 44 ${cx+25} 30 Q${cx+20} 38 ${cx+18} 28 Q${cx+20} 42 ${cx+10} 52" fill="${p.accent}"><animate attributeName="d" dur="0.6s" repeatCount="indefinite" values="M${cx+10} 52 Q${cx+22} 44 ${cx+25} 30 Q${cx+20} 38 ${cx+18} 28 Q${cx+20} 42 ${cx+10} 52;M${cx+10} 52 Q${cx+24} 42 ${cx+27} 28 Q${cx+22} 36 ${cx+20} 26 Q${cx+22} 40 ${cx+10} 52;M${cx+10} 52 Q${cx+22} 44 ${cx+25} 30 Q${cx+20} 38 ${cx+18} 28 Q${cx+20} 42 ${cx+10} 52"/></path>`;
+            s += `<ellipse cx="${cx}" cy="48" rx="16" ry="20" fill="${p.main}" stroke="${p.dark}" stroke-width="1"/>`;
+            s += `<ellipse cx="${cx}" cy="50" rx="9" ry="11" fill="${p.belly}"/>`;
+            s += `<line x1="${cx}" y1="42" x2="${cx}" y2="56" stroke="${p.dark}" stroke-width="0.4" opacity="0.3"/>`;
+            s += `<line x1="${cx-4}" y1="44" x2="${cx-4}" y2="54" stroke="${p.dark}" stroke-width="0.3" opacity="0.2"/>`;
+            s += `<line x1="${cx+4}" y1="44" x2="${cx+4}" y2="54" stroke="${p.dark}" stroke-width="0.3" opacity="0.2"/>`;
+            s += `<circle cx="${cx}" cy="25" r="13" fill="${p.main}" stroke="${p.dark}" stroke-width="1"/>`;
+            for (let i = 0; i < 6; i++) { const fx = cx-8+i*3.5; const fh = 10+Math.abs(i-2.5)*2; s += `<path d="M${fx} 13 Q${fx+1} ${13-fh} ${fx+3} 12" fill="${p.accent}"><animate attributeName="d" dur="${0.4+i*0.08}s" repeatCount="indefinite" values="M${fx} 13 Q${fx+1} ${13-fh} ${fx+3} 12;M${fx} 13 Q${fx+2} ${11-fh} ${fx+3} 12;M${fx} 13 Q${fx+1} ${13-fh} ${fx+3} 12"/></path>`; }
+            s += this._eyes(cx, 24, 2.5, mood);
+            s += `<path d="M${cx-3} 29 L${cx-2} 31" stroke="white" stroke-width="0.8"/><path d="M${cx+3} 29 L${cx+2} 31" stroke="white" stroke-width="0.8"/>`;
+            s += `<path d="M${cx-16} 42 Q${cx-28} 44 ${cx-26} 55" stroke="${p.main}" stroke-width="4.5" fill="none" stroke-linecap="round"/>`;
+            s += `<path d="M${cx+16} 42 Q${cx+28} 44 ${cx+26} 55" stroke="${p.main}" stroke-width="4.5" fill="none" stroke-linecap="round"/>`;
+            s += `<circle cx="${cx-26}" cy="55" r="3.5" fill="${p.light}" stroke="${p.dark}" stroke-width="0.5"/><circle cx="${cx+26}" cy="55" r="3.5" fill="${p.light}" stroke="${p.dark}" stroke-width="0.5"/>`;
+            s += `<path d="M${cx-7} 67 L${cx-10} 80" stroke="${p.main}" stroke-width="4.5" fill="none" stroke-linecap="round"/>`;
+            s += `<path d="M${cx+7} 67 L${cx+10} 80" stroke="${p.main}" stroke-width="4.5" fill="none" stroke-linecap="round"/>`;
+            s += `<ellipse cx="${cx-10}" cy="81" rx="5" ry="2.5" fill="${p.dark}"/><ellipse cx="${cx+10}" cy="81" rx="5" ry="2.5" fill="${p.dark}"/>`;
+        } else {
+            // Gorille massif — crinière feu complète, abdos, crocs, aura
+            s += `<circle cx="${cx}" cy="42" r="8" fill="${p.accent}" opacity="0.15"><animate attributeName="r" dur="1.5s" repeatCount="indefinite" values="8;12;8"/></circle>`;
+            s += `<path d="M${cx+12} 48 Q${cx+26} 38 ${cx+28} 22 Q${cx+22} 30 ${cx+20} 20 Q${cx+24} 36 ${cx+12} 48" fill="${p.accent}"><animate attributeName="d" dur="0.5s" repeatCount="indefinite" values="M${cx+12} 48 Q${cx+26} 38 ${cx+28} 22 Q${cx+22} 30 ${cx+20} 20 Q${cx+24} 36 ${cx+12} 48;M${cx+12} 48 Q${cx+28} 36 ${cx+30} 20 Q${cx+24} 28 ${cx+22} 18 Q${cx+26} 34 ${cx+12} 48;M${cx+12} 48 Q${cx+26} 38 ${cx+28} 22 Q${cx+22} 30 ${cx+20} 20 Q${cx+24} 36 ${cx+12} 48"/></path>`;
+            s += `<ellipse cx="${cx}" cy="45" rx="20" ry="24" fill="${p.main}" stroke="${p.dark}" stroke-width="1.2"/>`;
+            s += `<ellipse cx="${cx}" cy="47" rx="11" ry="13" fill="${p.belly}"/>`;
+            s += `<line x1="${cx}" y1="38" x2="${cx}" y2="56" stroke="${p.dark}" stroke-width="0.5" opacity="0.3"/>`;
+            s += `<line x1="${cx-5}" y1="40" x2="${cx-5}" y2="54" stroke="${p.dark}" stroke-width="0.4" opacity="0.25"/>`;
+            s += `<line x1="${cx+5}" y1="40" x2="${cx+5}" y2="54" stroke="${p.dark}" stroke-width="0.4" opacity="0.25"/>`;
+            s += `<path d="M${cx-8} 42 Q${cx-6} 44 ${cx-8} 46" stroke="${p.dark}" stroke-width="0.3" fill="none" opacity="0.2"/>`;
+            s += `<path d="M${cx+8} 42 Q${cx+6} 44 ${cx+8} 46" stroke="${p.dark}" stroke-width="0.3" fill="none" opacity="0.2"/>`;
+            s += `<circle cx="${cx}" cy="18" r="15" fill="${p.main}" stroke="${p.dark}" stroke-width="1.2"/>`;
+            for (let i = 0; i < 8; i++) { const fx = cx-12+i*3.5; const fh = 12+Math.abs(i-3.5)*3; s += `<path d="M${fx} 5 Q${fx+1} ${5-fh} ${fx+3} 4" fill="${i%2===0?p.accent:p.light}"><animate attributeName="d" dur="${0.35+i*0.06}s" repeatCount="indefinite" values="M${fx} 5 Q${fx+1} ${5-fh} ${fx+3} 4;M${fx} 5 Q${fx+2} ${3-fh} ${fx+3} 4;M${fx} 5 Q${fx+1} ${5-fh} ${fx+3} 4"/></path>`; }
+            s += this._eyes(cx, 17, 2.2, mood);
+            s += `<path d="M${cx-4} 24 L${cx-3} 27" stroke="white" stroke-width="1" stroke-linecap="round"/><path d="M${cx+4} 24 L${cx+3} 27" stroke="white" stroke-width="1" stroke-linecap="round"/>`;
+            s += `<path d="M${cx-6} 22 L${cx+6} 22" stroke="${p.dark}" stroke-width="0.6" opacity="0.4"/>`;
+            s += `<path d="M${cx-20} 36 Q${cx-34} 38 ${cx-32} 52" stroke="${p.main}" stroke-width="6" fill="none" stroke-linecap="round"/>`;
+            s += `<path d="M${cx+20} 36 Q${cx+34} 38 ${cx+32} 52" stroke="${p.main}" stroke-width="6" fill="none" stroke-linecap="round"/>`;
+            s += `<circle cx="${cx-32}" cy="52" r="4.5" fill="${p.light}" stroke="${p.dark}" stroke-width="0.6"/><circle cx="${cx+32}" cy="52" r="4.5" fill="${p.light}" stroke="${p.dark}" stroke-width="0.6"/>`;
+            s += `<path d="M${cx-9} 68 L${cx-12} 84" stroke="${p.main}" stroke-width="5.5" fill="none" stroke-linecap="round"/>`;
+            s += `<path d="M${cx+9} 68 L${cx+12} 84" stroke="${p.main}" stroke-width="5.5" fill="none" stroke-linecap="round"/>`;
+            s += `<ellipse cx="${cx-12}" cy="85" rx="6" ry="3" fill="${p.dark}"/><ellipse cx="${cx+12}" cy="85" rx="6" ry="3" fill="${p.dark}"/>`;
         }
-        // Face
-        s += this._eyes(cx, hy-1, 2.5+form*0.3, mood);
-        // Ears
-        s += `<ellipse cx="${cx-hr+2}" cy="${hy-hr*0.5}" rx="3" ry="4" fill="${p.light}" stroke="${p.dark}" stroke-width="0.5"/>`;
-        s += `<ellipse cx="${cx+hr-2}" cy="${hy-hr*0.5}" rx="3" ry="4" fill="${p.light}" stroke="${p.dark}" stroke-width="0.5"/>`;
-        // Arms
-        const al = 6+form*3;
-        s += `<path d="M${cx-bw*sc} ${by-4} Q${cx-bw*sc-al} ${by} ${cx-bw*sc-al+2} ${by+al*0.6}" stroke="${p.main}" stroke-width="${2.5+form*0.5}" fill="none" stroke-linecap="round"/>`;
-        s += `<path d="M${cx+bw*sc} ${by-4} Q${cx+bw*sc+al} ${by} ${cx+bw*sc+al-2} ${by+al*0.6}" stroke="${p.main}" stroke-width="${2.5+form*0.5}" fill="none" stroke-linecap="round"/>`;
-        // Fists
-        s += `<circle cx="${cx-bw*sc-al+2}" cy="${by+al*0.6}" r="${2+form*0.3}" fill="${p.light}"/>`;
-        s += `<circle cx="${cx+bw*sc+al-2}" cy="${by+al*0.6}" r="${2+form*0.3}" fill="${p.light}"/>`;
-        // Legs
-        const ly = by + bh*sc - 2;
-        s += `<path d="M${cx-5} ${ly} L${cx-7-form} ${ly+8+form*2}" stroke="${p.main}" stroke-width="${3+form*0.5}" fill="none" stroke-linecap="round"/>`;
-        s += `<path d="M${cx+5} ${ly} L${cx+7+form} ${ly+8+form*2}" stroke="${p.main}" stroke-width="${3+form*0.5}" fill="none" stroke-linecap="round"/>`;
-        // Feet
-        s += `<ellipse cx="${cx-7-form}" cy="${ly+9+form*2}" rx="${3+form*0.5}" ry="2" fill="${p.dark}"/>`;
-        s += `<ellipse cx="${cx+7+form}" cy="${ly+9+form*2}" rx="${3+form*0.5}" ry="2" fill="${p.dark}"/>`;
         return s;
     },
 
     _buildPlant(form, p, mood) {
         let s = '';
-        const cx = 50, sc = [0.7, 0.85, 0.95, 1][form];
-        // Tail leaf
-        const tx = cx+12+form*3, ty = 58+form;
-        s += `<path d="M${cx+6} ${ty} Q${tx} ${ty-2} ${tx+4} ${ty-10-form*3} Q${tx+2} ${ty-12-form*3} ${tx-2} ${ty-6} Z" fill="${p.light}" stroke="${p.dark}" stroke-width="0.5"/>`;
-        s += `<line x1="${cx+8}" y1="${ty-2}" x2="${tx+1}" y2="${ty-8-form*2}" stroke="${p.dark}" stroke-width="0.4" opacity="0.5"/>`;
-        // Body
-        const bw = 11+form*3, bh = 13+form*4, by = 48+form*2;
-        s += `<ellipse cx="${cx}" cy="${by}" rx="${bw*sc}" ry="${bh*sc}" fill="${p.main}" stroke="${p.dark}" stroke-width="1"/>`;
-        // Belly
-        s += `<ellipse cx="${cx}" cy="${by+2}" rx="${bw*sc*0.55}" ry="${bh*sc*0.5}" fill="${p.belly}"/>`;
-        // Head
-        const hr = 10+form*2, hy = by - bh*sc + hr*0.3;
-        s += `<circle cx="${cx}" cy="${hy}" r="${hr}" fill="${p.main}" stroke="${p.dark}" stroke-width="1"/>`;
-        // Leaf crest on head
-        for (let i = 0; i < 2+form; i++) {
-            const lx = cx - 3 - form*0.5 + i*(4+form*0.5);
-            const lh = 5+form*2+i*1.5;
-            s += `<path d="M${lx} ${hy-hr+1} Q${lx-1} ${hy-hr-lh} ${lx+3} ${hy-hr-lh+3} Q${lx+2} ${hy-hr+2} ${lx} ${hy-hr+1}" fill="${p.light}" stroke="${p.dark}" stroke-width="0.3"/>`;
-        }
-        // Face
-        s += this._eyes(cx, hy-1, 2.5+form*0.3, mood);
-        // Nose dots
-        s += `<circle cx="${cx-1}" cy="${hy+2}" r="0.6" fill="${p.dark}"/>`;
-        s += `<circle cx="${cx+1}" cy="${hy+2}" r="0.6" fill="${p.dark}"/>`;
-        // Arms (leaf blade style for higher forms)
-        const al = 6+form*3;
-        if (form >= 2) {
-            s += `<path d="M${cx-bw*sc} ${by-3} L${cx-bw*sc-al} ${by-2} L${cx-bw*sc-al-3} ${by-6} L${cx-bw*sc-al+1} ${by+2} Z" fill="${p.light}" stroke="${p.dark}" stroke-width="0.5"/>`;
-            s += `<path d="M${cx+bw*sc} ${by-3} L${cx+bw*sc+al} ${by-2} L${cx+bw*sc+al+3} ${by-6} L${cx+bw*sc+al-1} ${by+2} Z" fill="${p.light}" stroke="${p.dark}" stroke-width="0.5"/>`;
+        const cx = 50;
+        if (form === 0) {
+            // Petit gecko mignon — feuille sur la tête, queue feuille
+            s += `<path d="M${cx+6} 62 Q${cx+14} 60 ${cx+16} 52 Q${cx+14} 50 ${cx+10} 56 Z" fill="${p.light}" stroke="${p.dark}" stroke-width="0.4"/>`;
+            s += `<line x1="${cx+8}" y1="60" x2="${cx+14}" y2="54" stroke="${p.dark}" stroke-width="0.3" opacity="0.4"/>`;
+            s += `<ellipse cx="${cx}" cy="58" rx="9" ry="11" fill="${p.main}" stroke="${p.dark}" stroke-width="0.8"/>`;
+            s += `<ellipse cx="${cx}" cy="60" rx="5.5" ry="6.5" fill="${p.belly}"/>`;
+            s += `<circle cx="${cx}" cy="43" r="10" fill="${p.main}" stroke="${p.dark}" stroke-width="0.8"/>`;
+            s += `<path d="M${cx-1} 33 Q${cx-2} 26 ${cx+1} 28 Q${cx+3} 25 ${cx+2} 33" fill="${p.light}" stroke="${p.dark}" stroke-width="0.3"/>`;
+            s += this._eyes(cx, 42, 3, mood);
+            s += `<circle cx="${cx-1}" cy="45" r="0.5" fill="${p.dark}"/><circle cx="${cx+1}" cy="45" r="0.5" fill="${p.dark}"/>`;
+            s += `<path d="M${cx-9} 55 Q${cx-14} 58 ${cx-13} 62" stroke="${p.main}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+            s += `<path d="M${cx+9} 55 Q${cx+14} 58 ${cx+13} 62" stroke="${p.main}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+            s += `<ellipse cx="${cx-4}" cy="69" rx="3.5" ry="1.8" fill="${p.dark}"/><ellipse cx="${cx+4}" cy="69" rx="3.5" ry="1.8" fill="${p.dark}"/>`;
+        } else if (form === 1) {
+            // Lézard debout — lames feuilles bras, rapide
+            s += `<path d="M${cx+7} 58 Q${cx+16} 54 ${cx+18} 44 Q${cx+16} 42 ${cx+12} 50 Z" fill="${p.light}" stroke="${p.dark}" stroke-width="0.4"/>`;
+            s += `<ellipse cx="${cx}" cy="52" rx="11" ry="15" fill="${p.main}" stroke="${p.dark}" stroke-width="0.8"/>`;
+            s += `<ellipse cx="${cx}" cy="54" rx="6.5" ry="8" fill="${p.belly}"/>`;
+            s += `<circle cx="${cx}" cy="33" r="11" fill="${p.main}" stroke="${p.dark}" stroke-width="0.8"/>`;
+            for (let i = 0; i < 3; i++) { const lx = cx-3+i*3; s += `<path d="M${lx} 22 Q${lx-1} ${16-i*2} ${lx+2} ${17-i*2} Q${lx+1} 23 ${lx} 22" fill="${p.light}" stroke="${p.dark}" stroke-width="0.3"/>`;  }
+            s += this._eyes(cx, 32, 2.8, mood);
+            s += `<circle cx="${cx-1}" cy="36" r="0.5" fill="${p.dark}"/><circle cx="${cx+1}" cy="36" r="0.5" fill="${p.dark}"/>`;
+            s += `<path d="M${cx-11} 48 Q${cx-18} 46 ${cx-20} 52" stroke="${p.main}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+            s += `<path d="M${cx+11} 48 Q${cx+18} 46 ${cx+20} 52" stroke="${p.main}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+            s += `<path d="M${cx-20} 52 L${cx-24} 48 L${cx-22} 54 Z" fill="${p.light}" stroke="${p.dark}" stroke-width="0.3"/>`;
+            s += `<path d="M${cx+20} 52 L${cx+24} 48 L${cx+22} 54 Z" fill="${p.light}" stroke="${p.dark}" stroke-width="0.3"/>`;
+            s += `<path d="M${cx-5} 66 L${cx-7} 78" stroke="${p.main}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+            s += `<path d="M${cx+5} 66 L${cx+7} 78" stroke="${p.main}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+            s += `<ellipse cx="${cx-7}" cy="79" rx="4" ry="2" fill="${p.dark}"/><ellipse cx="${cx+7}" cy="79" rx="4" ry="2" fill="${p.dark}"/>`;
+        } else if (form === 2) {
+            // Raptor musclé — crête impressionnante, griffes
+            s += `<path d="M${cx+9} 54 Q${cx+20} 48 ${cx+24} 34 Q${cx+22} 32 ${cx+16} 44 Z" fill="${p.light}" stroke="${p.dark}" stroke-width="0.4"/>`;
+            s += `<line x1="${cx+12}" y1="50" x2="${cx+20}" y2="40" stroke="${p.dark}" stroke-width="0.3" opacity="0.3"/>`;
+            s += `<ellipse cx="${cx}" cy="48" rx="15" ry="19" fill="${p.main}" stroke="${p.dark}" stroke-width="1"/>`;
+            s += `<ellipse cx="${cx}" cy="50" rx="8.5" ry="10" fill="${p.belly}"/>`;
+            s += `<circle cx="${cx}" cy="25" r="13" fill="${p.main}" stroke="${p.dark}" stroke-width="1"/>`;
+            for (let i = 0; i < 5; i++) { const lx = cx-6+i*3; const lh = 8+Math.abs(i-2)*3; s += `<path d="M${lx} 13 Q${lx-1} ${13-lh} ${lx+2} ${14-lh} Q${lx+1} 14 ${lx} 13" fill="${p.light}" stroke="${p.dark}" stroke-width="0.3"/>`;  }
+            s += this._eyes(cx, 24, 2.3, mood);
+            s += `<circle cx="${cx-1}" cy="28" r="0.6" fill="${p.dark}"/><circle cx="${cx+1}" cy="28" r="0.6" fill="${p.dark}"/>`;
+            s += `<path d="M${cx-15} 42 L${cx-26} 40 L${cx-30} 34 L${cx-28} 42 Z" fill="${p.light}" stroke="${p.dark}" stroke-width="0.5"/>`;
+            s += `<path d="M${cx+15} 42 L${cx+26} 40 L${cx+30} 34 L${cx+28} 42 Z" fill="${p.light}" stroke="${p.dark}" stroke-width="0.5"/>`;
+            s += `<path d="M${cx-7} 66 L${cx-10} 80" stroke="${p.main}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+            s += `<path d="M${cx+7} 66 L${cx+10} 80" stroke="${p.main}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+            s += `<path d="M${cx-13} 80 L${cx-10} 78 L${cx-7} 80" stroke="${p.dark}" stroke-width="0.8" fill="none"/>`;
+            s += `<path d="M${cx+7} 80 L${cx+10} 78 L${cx+13} 80" stroke="${p.dark}" stroke-width="0.8" fill="none"/>`;
         } else {
-            s += `<path d="M${cx-bw*sc} ${by-3} Q${cx-bw*sc-al} ${by} ${cx-bw*sc-al+2} ${by+al*0.5}" stroke="${p.main}" stroke-width="${2+form*0.5}" fill="none" stroke-linecap="round"/>`;
-            s += `<path d="M${cx+bw*sc} ${by-3} Q${cx+bw*sc+al} ${by} ${cx+bw*sc+al-2} ${by+al*0.5}" stroke="${p.main}" stroke-width="${2+form*0.5}" fill="none" stroke-linecap="round"/>`;
-            s += `<circle cx="${cx-bw*sc-al+2}" cy="${by+al*0.5}" r="${1.5+form*0.2}" fill="${p.light}"/>`;
-            s += `<circle cx="${cx+bw*sc+al-2}" cy="${by+al*0.5}" r="${1.5+form*0.2}" fill="${p.light}"/>`;
+            // Dragon végétal — ailes feuilles, torse écorce, queue massive
+            s += `<path d="M${cx+12} 50 Q${cx+24} 42 ${cx+28} 26 Q${cx+26} 24 ${cx+18} 40 Z" fill="${p.light}" stroke="${p.dark}" stroke-width="0.5"/>`;
+            s += `<path d="M${cx-12} 38 Q${cx-28} 26 ${cx-34} 18 L${cx-30} 28 L${cx-36} 22 L${cx-28} 34 Q${cx-18} 42 ${cx-14} 42" fill="${p.light}" stroke="${p.dark}" stroke-width="0.5" opacity="0.8"/>`;
+            s += `<path d="M${cx+12} 38 Q${cx+28} 26 ${cx+34} 18 L${cx+30} 28 L${cx+36} 22 L${cx+28} 34 Q${cx+18} 42 ${cx+14} 42" fill="${p.light}" stroke="${p.dark}" stroke-width="0.5" opacity="0.8"/>`;
+            s += `<ellipse cx="${cx}" cy="46" rx="18" ry="22" fill="${p.main}" stroke="${p.dark}" stroke-width="1.2"/>`;
+            s += `<ellipse cx="${cx}" cy="48" rx="10" ry="12" fill="${p.belly}"/>`;
+            s += `<path d="M${cx-6} 40 Q${cx-4} 42 ${cx-6} 44" stroke="${p.dark}" stroke-width="0.4" fill="none" opacity="0.3"/>`;
+            s += `<path d="M${cx+6} 40 Q${cx+4} 42 ${cx+6} 44" stroke="${p.dark}" stroke-width="0.4" fill="none" opacity="0.3"/>`;
+            s += `<circle cx="${cx}" cy="18" r="14" fill="${p.main}" stroke="${p.dark}" stroke-width="1.2"/>`;
+            for (let i = 0; i < 7; i++) { const lx = cx-9+i*3; const lh = 10+Math.abs(i-3)*3; s += `<path d="M${lx} 5 Q${lx-1} ${5-lh} ${lx+2} ${6-lh} Q${lx+1} 6 ${lx} 5" fill="${p.light}" stroke="${p.dark}" stroke-width="0.3"/>`;  }
+            s += this._eyes(cx, 17, 2.2, mood);
+            s += `<circle cx="${cx-1}" cy="22" r="0.7" fill="${p.dark}"/><circle cx="${cx+1}" cy="22" r="0.7" fill="${p.dark}"/>`;
+            s += `<path d="M${cx-18} 38 L${cx-30} 36 L${cx-34} 28 L${cx-32} 38 Z" fill="${p.accent}" stroke="${p.dark}" stroke-width="0.5"/>`;
+            s += `<path d="M${cx+18} 38 L${cx+30} 36 L${cx+34} 28 L${cx+32} 38 Z" fill="${p.accent}" stroke="${p.dark}" stroke-width="0.5"/>`;
+            s += `<path d="M${cx-9} 67 L${cx-12} 84" stroke="${p.main}" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+            s += `<path d="M${cx+9} 67 L${cx+12} 84" stroke="${p.main}" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+            s += `<path d="M${cx-16} 84 L${cx-12} 82 L${cx-8} 84" stroke="${p.dark}" stroke-width="1" fill="none"/>`;
+            s += `<path d="M${cx+8} 84 L${cx+12} 82 L${cx+16} 84" stroke="${p.dark}" stroke-width="1" fill="none"/>`;
         }
-        // Legs
-        const ly = by + bh*sc - 2;
-        s += `<path d="M${cx-5} ${ly} L${cx-6-form} ${ly+8+form*2}" stroke="${p.main}" stroke-width="${2.5+form*0.5}" fill="none" stroke-linecap="round"/>`;
-        s += `<path d="M${cx+5} ${ly} L${cx+6+form} ${ly+8+form*2}" stroke="${p.main}" stroke-width="${2.5+form*0.5}" fill="none" stroke-linecap="round"/>`;
-        // Feet (clawed)
-        s += `<ellipse cx="${cx-6-form}" cy="${ly+9+form*2}" rx="${3+form*0.4}" ry="1.8" fill="${p.dark}"/>`;
-        s += `<ellipse cx="${cx+6+form}" cy="${ly+9+form*2}" rx="${3+form*0.4}" ry="1.8" fill="${p.dark}"/>`;
         return s;
     },
 
     _buildWater(form, p, mood) {
         let s = '';
-        const cx = 50, sc = [0.7, 0.85, 0.95, 1][form];
-        // Tail (mermaid-like for high forms)
-        const tx = cx+10+form*4, ty = 56+form;
-        if (form >= 2) {
-            s += `<path d="M${cx+6} ${ty} Q${tx} ${ty+2} ${tx+5} ${ty-4} L${tx+8} ${ty-8} L${tx+3} ${ty-3} L${tx+7} ${ty-12} L${tx+1} ${ty-5} Q${tx-2} ${ty+1} ${cx+6} ${ty}" fill="${p.accent}" stroke="${p.dark}" stroke-width="0.5"/>`;
+        const cx = 50;
+        if (form === 0) {
+            // Chaton rond — oreilles nageoire, queue goutte d'eau
+            s += `<path d="M${cx+6} 60 Q${cx+12} 58 ${cx+13} 52" stroke="${p.light}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+            s += `<circle cx="${cx+13}" cy="51" r="2.5" fill="${p.accent}"/>`;
+            s += `<ellipse cx="${cx}" cy="58" rx="10" ry="11" fill="${p.main}" stroke="${p.dark}" stroke-width="0.8"/>`;
+            s += `<ellipse cx="${cx}" cy="60" rx="6" ry="6.5" fill="${p.belly}"/>`;
+            s += `<circle cx="${cx}" cy="43" r="11" fill="${p.main}" stroke="${p.dark}" stroke-width="0.8"/>`;
+            s += `<path d="M${cx-10} 41 L${cx-14} 34 L${cx-7} 38 Z" fill="${p.accent}" stroke="${p.dark}" stroke-width="0.4"/>`;
+            s += `<path d="M${cx+10} 41 L${cx+14} 34 L${cx+7} 38 Z" fill="${p.accent}" stroke="${p.dark}" stroke-width="0.4"/>`;
+            s += `<path d="M${cx-9} 41 L${cx-12} 36 L${cx-7} 39 Z" fill="${p.light}" opacity="0.4"/>`;
+            s += `<path d="M${cx+9} 41 L${cx+12} 36 L${cx+7} 39 Z" fill="${p.light}" opacity="0.4"/>`;
+            s += this._eyes(cx, 42, 3, mood);
+            s += `<ellipse cx="${cx}" cy="45" rx="1" ry="0.7" fill="${p.dark}"/>`;
+            s += `<line x1="${cx-11}" y1="43" x2="${cx-16}" y2="42" stroke="${p.dark}" stroke-width="0.3" opacity="0.4"/><line x1="${cx-11}" y1="44.5" x2="${cx-16}" y2="45.5" stroke="${p.dark}" stroke-width="0.3" opacity="0.4"/>`;
+            s += `<line x1="${cx+11}" y1="43" x2="${cx+16}" y2="42" stroke="${p.dark}" stroke-width="0.3" opacity="0.4"/><line x1="${cx+11}" y1="44.5" x2="${cx+16}" y2="45.5" stroke="${p.dark}" stroke-width="0.3" opacity="0.4"/>`;
+            s += `<path d="M${cx-10} 55 Q${cx-14} 58 ${cx-13} 62" stroke="${p.main}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+            s += `<path d="M${cx+10} 55 Q${cx+14} 58 ${cx+13} 62" stroke="${p.main}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+            s += `<ellipse cx="${cx-4}" cy="69" rx="3.5" ry="1.8" fill="${p.dark}"/><ellipse cx="${cx+4}" cy="69" rx="3.5" ry="1.8" fill="${p.dark}"/>`;
+        } else if (form === 1) {
+            // Chat élancé — nageoires développées, moustaches longues
+            s += `<path d="M${cx+8} 56 Q${cx+16} 52 ${cx+18} 44" stroke="${p.light}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+            s += `<circle cx="${cx+18}" cy="43" r="3" fill="${p.accent}"/>`;
+            s += `<ellipse cx="${cx}" cy="52" rx="12" ry="15" fill="${p.main}" stroke="${p.dark}" stroke-width="0.8"/>`;
+            s += `<ellipse cx="${cx}" cy="54" rx="7" ry="8.5" fill="${p.belly}"/>`;
+            s += `<circle cx="${cx}" cy="33" r="12" fill="${p.main}" stroke="${p.dark}" stroke-width="0.8"/>`;
+            s += `<path d="M${cx-11} 31 L${cx-16} 22 L${cx-7} 28 Z" fill="${p.accent}" stroke="${p.dark}" stroke-width="0.4"/>`;
+            s += `<path d="M${cx+11} 31 L${cx+16} 22 L${cx+7} 28 Z" fill="${p.accent}" stroke="${p.dark}" stroke-width="0.4"/>`;
+            s += `<path d="M${cx-10} 31 L${cx-14} 24 L${cx-7} 29 Z" fill="${p.light}" opacity="0.4"/>`;
+            s += `<path d="M${cx+10} 31 L${cx+14} 24 L${cx+7} 29 Z" fill="${p.light}" opacity="0.4"/>`;
+            s += this._eyes(cx, 32, 2.8, mood);
+            s += `<ellipse cx="${cx}" cy="35" rx="1.2" ry="0.8" fill="${p.dark}"/>`;
+            s += `<line x1="${cx-12}" y1="33" x2="${cx-19}" y2="31" stroke="${p.dark}" stroke-width="0.4" opacity="0.4"/><line x1="${cx-12}" y1="35" x2="${cx-19}" y2="37" stroke="${p.dark}" stroke-width="0.4" opacity="0.4"/>`;
+            s += `<line x1="${cx+12}" y1="33" x2="${cx+19}" y2="31" stroke="${p.dark}" stroke-width="0.4" opacity="0.4"/><line x1="${cx+12}" y1="35" x2="${cx+19}" y2="37" stroke="${p.dark}" stroke-width="0.4" opacity="0.4"/>`;
+            s += `<path d="M${cx-12} 48 Q${cx-19} 50 ${cx-17} 57" stroke="${p.main}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+            s += `<path d="M${cx+12} 48 Q${cx+19} 50 ${cx+17} 57" stroke="${p.main}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+            s += `<circle cx="${cx-17}" cy="57" r="2" fill="${p.light}"/><circle cx="${cx+17}" cy="57" r="2" fill="${p.light}"/>`;
+            s += `<path d="M${cx-5} 66 L${cx-7} 78" stroke="${p.main}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+            s += `<path d="M${cx+5} 66 L${cx+7} 78" stroke="${p.main}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+            s += `<ellipse cx="${cx-7}" cy="79" rx="3.5" ry="1.8" fill="${p.dark}"/><ellipse cx="${cx+7}" cy="79" rx="3.5" ry="1.8" fill="${p.dark}"/>`;
+        } else if (form === 2) {
+            // Panthère aquatique — collerette d'eau, musclé, regard intense
+            s += `<path d="M${cx+10} 52 Q${cx+20} 46 ${cx+24} 36 L${cx+28} 30 L${cx+22} 38 L${cx+26} 26 L${cx+20} 40 Q${cx+14} 50 ${cx+10} 52" fill="${p.accent}" stroke="${p.dark}" stroke-width="0.4"/>`;
+            s += `<ellipse cx="${cx}" cy="48" rx="15" ry="19" fill="${p.main}" stroke="${p.dark}" stroke-width="1"/>`;
+            s += `<ellipse cx="${cx}" cy="50" rx="8.5" ry="10" fill="${p.belly}"/>`;
+            s += `<path d="M${cx-15} 34 Q${cx-18} 30 ${cx-14} 28 Q${cx-3} 32 ${cx+3} 32 Q${cx+14} 28 ${cx+18} 30 Q${cx+15} 34 ${cx+14} 36" fill="${p.accent}" opacity="0.5" stroke="${p.dark}" stroke-width="0.3"/>`;
+            s += `<circle cx="${cx}" cy="25" r="13" fill="${p.main}" stroke="${p.dark}" stroke-width="1"/>`;
+            s += `<path d="M${cx-12} 23 L${cx-18} 12 L${cx-8} 19 Z" fill="${p.accent}" stroke="${p.dark}" stroke-width="0.4"/>`;
+            s += `<path d="M${cx+12} 23 L${cx+18} 12 L${cx+8} 19 Z" fill="${p.accent}" stroke="${p.dark}" stroke-width="0.4"/>`;
+            s += this._eyes(cx, 24, 2.3, mood);
+            s += `<ellipse cx="${cx}" cy="28" rx="1.3" ry="0.8" fill="${p.dark}"/>`;
+            s += `<line x1="${cx-13}" y1="25" x2="${cx-20}" y2="23" stroke="${p.dark}" stroke-width="0.5" opacity="0.5"/><line x1="${cx-13}" y1="27" x2="${cx-20}" y2="29" stroke="${p.dark}" stroke-width="0.5" opacity="0.5"/>`;
+            s += `<line x1="${cx+13}" y1="25" x2="${cx+20}" y2="23" stroke="${p.dark}" stroke-width="0.5" opacity="0.5"/><line x1="${cx+13}" y1="27" x2="${cx+20}" y2="29" stroke="${p.dark}" stroke-width="0.5" opacity="0.5"/>`;
+            s += `<path d="M${cx-15} 42 Q${cx-24} 44 ${cx-22} 54" stroke="${p.main}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+            s += `<path d="M${cx+15} 42 Q${cx+24} 44 ${cx+22} 54" stroke="${p.main}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+            s += `<circle cx="${cx-22}" cy="54" r="3" fill="${p.light}"/><circle cx="${cx+22}" cy="54" r="3" fill="${p.light}"/>`;
+            s += `<path d="M${cx-7} 66 L${cx-9} 80" stroke="${p.main}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+            s += `<path d="M${cx+7} 66 L${cx+9} 80" stroke="${p.main}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+            s += `<ellipse cx="${cx-9}" cy="81" rx="4.5" ry="2" fill="${p.dark}"/><ellipse cx="${cx+9}" cy="81" rx="4.5" ry="2" fill="${p.dark}"/>`;
         } else {
-            s += `<path d="M${cx+6} ${ty} Q${tx} ${ty-2} ${tx+2} ${ty-6-form*2}" stroke="${p.light}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
-            s += `<circle cx="${tx+2}" cy="${ty-7-form*2}" r="${2+form*0.5}" fill="${p.accent}"/>`;
+            // Lion aquatique majestueux — crinière de vagues, queue sirène
+            s += `<circle cx="${cx}" cy="40" r="10" fill="${p.accent}" opacity="0.1"><animate attributeName="r" dur="2s" repeatCount="indefinite" values="10;14;10"/></circle>`;
+            s += `<path d="M${cx+12} 48 Q${cx+24} 40 ${cx+28} 28 L${cx+32} 22 L${cx+26} 30 L${cx+30} 18 L${cx+24} 32 Q${cx+16} 44 ${cx+12} 48" fill="${p.accent}" stroke="${p.dark}" stroke-width="0.5"/>`;
+            s += `<ellipse cx="${cx}" cy="45" rx="19" ry="23" fill="${p.main}" stroke="${p.dark}" stroke-width="1.2"/>`;
+            s += `<ellipse cx="${cx}" cy="47" rx="10.5" ry="12" fill="${p.belly}"/>`;
+            s += `<path d="M${cx-19} 28 Q${cx-24} 22 ${cx-18} 18 Q${cx-5} 24 ${cx+5} 24 Q${cx+18} 18 ${cx+24} 22 Q${cx+19} 28 ${cx+18} 32" fill="${p.accent}" opacity="0.5" stroke="${p.dark}" stroke-width="0.3"/>`;
+            s += `<path d="M${cx-16} 30 Q${cx-20} 26 ${cx-15} 22 Q${cx-4} 26 ${cx+4} 26 Q${cx+15} 22 ${cx+20} 26 Q${cx+16} 30 ${cx+15} 33" fill="${p.light}" opacity="0.3"/>`;
+            s += `<circle cx="${cx}" cy="18" r="15" fill="${p.main}" stroke="${p.dark}" stroke-width="1.2"/>`;
+            s += `<path d="M${cx-14} 16 L${cx-20} 4 L${cx-10} 12 Z" fill="${p.accent}" stroke="${p.dark}" stroke-width="0.5"/>`;
+            s += `<path d="M${cx+14} 16 L${cx+20} 4 L${cx+10} 12 Z" fill="${p.accent}" stroke="${p.dark}" stroke-width="0.5"/>`;
+            s += this._eyes(cx, 17, 2.2, mood);
+            s += `<ellipse cx="${cx}" cy="22" rx="1.5" ry="1" fill="${p.dark}"/>`;
+            s += `<line x1="${cx-15}" y1="18" x2="${cx-23}" y2="16" stroke="${p.dark}" stroke-width="0.5" opacity="0.5"/><line x1="${cx-15}" y1="20" x2="${cx-23}" y2="22" stroke="${p.dark}" stroke-width="0.5" opacity="0.5"/><line x1="${cx-15}" y1="22" x2="${cx-22}" y2="25" stroke="${p.dark}" stroke-width="0.3" opacity="0.3"/>`;
+            s += `<line x1="${cx+15}" y1="18" x2="${cx+23}" y2="16" stroke="${p.dark}" stroke-width="0.5" opacity="0.5"/><line x1="${cx+15}" y1="20" x2="${cx+23}" y2="22" stroke="${p.dark}" stroke-width="0.5" opacity="0.5"/><line x1="${cx+15}" y1="22" x2="${cx+22}" y2="25" stroke="${p.dark}" stroke-width="0.3" opacity="0.3"/>`;
+            s += `<path d="M${cx-19} 36 Q${cx-32} 38 ${cx-30} 52" stroke="${p.main}" stroke-width="5.5" fill="none" stroke-linecap="round"/>`;
+            s += `<path d="M${cx+19} 36 Q${cx+32} 38 ${cx+30} 52" stroke="${p.main}" stroke-width="5.5" fill="none" stroke-linecap="round"/>`;
+            s += `<circle cx="${cx-30}" cy="52" r="4" fill="${p.light}" stroke="${p.dark}" stroke-width="0.5"/><circle cx="${cx+30}" cy="52" r="4" fill="${p.light}" stroke="${p.dark}" stroke-width="0.5"/>`;
+            s += `<path d="M${cx-9} 67 L${cx-11} 84" stroke="${p.main}" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+            s += `<path d="M${cx+9} 67 L${cx+11} 84" stroke="${p.main}" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+            s += `<ellipse cx="${cx-11}" cy="85" rx="5.5" ry="2.5" fill="${p.dark}"/><ellipse cx="${cx+11}" cy="85" rx="5.5" ry="2.5" fill="${p.dark}"/>`;
         }
-        // Body
-        const bw = 11+form*3, bh = 13+form*4, by = 48+form*2;
-        s += `<ellipse cx="${cx}" cy="${by}" rx="${bw*sc}" ry="${bh*sc}" fill="${p.main}" stroke="${p.dark}" stroke-width="1"/>`;
-        // Belly
-        s += `<ellipse cx="${cx}" cy="${by+2}" rx="${bw*sc*0.55}" ry="${bh*sc*0.5}" fill="${p.belly}"/>`;
-        // Head
-        const hr = 10+form*2, hy = by - bh*sc + hr*0.3;
-        s += `<circle cx="${cx}" cy="${hy}" r="${hr}" fill="${p.main}" stroke="${p.dark}" stroke-width="1"/>`;
-        // Fin ears
-        const es = 4+form*1.5;
-        s += `<path d="M${cx-hr+1} ${hy-2} L${cx-hr-es} ${hy-es-3} L${cx-hr+3} ${hy-es+2} Z" fill="${p.accent}" stroke="${p.dark}" stroke-width="0.5"/>`;
-        s += `<path d="M${cx+hr-1} ${hy-2} L${cx+hr+es} ${hy-es-3} L${cx+hr-3} ${hy-es+2} Z" fill="${p.accent}" stroke="${p.dark}" stroke-width="0.5"/>`;
-        // Inner ear
-        s += `<path d="M${cx-hr+2} ${hy-2} L${cx-hr-es+2} ${hy-es-1} L${cx-hr+3} ${hy-es+3} Z" fill="${p.light}" opacity="0.5"/>`;
-        s += `<path d="M${cx+hr-2} ${hy-2} L${cx+hr+es-2} ${hy-es-1} L${cx+hr-3} ${hy-es+3} Z" fill="${p.light}" opacity="0.5"/>`;
-        // Face
-        s += this._eyes(cx, hy-1, 2.5+form*0.3, mood);
-        // Whiskers
-        s += `<line x1="${cx-hr}" y1="${hy+1}" x2="${cx-hr-5}" y2="${hy-1}" stroke="${p.dark}" stroke-width="0.4" opacity="0.4"/>`;
-        s += `<line x1="${cx-hr}" y1="${hy+2}" x2="${cx-hr-5}" y2="${hy+3}" stroke="${p.dark}" stroke-width="0.4" opacity="0.4"/>`;
-        s += `<line x1="${cx+hr}" y1="${hy+1}" x2="${cx+hr+5}" y2="${hy-1}" stroke="${p.dark}" stroke-width="0.4" opacity="0.4"/>`;
-        s += `<line x1="${cx+hr}" y1="${hy+2}" x2="${cx+hr+5}" y2="${hy+3}" stroke="${p.dark}" stroke-width="0.4" opacity="0.4"/>`;
-        // Nose
-        s += `<ellipse cx="${cx}" cy="${hy+2}" rx="1.2" ry="0.8" fill="${p.dark}"/>`;
-        // Water collar for form 2+
-        if (form >= 2) {
-            s += `<path d="M${cx-bw*sc-2} ${by-bh*sc+6} Q${cx-bw*sc-5} ${by-bh*sc+10} ${cx-bw*sc} ${by-bh*sc+14} Q${cx-3} ${by-bh*sc+8} ${cx+3} ${by-bh*sc+8} Q${cx+bw*sc} ${by-bh*sc+14} ${cx+bw*sc+5} ${by-bh*sc+10} Q${cx+bw*sc+2} ${by-bh*sc+6} ${cx+bw*sc-2} ${by-bh*sc+4}" fill="${p.accent}" opacity="0.6" stroke="${p.dark}" stroke-width="0.3"/>`;
-        }
-        // Arms/paws
-        const al = 5+form*2.5;
-        s += `<path d="M${cx-bw*sc} ${by-3} Q${cx-bw*sc-al} ${by} ${cx-bw*sc-al+1} ${by+al*0.5}" stroke="${p.main}" stroke-width="${2+form*0.5}" fill="none" stroke-linecap="round"/>`;
-        s += `<path d="M${cx+bw*sc} ${by-3} Q${cx+bw*sc+al} ${by} ${cx+bw*sc+al-1} ${by+al*0.5}" stroke="${p.main}" stroke-width="${2+form*0.5}" fill="none" stroke-linecap="round"/>`;
-        s += `<circle cx="${cx-bw*sc-al+1}" cy="${by+al*0.5}" r="${1.5+form*0.3}" fill="${p.light}"/>`;
-        s += `<circle cx="${cx+bw*sc+al-1}" cy="${by+al*0.5}" r="${1.5+form*0.3}" fill="${p.light}"/>`;
-        // Legs
-        const ly = by + bh*sc - 2;
-        s += `<path d="M${cx-5} ${ly} L${cx-6-form} ${ly+7+form*2}" stroke="${p.main}" stroke-width="${2.5+form*0.5}" fill="none" stroke-linecap="round"/>`;
-        s += `<path d="M${cx+5} ${ly} L${cx+6+form} ${ly+7+form*2}" stroke="${p.main}" stroke-width="${2.5+form*0.5}" fill="none" stroke-linecap="round"/>`;
-        s += `<ellipse cx="${cx-6-form}" cy="${ly+8+form*2}" rx="${2.5+form*0.4}" ry="1.8" fill="${p.dark}"/>`;
-        s += `<ellipse cx="${cx+6+form}" cy="${ly+8+form*2}" rx="${2.5+form*0.4}" ry="1.8" fill="${p.dark}"/>`;
         return s;
     },
 
