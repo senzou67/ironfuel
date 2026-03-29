@@ -27,7 +27,7 @@ async function getAccessToken() {
     return data.access_token;
 }
 
-const ALLOWED_ORIGIN = process.env.URL || 'https://theonefood.netlify.app';
+const ALLOWED_ORIGIN = process.env.URL || 'https://1food.fr';
 
 exports.handler = async (event) => {
     const headers = {
@@ -81,8 +81,8 @@ exports.handler = async (event) => {
                         locale: 'fr-FR',
                         landing_page: 'NO_PREFERENCE',
                         user_action: 'PAY_NOW',
-                        return_url: `${process.env.URL || 'https://onefood.netlify.app'}/?payment=paypal_success`,
-                        cancel_url: `${process.env.URL || 'https://onefood.netlify.app'}/?payment=cancel`
+                        return_url: `${process.env.URL || 'https://1food.fr'}/?payment=paypal_success`,
+                        cancel_url: `${process.env.URL || 'https://1food.fr'}/?payment=cancel`
                     }
                 })
             });

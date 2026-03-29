@@ -4,4 +4,4 @@ Disallow: /.netlify/
 Disallow: /assets/creatures/
 Disallow: /admin.html
 
-Sitemap: https://theonefood.netlify.app/sitemap.xml
+Sitemap: https://1food.fr/sitemap.xml
