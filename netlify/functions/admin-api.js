@@ -131,24 +131,49 @@ exports.handler = async (event) => {
 
         if (action === 'payments') {
             const payments = [];
+            let debugInfo = { subsDocs: 0, donDocs: 0, subsError: null, donError: null, premiumUsers: 0 };
+            // Subscriptions collection
             try {
                 const subsSnap = await db.collection('subscriptions').get();
+                debugInfo.subsDocs = subsSnap.size;
                 subsSnap.forEach(doc => {
                     const d = doc.data();
                     const ts = d.createdAt?._seconds || d.createdAt?.seconds || 0;
-                    payments.push({ type: 'abo', email: d.email || '—', plan: d.plan || '—', status: d.status || 'active', date: ts ? new Date(ts * 1000).toISOString() : '—' });
+                    payments.push({ type: 'abo', email: d.email || doc.id, plan: d.plan || '—', status: d.status || 'active', date: ts ? new Date(ts * 1000).toISOString() : '—' });
                 });
-            } catch (e) { console.error('Subscriptions error:', e.message); }
+            } catch (e) { debugInfo.subsError = e.message; }
+            // Donations collection
             try {
                 const donSnap = await db.collection('donations').get();
+                debugInfo.donDocs = donSnap.size;
                 donSnap.forEach(doc => {
                     const d = doc.data();
                     const ts = d.createdAt?._seconds || d.createdAt?.seconds || 0;
-                    payments.push({ type: 'don', email: d.email || '—', amount: d.amount || 0, date: ts ? new Date(ts * 1000).toISOString() : '—' });
+                    payments.push({ type: 'don', email: d.email || doc.id, amount: d.amount || 0, date: ts ? new Date(ts * 1000).toISOString() : '—' });
                 });
-            } catch (e) { console.error('Donations error:', e.message); }
+            } catch (e) { debugInfo.donError = e.message; }
+            // Fallback: scan users with paid status in their data
+            try {
+                const usersSnap = await db.collection('users').get();
+                usersSnap.forEach(doc => {
+                    const d = doc.data();
+                    const fields = d.data?.mapValue?.fields || {};
+                    try {
+                        const trial = JSON.parse(fields.trial?.stringValue || '{}');
+                        if (trial.paid) {
+                            debugInfo.premiumUsers++;
+                            // Only add if not already in payments list
+                            const profile = JSON.parse(fields.profile?.stringValue || '{}');
+                            const email = profile.email || d.email || doc.id;
+                            if (!payments.some(p => p.email === email)) {
+                                payments.push({ type: 'abo', email, plan: trial.plan || '—', status: 'active (from user data)', date: trial.paidDate || '—' });
+                            }
+                        }
+                    } catch {}
+                });
+            } catch {}
             payments.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-            return { statusCode: 200, headers, body: JSON.stringify({ payments }) };
+            return { statusCode: 200, headers, body: JSON.stringify({ payments, debug: debugInfo }) };
         }
 
         if (action === 'broadcast' && event.httpMethod === 'POST') {
