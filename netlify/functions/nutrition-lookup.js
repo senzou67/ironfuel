@@ -15,19 +15,26 @@ function _cached(key, ttlMs, fn) {
 // Search USDA FoodData Central for a food by English name
 async function searchUSDA(query) {
     try {
-        const url = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${USDA_KEY}&query=${encodeURIComponent(query)}&dataType=Foundation,SR%20Legacy&pageSize=3`;
+        const url = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${USDA_KEY}&query=${encodeURIComponent(query)}&dataType=Foundation,SR%20Legacy&pageSize=5`;
         const res = await fetch(url);
         if (!res.ok) return null;
         const data = await res.json();
-        const food = data.foods?.[0];
-        if (!food) return null;
+        if (!data.foods?.length) return null;
+
+        // Pick best match: prefer result whose description contains the query words
+        const queryWords = query.toLowerCase().split(/\s+/);
+        let food = data.foods[0]; // default to first
+        for (const f of data.foods) {
+            const desc = f.description.toLowerCase();
+            const matches = queryWords.filter(w => desc.includes(w)).length;
+            if (matches >= queryWords.length) { food = f; break; }
+        }
 
         const get = (name) => {
             const n = food.foodNutrients?.find(n => n.nutrientName === name);
             return n ? n.value : 0;
         };
 
-        // USDA values are per 100g
         return {
             source: 'usda',
             name_en: food.description,

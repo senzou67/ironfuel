@@ -131,7 +131,34 @@ const Storage = {
         foodEntry.id = Date.now() + Math.random();
         log.meals[mealType].push(foodEntry);
         this.setDayLog(log);
+        // Save to community food database if it has verified nutrition data
+        if (foodEntry.name && foodEntry.calories && (foodEntry.source === 'usda' || foodEntry.source === 'openfoodfacts' || foodEntry.barcode)) {
+            this._saveToCommunityDB(foodEntry);
+        }
         return foodEntry;
+    },
+
+    _saveToCommunityDB(food) {
+        try {
+            const db = this._get('community_foods', []);
+            const key = (food.barcode || food.name || '').toLowerCase().trim();
+            if (!key || db.some(f => (f.barcode || f.name || '').toLowerCase().trim() === key)) return;
+            db.push({
+                name: food.name,
+                barcode: food.barcode || null,
+                calories: food.calories,
+                protein: food.protein,
+                carbs: food.carbs,
+                fat: food.fat,
+                fiber: food.fiber || 0,
+                grams: food.grams || 100,
+                source: food.source || 'user',
+                addedAt: new Date().toISOString()
+            });
+            // Keep max 500 entries
+            if (db.length > 500) db.splice(0, db.length - 500);
+            this._set('community_foods', db);
+        } catch {}
     },
 
     removeFoodFromMeal(mealType, entryId, date) {
