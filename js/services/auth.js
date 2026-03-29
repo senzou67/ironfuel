@@ -320,7 +320,7 @@ const AuthService = {
                     <div class="login-logo">
                         <svg width="64" height="64" viewBox="0 0 100 100">
                             <circle cx="50" cy="50" r="45" fill="#C62828"/>
-                            <text x="50" y="58" text-anchor="middle" fill="white" font-size="28" font-weight="bold">IF</text>
+                            <text x="50" y="62" text-anchor="middle" fill="white" font-size="42" font-weight="900">1</text>
                         </svg>
                     </div>
                     <h1 class="login-title">OneFood</h1>

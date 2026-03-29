@@ -99,7 +99,7 @@ const BarcodePage = {
                 { facingMode: 'environment' },
                 {
                     fps: 10,
-                    qrbox: { width: 280, height: 150 },
+                    qrbox: { width: 250, height: 120 },
                     formatsToSupport: [
                         Html5QrcodeSupportedFormats.EAN_13,
                         Html5QrcodeSupportedFormats.EAN_8,
