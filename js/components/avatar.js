@@ -342,14 +342,14 @@ const Creature = {
     buildSVG(size, options = {}) {
         const data = options.creatureData || this.getData();
         const type = data.type || 'fire';
-        const form = data.form !== undefined ? data.form : this.getForm();
+        // Use calculated form for normal display, only use data.form for previews
+        const form = options.creatureData ? (data.form !== undefined ? data.form : 0) : this.getForm();
         const mood = options.mood || this.getMood();
         const src = '/assets/creatures/' + type + '_' + form + '.png?v=2';
 
-        return '<svg viewBox="0 0 100 100" width="' + size + '" height="' + size + '" class="creature-svg ' + (mood === 'celebrating' ? 'creature-bounce' : '') + '" style="overflow:visible">'
-            + '<g><animateTransform attributeName="transform" type="translate" values="0,0;0,-1;0,0" dur="2.5s" repeatCount="indefinite"/>'
-            + '<image href="' + src + '" x="5" y="5" width="90" height="90" style="image-rendering:auto"/>'
-            + '</g></svg>';
+        return '<div class="creature-svg ' + (mood === 'celebrating' ? 'creature-bounce' : '') + '" style="width:' + size + 'px;height:' + size + 'px;display:flex;align-items:center;justify-content:center">'
+            + '<img src="' + src + '" alt="' + this.getSpeciesName(type, form) + '" style="width:100%;height:100%;object-fit:contain" loading="lazy"/>'
+            + '</div>';
     },
 
     render() {
