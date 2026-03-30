@@ -13,6 +13,8 @@ const GymPage = {
     ],
 
     render() {
+        // Auto-fill from routine if configured
+        this._applyRoutine();
         const now = new Date();
         if (!this._currentMonth) this._currentMonth = now.getMonth();
         if (!this._currentYear) this._currentYear = now.getFullYear();
@@ -102,6 +104,15 @@ const GymPage = {
                         <button class="btn btn-outline" onclick="GymPage._editGoals()" style="padding:4px 10px;font-size:11px">Modifier</button>
                     </div>
                     ${this._renderGoals()}
+                </div>
+
+                <!-- Routine hebdo -->
+                <div class="card" style="padding:14px 16px;margin-top:12px">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                        <span style="font-size:14px;font-weight:700">Routine hebdo</span>
+                        <button class="btn btn-outline" onclick="GymPage._editRoutine()" style="padding:4px 10px;font-size:11px">Modifier</button>
+                    </div>
+                    ${this._renderRoutine()}
                 </div>
             </div>
         `;
@@ -445,6 +456,77 @@ const GymPage = {
         Modal.close();
         App.showToast('Objectifs mis à jour');
         this.render();
+    },
+
+    // === ROUTINE HEBDO ===
+    _getRoutine() {
+        return Storage._get('gym_routine', { lun: null, mar: null, mer: null, jeu: null, ven: null, sam: null, dim: null });
+    },
+
+    _renderRoutine() {
+        const routine = this._getRoutine();
+        const days = [['lun','Lun'],['mar','Mar'],['mer','Mer'],['jeu','Jeu'],['ven','Ven'],['sam','Sam'],['dim','Dim']];
+        const hasRoutine = Object.values(routine).some(v => v);
+        if (!hasRoutine) return '<p style="text-align:center;color:var(--text-secondary);font-size:13px">Aucune routine configurée</p>';
+        return `<div style="display:flex;gap:4px">${days.map(([key, label]) => {
+            const typeId = routine[key];
+            const type = typeId ? this.WORKOUT_TYPES.find(t => t.id === typeId) : null;
+            return `<div style="flex:1;text-align:center"><div style="font-size:10px;color:var(--text-secondary);margin-bottom:4px">${label}</div><div style="width:28px;height:28px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;${type ? `background:${type.color}20;border:1.5px solid ${type.color}` : 'border:1.5px dashed var(--border)'};font-size:${type ? '14px' : '10px'}">${type ? type.icon : '—'}</div></div>`;
+        }).join('')}</div>`;
+    },
+
+    _editRoutine() {
+        const routine = this._getRoutine();
+        const days = [['lun','Lundi'],['mar','Mardi'],['mer','Mercredi'],['jeu','Jeudi'],['ven','Vendredi'],['sam','Samedi'],['dim','Dimanche']];
+        const typeOptions = '<option value="">Repos</option>' + this.WORKOUT_TYPES.map(t => `<option value="${t.id}">${t.icon} ${t.name}</option>`).join('');
+
+        Modal.show(`
+            <div class="modal-title">Routine hebdomadaire</div>
+            <p style="color:var(--text-secondary);font-size:12px;margin-bottom:12px">Les séances seront pré-remplies chaque semaine automatiquement.</p>
+            ${days.map(([key, label]) => `
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                    <span style="font-size:13px;font-weight:600;min-width:80px">${label}</span>
+                    <select class="form-select gym-routine-select" data-day="${key}" style="flex:1;max-width:180px;padding:8px;font-size:13px">
+                        ${typeOptions.replace(`value="${routine[key]}"`, `value="${routine[key]}" selected`)}
+                    </select>
+                </div>
+            `).join('')}
+            <button class="btn btn-primary" onclick="GymPage._saveRoutine()" style="width:100%;margin-top:12px">Enregistrer</button>
+        `);
+    },
+
+    _saveRoutine() {
+        const routine = {};
+        document.querySelectorAll('.gym-routine-select').forEach(sel => {
+            routine[sel.dataset.day] = sel.value || null;
+        });
+        Storage._set('gym_routine', routine);
+        if (typeof SyncService !== 'undefined') SyncService.autoSync();
+        Modal.close();
+        App.showToast('Routine mise à jour !');
+        // Auto-fill this week's sessions from routine
+        this._applyRoutine();
+        this.render();
+    },
+
+    _applyRoutine() {
+        const routine = this._getRoutine();
+        const dayKeys = ['dim','lun','mar','mer','jeu','ven','sam'];
+        const today = new Date();
+        const dayOfWeek = (today.getDay() + 6) % 7; // Monday = 0
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(today);
+            d.setDate(d.getDate() - dayOfWeek + i);
+            const key = Storage._dateKey(d);
+            const existing = Storage._get('gym_' + key, null);
+            if (!existing) {
+                const routineDay = ['lun','mar','mer','jeu','ven','sam','dim'][i];
+                const typeId = routine[routineDay];
+                if (typeId) {
+                    Storage._set('gym_' + key, { type: typeId, time: new Date().toISOString(), done: false });
+                }
+            }
+        }
     },
 
     _prevMonth() {

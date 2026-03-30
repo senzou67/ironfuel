@@ -44,6 +44,19 @@ async function searchUSDA(query) {
                 carbs: Math.round(get('Carbohydrate, by difference') * 10) / 10,
                 fat: Math.round(get('Total lipid (fat)') * 10) / 10,
                 fiber: Math.round(get('Fiber, total dietary') * 10) / 10
+            },
+            micros: {
+                vitC: Math.round(get('Vitamin C, total ascorbic acid') * 10) / 10,
+                vitD: Math.round(get('Vitamin D (D2 + D3)') * 10) / 10,
+                vitE: Math.round(get('Vitamin E (alpha-tocopherol)') * 10) / 10,
+                vitA: Math.round(get('Vitamin A, RAE') * 10) / 10,
+                vitB12: Math.round(get('Vitamin B-12') * 10) / 10,
+                calcium: Math.round(get('Calcium, Ca')),
+                iron: Math.round(get('Iron, Fe') * 10) / 10,
+                magnesium: Math.round(get('Magnesium, Mg')),
+                potassium: Math.round(get('Potassium, K')),
+                sodium: Math.round(get('Sodium, Na')),
+                zinc: Math.round(get('Zinc, Zn') * 10) / 10
             }
         };
     } catch {
@@ -89,7 +102,7 @@ async function enrichFood(food) {
     if (food.name_en) {
         const usda = await _cached('usda:' + food.name_en.toLowerCase(), 3600000, () => searchUSDA(food.name_en));
         if (usda && usda.per100g.calories > 0) {
-            return {
+            const result = {
                 name: food.name,
                 weight_g: weight,
                 calories: Math.round(usda.per100g.calories * factor),
@@ -99,6 +112,14 @@ async function enrichFood(food) {
                 fiber: Math.round(usda.per100g.fiber * factor * 10) / 10,
                 source: 'usda'
             };
+            // Include micro-nutrients if available
+            if (usda.micros) {
+                result.micros = {};
+                for (const [k, v] of Object.entries(usda.micros)) {
+                    result.micros[k] = Math.round(v * factor * 10) / 10;
+                }
+            }
+            return result;
         }
     }
 
