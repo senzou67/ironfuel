@@ -18,29 +18,55 @@ const MicronutrientService = {
     },
 
     // Micronutrient profile per food category (per 100g, approximate)
+    _guessCategory(name) {
+        if (!name) return null;
+        const n = name.toLowerCase();
+        const map = {
+            fruits: ['banane','pomme','orange','fraise','kiwi','mangue','raisin','poire','cerise','ananas','melon','pastèque','myrtille','framboise','abricot','pêche','citron'],
+            legumes: ['tomate','carotte','brocoli','courgette','poivron','épinard','salade','laitue','haricot vert','chou','aubergine','concombre','champignon','oignon','ail','petits pois','asperge','betterave','radis','navet','fenouil','artichaut','endive','céleri','maïs'],
+            viandes: ['poulet','boeuf','steak','porc','veau','dinde','agneau','filet','escalope','blanc de poulet','cuisse','entrecôte','bavette','hachis'],
+            poissons: ['saumon','thon','cabillaud','sardine','maquereau','truite','crevette','moule','bar','dorade','colin'],
+            laitiers: ['lait','yaourt','fromage blanc','crème','beurre','skyr'],
+            feculents: ['riz','pâtes','spaghetti','pain','baguette','pomme de terre','patate','semoule','quinoa','boulgour','avoine','flocon','muesli','céréales','pain de mie','tortilla','wrap'],
+            noix: ['amande','noix','cacahuète','noisette','pistache','cajou','beurre de cacahuète','beurre de cacahuètes','beurre d\'amande','purée d\'amande'],
+            fromages: ['camembert','gruyère','comté','emmental','mozzarella','parmesan','chèvre','roquefort','brie','cheddar','raclette','feta'],
+            matieres_grasses: ['huile','olive','beurre','margarine','graisse','mayonnaise'],
+            charcuterie: ['jambon','saucisse','saucisson','bacon','lard','pâté','rillette','chorizo','coppa'],
+            boissons: ['eau','jus','café','thé','soda','coca','bière','vin'],
+            desserts: ['gâteau','tarte','crème','glace','mousse','brownie','cookie','muffin','crêpe','pancake','compote'],
+            confiseries: ['chocolat','bonbon','barre','nutella','confiture','miel'],
+        };
+        for (const [cat, words] of Object.entries(map)) {
+            for (const w of words) {
+                if (n.includes(w)) return cat;
+            }
+        }
+        return null;
+    },
+
     _categoryProfiles: {
-        fruits:      { vitA: 5, vitC: 30, vitE: 0.5, potassium: 180, magnesium: 12, iron: 0.3, calcium: 10 },
-        legumes:     { vitA: 50, vitC: 20, vitE: 0.8, potassium: 250, magnesium: 18, iron: 0.8, calcium: 30, zinc: 0.4 },
-        viandes:     { vitB12: 2.5, iron: 2.5, zinc: 4, potassium: 300, magnesium: 22, sodium: 60 },
-        poissons:    { vitD: 5, vitB12: 3, omega3: 1.2, potassium: 350, magnesium: 28, iron: 0.5, calcium: 15, zinc: 0.6 },
-        laitiers:    { vitA: 30, vitB12: 0.8, vitD: 0.5, calcium: 200, potassium: 150, zinc: 0.8, magnesium: 12, sodium: 50 },
-        feculents:   { iron: 0.8, magnesium: 25, potassium: 120, zinc: 0.6, vitE: 0.3 },
-        legumineuses:{ iron: 3, magnesium: 40, potassium: 400, zinc: 1.5, vitB12: 0, calcium: 40 },
-        noix:        { vitE: 7, magnesium: 150, potassium: 500, zinc: 3, iron: 3, calcium: 80, omega3: 0.3 },
+        fruits:      { vitA: 5, vitC: 30, vitE: 0.5, potassium: 180, magnesium: 12, iron: 0.3, calcium: 10, sodium: 2 },
+        legumes:     { vitA: 50, vitC: 20, vitE: 0.8, potassium: 250, magnesium: 18, iron: 0.8, calcium: 30, zinc: 0.4, sodium: 10 },
+        viandes:     { vitB12: 2.5, iron: 2.5, zinc: 4, potassium: 300, magnesium: 22, sodium: 65, vitE: 0.3 },
+        poissons:    { vitD: 5, vitB12: 3, omega3: 1.2, potassium: 350, magnesium: 28, iron: 0.5, calcium: 15, zinc: 0.6, sodium: 60 },
+        laitiers:    { vitA: 30, vitB12: 0.8, vitD: 0.5, calcium: 200, potassium: 150, zinc: 0.8, magnesium: 12, sodium: 45 },
+        feculents:   { iron: 0.8, magnesium: 25, potassium: 120, zinc: 0.6, vitE: 0.3, sodium: 5 },
+        legumineuses:{ iron: 3, magnesium: 40, potassium: 400, zinc: 1.5, vitB12: 0, calcium: 40, sodium: 5 },
+        noix:        { vitE: 8, magnesium: 150, potassium: 500, zinc: 3, iron: 3, calcium: 80, omega3: 0.3, sodium: 5 },
         boissons:    { potassium: 20, magnesium: 5, sodium: 5 },
-        matieres_grasses: { vitE: 3, vitA: 40, omega3: 0.1 },
-        snacks:      { sodium: 300, iron: 0.5, magnesium: 10 },
-        plats:       { sodium: 400, potassium: 200, iron: 1.2, magnesium: 15, calcium: 30 },
-        petit_dejeuner: { iron: 2, calcium: 50, magnesium: 20, vitB12: 0.5 },
-        sauces:      { sodium: 800, potassium: 80 },
-        charcuterie: { sodium: 900, vitB12: 1, iron: 1, zinc: 2 },
-        fromages:    { calcium: 500, vitA: 80, vitB12: 1.2, sodium: 500, zinc: 2.5 },
-        desserts:    { calcium: 40, sodium: 100, iron: 0.5 },
-        fast_food:   { sodium: 600, potassium: 200, iron: 1.5, calcium: 50, zinc: 1.5 },
-        ethnique:    { sodium: 500, potassium: 250, iron: 1.5, magnesium: 20 },
-        vegetarien:  { iron: 2, magnesium: 30, potassium: 300, vitC: 5, calcium: 100 },
-        cereales:    { iron: 3, magnesium: 40, zinc: 1.5, potassium: 200 },
-        confiseries: { sodium: 50, iron: 0.5 }
+        matieres_grasses: { vitE: 5, vitA: 40, omega3: 0.1, sodium: 5 },
+        snacks:      { sodium: 200, iron: 0.5, magnesium: 10 },
+        plats:       { sodium: 150, potassium: 200, iron: 1.2, magnesium: 15, calcium: 30, vitE: 0.3 },
+        petit_dejeuner: { iron: 2, calcium: 50, magnesium: 20, vitB12: 0.5, sodium: 30 },
+        sauces:      { sodium: 600, potassium: 80 },
+        charcuterie: { sodium: 800, vitB12: 1, iron: 1, zinc: 2 },
+        fromages:    { calcium: 500, vitA: 80, vitB12: 1.2, sodium: 400, zinc: 2.5 },
+        desserts:    { calcium: 40, sodium: 50, iron: 0.5 },
+        fast_food:   { sodium: 500, potassium: 200, iron: 1.5, calcium: 50, zinc: 1.5 },
+        ethnique:    { sodium: 350, potassium: 250, iron: 1.5, magnesium: 20 },
+        vegetarien:  { iron: 2, magnesium: 30, potassium: 300, vitC: 5, calcium: 100, sodium: 20 },
+        cereales:    { iron: 3, magnesium: 40, zinc: 1.5, potassium: 200, sodium: 5 },
+        confiseries: { sodium: 30, iron: 0.5 }
     },
 
     // Estimate micronutrients from today's food log
@@ -68,7 +94,17 @@ const MicronutrientService = {
                     const dbFood = FoodDB.foods.find(f => f.id === entry.foodId);
                     if (dbFood) cat = dbFood.cat;
                 }
-                if (!cat) cat = 'plats'; // fallback
+                // Guess category from food name if still unknown
+                if (!cat && entry.name) {
+                    cat = this._guessCategory(entry.name);
+                }
+                if (!cat) {
+                    // Smart fallback: estimate category from macros
+                    if (entry.fat > 15) cat = 'matieres_grasses';
+                    else if (entry.protein > 15) cat = 'viandes';
+                    else if (entry.carbs > 40) cat = 'feculents';
+                    else cat = 'plats';
+                }
 
                 const profile = this._categoryProfiles[cat] || this._categoryProfiles.plats;
                 Object.keys(profile).forEach(k => {
