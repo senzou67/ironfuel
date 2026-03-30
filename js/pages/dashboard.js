@@ -284,6 +284,9 @@ const DashboardPage = {
     },
 
     _showDailyPopup() {
+        // Check if user disabled popup in settings
+        const settings = Storage.getSettings();
+        if (settings.dailyPopup === false) return;
         const today = Storage._dateKey();
         const shown = localStorage.getItem('ironfuel_daily_popup');
         if (shown === today) return;

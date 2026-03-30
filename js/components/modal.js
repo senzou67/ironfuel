@@ -1,4 +1,107 @@
 const Modal = {
+    // Common portion sizes for intuitive selection
+    PORTIONS: {
+        // Fruits
+        'banane': [{label:'Petite',g:90},{label:'Moyenne',g:120},{label:'Grande',g:150}],
+        'pomme': [{label:'Petite',g:130},{label:'Moyenne',g:180},{label:'Grande',g:220}],
+        'orange': [{label:'Petite',g:130},{label:'Moyenne',g:180},{label:'Grande',g:250}],
+        'fraise': [{label:'Barquette',g:250},{label:'Poignée',g:100}],
+        'raisin': [{label:'Grappe',g:150},{label:'Poignée',g:75}],
+        'kiwi': [{label:'1 kiwi',g:75},{label:'2 kiwis',g:150}],
+        'poire': [{label:'Petite',g:140},{label:'Moyenne',g:180}],
+        'mangue': [{label:'1/2',g:150},{label:'1 entière',g:300}],
+        'avocat': [{label:'1/2',g:75},{label:'1 entier',g:150}],
+        // Pain & céréales
+        'pain': [{label:'1 tranche',g:30},{label:'2 tranches',g:60},{label:'1/4 baguette',g:65}],
+        'baguette': [{label:'1/4',g:65},{label:'1/2',g:125},{label:'Entière',g:250}],
+        'pain de mie': [{label:'1 tranche',g:25},{label:'2 tranches',g:50}],
+        'riz': [{label:'Petite portion',g:150},{label:'Moyenne',g:200},{label:'Grande',g:300}],
+        'pâtes': [{label:'Petite portion',g:150},{label:'Moyenne',g:200},{label:'Grande',g:300}],
+        'spaghetti': [{label:'Petite',g:150},{label:'Moyenne',g:200},{label:'Grande',g:300}],
+        'flocons d\'avoine': [{label:'30g',g:30},{label:'50g',g:50},{label:'80g',g:80}],
+        'muesli': [{label:'30g',g:30},{label:'50g',g:50}],
+        'céréales': [{label:'30g',g:30},{label:'50g',g:50}],
+        // Protéines
+        'poulet': [{label:'1 filet',g:130},{label:'2 filets',g:260},{label:'Cuisse',g:180}],
+        'blanc de poulet': [{label:'1 filet',g:130},{label:'2 filets',g:260}],
+        'steak': [{label:'Petit',g:100},{label:'Moyen',g:150},{label:'Grand',g:200}],
+        'saumon': [{label:'1 pavé',g:130},{label:'Grand pavé',g:180}],
+        'thon': [{label:'1 boîte',g:80},{label:'1 pavé',g:150}],
+        'oeuf': [{label:'1 oeuf',g:60},{label:'2 oeufs',g:120},{label:'3 oeufs',g:180}],
+        'oeufs': [{label:'1',g:60},{label:'2',g:120},{label:'3',g:180}],
+        'jambon': [{label:'1 tranche',g:30},{label:'2 tranches',g:60}],
+        'whey': [{label:'1 scoop',g:30},{label:'2 scoops',g:60}],
+        // Produits laitiers
+        'lait': [{label:'1 verre',g:200},{label:'1 bol',g:300}],
+        'yaourt': [{label:'1 pot',g:125},{label:'Yaourt grec',g:170}],
+        'fromage': [{label:'1 portion',g:30},{label:'2 portions',g:60}],
+        'beurre': [{label:'1 noix',g:10},{label:'1 tartine',g:15}],
+        'beurre de cacahuète': [{label:'1 c. à soupe',g:15},{label:'2 c. à soupe',g:30}],
+        'beurre de cacahuètes': [{label:'1 c. à soupe',g:15},{label:'2 c. à soupe',g:30}],
+        'miel': [{label:'1 c. à café',g:10},{label:'1 c. à soupe',g:20}],
+        // Légumes
+        'tomate': [{label:'Petite',g:80},{label:'Moyenne',g:120},{label:'Grande',g:180}],
+        'salade': [{label:'Petite',g:50},{label:'Grande',g:100}],
+        'carotte': [{label:'1 carotte',g:80},{label:'2 carottes',g:160}],
+        'poivron': [{label:'1/2',g:80},{label:'1 entier',g:160}],
+        'courgette': [{label:'Petite',g:150},{label:'Moyenne',g:200}],
+        'brocoli': [{label:'Portion',g:150},{label:'Grande',g:250}],
+        'épinards': [{label:'Portion',g:100},{label:'Grande',g:200}],
+        'haricots verts': [{label:'Portion',g:150},{label:'Grande',g:250}],
+        'pomme de terre': [{label:'Petite',g:100},{label:'Moyenne',g:170},{label:'Grande',g:250}],
+        'patate douce': [{label:'Petite',g:130},{label:'Moyenne',g:200}],
+        // Autres
+        'huile d\'olive': [{label:'1 c. à soupe',g:10},{label:'2 c. à soupe',g:20}],
+        'chocolat': [{label:'2 carrés',g:20},{label:'4 carrés',g:40},{label:'1/2 tablette',g:50}],
+        'amandes': [{label:'Poignée',g:20},{label:'Grande poignée',g:40}],
+        'noix': [{label:'Poignée',g:20},{label:'Grande poignée',g:40}],
+    },
+
+    _getPortions(foodName) {
+        if (!foodName) return null;
+        const name = foodName.toLowerCase().trim();
+        // Exact match
+        if (this.PORTIONS[name]) return this.PORTIONS[name];
+        // Partial match
+        for (const [key, portions] of Object.entries(this.PORTIONS)) {
+            if (name.includes(key) || key.includes(name)) return portions;
+        }
+        // Check user's saved portion preference
+        const saved = Storage._get('portion_prefs', {});
+        if (saved[name]) return [{ label: 'Ma portion', g: saved[name] }];
+        return null;
+    },
+
+    _renderPortionButtons(foodName, currentGrams) {
+        const portions = this._getPortions(foodName);
+        if (!portions) return '';
+        return `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">${portions.map(p =>
+            `<button onclick="Modal._selectPortion(${p.g})" style="padding:6px 12px;border:1.5px solid ${p.g === currentGrams ? 'var(--primary)' : 'var(--border)'};border-radius:20px;background:${p.g === currentGrams ? 'var(--primary-light)' : 'transparent'};color:${p.g === currentGrams ? 'var(--primary)' : 'var(--text)'};font-size:12px;font-weight:600;cursor:pointer">${p.label} <span style="opacity:0.6">${p.g}g</span></button>`
+        ).join('')}</div>`;
+    },
+
+    _onDirectInput(pickerId, val) {
+        const grams = parseInt(val) || 1;
+        this._scrollWheelTo(pickerId, grams);
+        const input = document.getElementById('modal-grams');
+        if (input) { input.value = grams; input.dispatchEvent(new Event('input')); }
+    },
+
+    _selectPortion(grams) {
+        const input = document.getElementById('modal-grams');
+        if (input) { input.value = grams; input.dispatchEvent(new Event('input')); }
+        this._scrollWheelTo('gram-wheel', grams);
+        const direct = document.getElementById('gram-wheel-direct');
+        if (direct) direct.value = grams;
+    },
+
+    _savePortionPref(foodName, grams) {
+        if (!foodName) return;
+        const prefs = Storage._get('portion_prefs', {});
+        prefs[foodName.toLowerCase().trim()] = grams;
+        Storage._set('portion_prefs', prefs);
+    },
+
     show(content, options = {}) {
         const existing = document.querySelector('.modal-overlay');
         if (existing) existing.remove();
@@ -122,14 +225,20 @@ const Modal = {
         const items = steps.map(v => `<div class="wheel-picker-item" data-value="${v}">${v}</div>`).join('');
 
         return `
-            <div class="wheel-picker-container" id="${id}-container">
-                <div class="wheel-picker-mask wheel-picker-mask-top"></div>
-                <div class="wheel-picker-highlight"></div>
-                <div class="wheel-picker-unit">g</div>
-                <div class="wheel-picker" id="${id}" data-current="${currentValue}">
-                    ${items}
+            <div style="display:flex;align-items:center;gap:8px">
+                <div class="wheel-picker-container" id="${id}-container" style="flex:1">
+                    <div class="wheel-picker-mask wheel-picker-mask-top"></div>
+                    <div class="wheel-picker-highlight"></div>
+                    <div class="wheel-picker-unit">g</div>
+                    <div class="wheel-picker" id="${id}" data-current="${currentValue}">
+                        ${items}
+                    </div>
+                    <div class="wheel-picker-mask wheel-picker-mask-bottom"></div>
                 </div>
-                <div class="wheel-picker-mask wheel-picker-mask-bottom"></div>
+                <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+                    <input type="number" id="${id}-direct" value="${currentValue}" min="1" max="2000" style="width:60px;padding:8px;text-align:center;font-size:16px;font-weight:700;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text)" oninput="Modal._onDirectInput('${id}',this.value)">
+                    <span style="font-size:10px;color:var(--text-secondary)">grammes</span>
+                </div>
             </div>
         `;
     },
@@ -233,7 +342,9 @@ const Modal = {
                     <button onclick="Modal.adjustQty(1)">+</button>
                 </div>
             </div>
-            <label class="form-label" style="margin-top:8px">Grammage</label>
+            <label class="form-label" style="margin-top:8px">Portion</label>
+            ${this._renderPortionButtons(food.name, grams)}
+            <label class="form-label">Grammage précis</label>
             ${this._renderWheelPicker(grams, 'gram-wheel')}
             <input type="hidden" id="modal-grams" value="${grams}">
             <div class="nutrition-preview" id="modal-nutrition">
@@ -309,7 +420,9 @@ const Modal = {
                 </select>
             </div>
             ` : '<input type="hidden" id="modal-meal" value="' + mealType + '">'}
-            <label class="form-label">Grammage</label>
+            <label class="form-label">Portion</label>
+            ${this._renderPortionButtons(foodData.name, baseWeight)}
+            <label class="form-label">Grammage précis</label>
             ${this._renderWheelPicker(baseWeight, 'gram-wheel')}
             <input type="hidden" id="modal-grams" value="${baseWeight}">
             <div class="nutrition-preview" id="modal-nutrition">
