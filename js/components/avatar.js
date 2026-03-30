@@ -102,11 +102,15 @@ const Creature = {
         return s;
     },
 
+    _flame(x, y, h, w, color, dur) {
+        return `<path d="M${x} ${y} Q${x-w} ${y-h*0.6} ${x} ${y-h} Q${x+w} ${y-h*0.6} ${x} ${y}" fill="${color}"><animate attributeName="d" dur="${dur||0.6}s" repeatCount="indefinite" values="M${x} ${y} Q${x-w} ${y-h*0.6} ${x} ${y-h} Q${x+w} ${y-h*0.6} ${x} ${y};M${x} ${y} Q${x-w*1.3} ${y-h*0.7} ${x+1} ${y-h-2} Q${x+w*1.2} ${y-h*0.5} ${x} ${y};M${x} ${y} Q${x-w} ${y-h*0.6} ${x} ${y-h} Q${x+w} ${y-h*0.6} ${x} ${y}"/></path>`;
+    },
+
     _buildFire(form, p, mood) {
         let s = '';
         const cx = 50;
         if (form === 0) {
-            // Bébé chimp assis — mignon, gros yeux, petite flamme
+            // BRAISINGE — Bébé chimp assis, tout rond, gros yeux, minuscule flamme queue
             s += `<path d="M${cx+6} 62 Q${cx+14} 58 ${cx+16} 50 Q${cx+13} 54 ${cx+10} 48 Q${cx+12} 56 ${cx+6} 62" fill="${p.accent}"><animate attributeName="d" dur="0.7s" repeatCount="indefinite" values="M${cx+6} 62 Q${cx+14} 58 ${cx+16} 50 Q${cx+13} 54 ${cx+10} 48 Q${cx+12} 56 ${cx+6} 62;M${cx+6} 62 Q${cx+15} 57 ${cx+17} 48 Q${cx+14} 52 ${cx+11} 46 Q${cx+13} 55 ${cx+6} 62;M${cx+6} 62 Q${cx+14} 58 ${cx+16} 50 Q${cx+13} 54 ${cx+10} 48 Q${cx+12} 56 ${cx+6} 62"/></path>`;
             s += `<ellipse cx="${cx}" cy="58" rx="10" ry="12" fill="${p.main}" stroke="${p.dark}" stroke-width="0.8"/>`;
             s += `<ellipse cx="${cx}" cy="60" rx="6" ry="7" fill="${p.belly}"/>`;
@@ -340,17 +344,12 @@ const Creature = {
         const type = data.type || 'fire';
         const form = data.form !== undefined ? data.form : this.getForm();
         const mood = options.mood || this.getMood();
-        const p = this.PALETTES[type];
+        const src = '/assets/creatures/' + type + '_' + form + '.png';
 
-        let svg = `<svg viewBox="10 5 80 90" width="${size}" height="${size}" class="creature-svg ${mood === 'celebrating' ? 'creature-bounce' : ''}" style="overflow:visible">`;
-        svg += `<g><animateTransform attributeName="transform" type="translate" values="0,0;0,-1;0,0" dur="2.5s" repeatCount="indefinite"/>`;
-
-        if (type === 'fire') svg += this._buildFire(form, p, mood);
-        else if (type === 'plant') svg += this._buildPlant(form, p, mood);
-        else svg += this._buildWater(form, p, mood);
-
-        svg += `</g></svg>`;
-        return svg;
+        return '<svg viewBox="0 0 100 100" width="' + size + '" height="' + size + '" class="creature-svg ' + (mood === 'celebrating' ? 'creature-bounce' : '') + '" style="overflow:visible">'
+            + '<g><animateTransform attributeName="transform" type="translate" values="0,0;0,-1;0,0" dur="2.5s" repeatCount="indefinite"/>'
+            + '<image href="' + src + '" x="5" y="5" width="90" height="90" style="image-rendering:auto"/>'
+            + '</g></svg>';
     },
 
     render() {
