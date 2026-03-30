@@ -54,6 +54,14 @@ const SettingsPage = {
                 </div>
 
                 <div class="settings-group">
+                    <div class="settings-group-title">Affichage</div>
+                    <div class="settings-item" style="justify-content:space-between">
+                        <span>💡 Pop-up info du jour</span>
+                        <button class="btn ${settings.dailyPopup !== false ? 'btn-primary' : 'btn-outline'}" style="padding:4px 14px;font-size:12px;border-radius:20px" onclick="SettingsPage._toggleDailyPopup()">${settings.dailyPopup !== false ? 'ON' : 'OFF'}</button>
+                    </div>
+                </div>
+
+                <div class="settings-group">
                     <div class="settings-group-title">Repas</div>
                     <button class="settings-item" onclick="SettingsPage._editMeals()">
                         <span>🍽️ Gérer mes repas</span>
@@ -269,6 +277,13 @@ const SettingsPage = {
 
     setTheme(theme) {
         Storage.setTheme(theme);
+        this.render();
+    },
+
+    _toggleDailyPopup() {
+        const settings = Storage.getSettings();
+        settings.dailyPopup = settings.dailyPopup === false ? true : false;
+        Storage.setSettings(settings);
         this.render();
     },
 
