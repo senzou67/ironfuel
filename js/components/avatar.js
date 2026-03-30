@@ -344,17 +344,12 @@ const Creature = {
         const type = data.type || 'fire';
         const form = data.form !== undefined ? data.form : this.getForm();
         const mood = options.mood || this.getMood();
-        const p = this.PALETTES[type];
+        const src = '/assets/creatures/' + type + '_' + form + '.png';
 
-        let svg = `<svg viewBox="10 5 80 90" width="${size}" height="${size}" class="creature-svg ${mood === 'celebrating' ? 'creature-bounce' : ''}" style="overflow:visible">`;
-        svg += `<g><animateTransform attributeName="transform" type="translate" values="0,0;0,-1;0,0" dur="2.5s" repeatCount="indefinite"/>`;
-
-        if (type === 'fire') svg += this._buildFire(form, p, mood);
-        else if (type === 'plant') svg += this._buildPlant(form, p, mood);
-        else svg += this._buildWater(form, p, mood);
-
-        svg += `</g></svg>`;
-        return svg;
+        return '<svg viewBox="0 0 100 100" width="' + size + '" height="' + size + '" class="creature-svg ' + (mood === 'celebrating' ? 'creature-bounce' : '') + '" style="overflow:visible">'
+            + '<g><animateTransform attributeName="transform" type="translate" values="0,0;0,-1;0,0" dur="2.5s" repeatCount="indefinite"/>'
+            + '<image href="' + src + '" x="5" y="5" width="90" height="90" style="image-rendering:auto"/>'
+            + '</g></svg>';
     },
 
     render() {
