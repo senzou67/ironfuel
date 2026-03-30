@@ -342,7 +342,8 @@ const Creature = {
     buildSVG(size, options = {}) {
         const data = options.creatureData || this.getData();
         const type = data.type || 'fire';
-        const form = data.form !== undefined ? data.form : this.getForm();
+        // Use calculated form for normal display, only use data.form for previews
+        const form = options.creatureData ? (data.form !== undefined ? data.form : 0) : this.getForm();
         const mood = options.mood || this.getMood();
         const src = '/assets/creatures/' + type + '_' + form + '.png?v=2';
 
