@@ -344,7 +344,7 @@ const Creature = {
         const type = data.type || 'fire';
         const form = data.form !== undefined ? data.form : this.getForm();
         const mood = options.mood || this.getMood();
-        const src = '/assets/creatures/' + type + '_' + form + '.png';
+        const src = '/assets/creatures/' + type + '_' + form + '.png?v=2';
 
         return '<svg viewBox="0 0 100 100" width="' + size + '" height="' + size + '" class="creature-svg ' + (mood === 'celebrating' ? 'creature-bounce' : '') + '" style="overflow:visible">'
             + '<g><animateTransform attributeName="transform" type="translate" values="0,0;0,-1;0,0" dur="2.5s" repeatCount="indefinite"/>'
