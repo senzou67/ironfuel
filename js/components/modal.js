@@ -88,11 +88,21 @@ const Modal = {
     },
 
     _selectPortion(grams) {
+        // Update hidden grams
         const input = document.getElementById('modal-grams');
         if (input) { input.value = grams; input.dispatchEvent(new Event('input')); }
+        // Update wheel picker
         this._scrollWheelTo('gram-wheel', grams);
+        // Update direct input
         const direct = document.getElementById('gram-wheel-direct');
         if (direct) direct.value = grams;
+        // Update quantity field to match (set qty to 1, update total display)
+        const qtyInput = document.getElementById('modal-qty');
+        if (qtyInput && this._currentUnitWeight) {
+            qtyInput.value = Math.round((grams / this._currentUnitWeight) * 100) / 100;
+        }
+        const totalEl = document.getElementById('qty-total');
+        if (totalEl) totalEl.textContent = grams + 'g';
     },
 
     _savePortionPref(foodName, grams) {
@@ -377,13 +387,14 @@ const Modal = {
         setTimeout(() => {
             this._initWheelPicker('gram-wheel', (val) => {
                 document.getElementById('modal-grams').value = val;
-                // Sync quantity field with wheel picker value
                 const qtyEl = document.getElementById('modal-qty');
                 const totalEl = document.getElementById('qty-total');
+                const directEl = document.getElementById('gram-wheel-direct');
                 if (qtyEl && this._currentUnitWeight) {
                     qtyEl.value = Math.round((val / this._currentUnitWeight) * 100) / 100;
                 }
                 if (totalEl) totalEl.textContent = val + 'g';
+                if (directEl) directEl.value = val;
                 this.updatePreview(food.id);
             });
         }, 100);
@@ -456,6 +467,8 @@ const Modal = {
         setTimeout(() => {
             this._initWheelPicker('gram-wheel', (val) => {
                 document.getElementById('modal-grams').value = val;
+                const directEl = document.getElementById('gram-wheel-direct');
+                if (directEl) directEl.value = val;
                 this.updateCustomPreview();
             });
         }, 100);
