@@ -61,7 +61,7 @@ const AvatarPage = {
                 <!-- Type-themed gradient background -->
                 <div class="creature-scene" style="background:linear-gradient(180deg, ${pal.bg1} 0%, ${pal.bg2} 60%, var(--bg) 100%)">
                     <!-- Large creature -->
-                    <div class="creature-display" data-type="${data.type}">
+                    <div class="creature-display" data-type="${data.type}" style="background:none">
                         ${Creature.buildSVG(200)}
                     </div>
 

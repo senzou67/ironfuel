@@ -2389,6 +2389,10 @@ body::before {
     width: 100%;
     height: 100%;
     overflow: visible;
+    background: none !important;
+}
+.creature-svg img {
+    background: none !important;
 }
 
 .creature-card-info {
