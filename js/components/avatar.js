@@ -102,11 +102,15 @@ const Creature = {
         return s;
     },
 
+    _flame(x, y, h, w, color, dur) {
+        return `<path d="M${x} ${y} Q${x-w} ${y-h*0.6} ${x} ${y-h} Q${x+w} ${y-h*0.6} ${x} ${y}" fill="${color}"><animate attributeName="d" dur="${dur||0.6}s" repeatCount="indefinite" values="M${x} ${y} Q${x-w} ${y-h*0.6} ${x} ${y-h} Q${x+w} ${y-h*0.6} ${x} ${y};M${x} ${y} Q${x-w*1.3} ${y-h*0.7} ${x+1} ${y-h-2} Q${x+w*1.2} ${y-h*0.5} ${x} ${y};M${x} ${y} Q${x-w} ${y-h*0.6} ${x} ${y-h} Q${x+w} ${y-h*0.6} ${x} ${y}"/></path>`;
+    },
+
     _buildFire(form, p, mood) {
         let s = '';
         const cx = 50;
         if (form === 0) {
-            // Bébé chimp assis — mignon, gros yeux, petite flamme
+            // BRAISINGE — Bébé chimp assis, tout rond, gros yeux, minuscule flamme queue
             s += `<path d="M${cx+6} 62 Q${cx+14} 58 ${cx+16} 50 Q${cx+13} 54 ${cx+10} 48 Q${cx+12} 56 ${cx+6} 62" fill="${p.accent}"><animate attributeName="d" dur="0.7s" repeatCount="indefinite" values="M${cx+6} 62 Q${cx+14} 58 ${cx+16} 50 Q${cx+13} 54 ${cx+10} 48 Q${cx+12} 56 ${cx+6} 62;M${cx+6} 62 Q${cx+15} 57 ${cx+17} 48 Q${cx+14} 52 ${cx+11} 46 Q${cx+13} 55 ${cx+6} 62;M${cx+6} 62 Q${cx+14} 58 ${cx+16} 50 Q${cx+13} 54 ${cx+10} 48 Q${cx+12} 56 ${cx+6} 62"/></path>`;
             s += `<ellipse cx="${cx}" cy="58" rx="10" ry="12" fill="${p.main}" stroke="${p.dark}" stroke-width="0.8"/>`;
             s += `<ellipse cx="${cx}" cy="60" rx="6" ry="7" fill="${p.belly}"/>`;
