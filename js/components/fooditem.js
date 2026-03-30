@@ -18,6 +18,9 @@ const FoodItem = {
                 <button class="food-item-delete" onclick="event.stopPropagation();FoodItem.remove('${mealType}', ${item.id}, '${dateStr || ''}')" title="Supprimer" aria-label="Supprimer ${item.name}">
                     ✕
                 </button>
+                <button class="food-item-move" onclick="event.stopPropagation();FoodItem.showMoveModal('${mealType}', ${item.id}, '${dateStr || ''}')" title="Changer de repas" aria-label="Déplacer ${item.name}" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;font-size:14px;padding:4px;margin-right:2px">
+                    ↔
+                </button>
             </div>
         `;
     },
@@ -64,6 +67,42 @@ const FoodItem = {
             entryId: entryId,
             dateStr: dateStr
         });
+    },
+
+    showMoveModal(mealType, entryId, dateStr) {
+        const meals = Storage.getMeals();
+        const otherMeals = meals.filter(m => m.id !== mealType);
+        if (otherMeals.length === 0) { App.showToast('Aucun autre repas disponible'); return; }
+
+        Modal.show(`
+            <div class="modal-title">Déplacer vers...</div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+                ${otherMeals.map(m => `
+                    <button class="btn btn-outline" onclick="FoodItem.moveTo('${mealType}','${m.id}',${entryId},'${dateStr || ''}');Modal.close()" style="padding:14px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;justify-content:center">
+                        <span>${m.icon}</span> ${m.name}
+                    </button>
+                `).join('')}
+            </div>
+        `);
+    },
+
+    moveTo(fromMeal, toMeal, entryId, dateStr) {
+        const date = this._parseDate(dateStr);
+        const log = Storage.getDayLog(date);
+        const idx = log.meals[fromMeal]?.findIndex(f => f.id === entryId);
+        if (idx === undefined || idx < 0) { App.showToast('Aliment introuvable'); return; }
+
+        const entry = log.meals[fromMeal].splice(idx, 1)[0];
+        if (!log.meals[toMeal]) log.meals[toMeal] = [];
+        log.meals[toMeal].push(entry);
+        Storage.setDayLog(log);
+
+        const toName = Storage.getMeals().find(m => m.id === toMeal)?.name || toMeal;
+        App.showToast(`Déplacé vers ${toName}`);
+        App.haptic('light');
+
+        if (App.currentPage === 'diary') DiaryPage.render();
+        else if (App.currentPage === 'dashboard') DashboardPage.render();
     },
 
     remove(mealType, entryId, dateStr) {
