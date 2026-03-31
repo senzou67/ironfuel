@@ -37,9 +37,9 @@ const MealCard = {
                         <span class="meal-name">${config.name}</span>
                         ${items.length > 0 ? `<span class="meal-item-count" style="min-width:16px;text-align:center">${items.length}</span>` : ''}
                     </div>
-                    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-                        <span class="meal-calories">${totals.calories} kcal</span>
+                    <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
                         ${showAdd ? `<button class="meal-add-btn" onclick="event.stopPropagation();App.navigate('${context === 'dashboard' ? 'diary' : 'search'}',{meal:'${mealType}'})" aria-label="Ajouter un aliment au ${config.name}">+</button>` : ''}
+                        <span class="meal-calories">${totals.calories} kcal</span>
                         <span class="meal-chevron">›</span>
                     </div>
                 </div>

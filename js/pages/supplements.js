@@ -39,7 +39,8 @@ const SupplementsPage = {
                     ${takenToday.length > 0 ? `
                         <div style="display:flex;flex-wrap:wrap;gap:6px">
                             ${takenToday.map(s => {
-                                const info = this.SUPPLEMENTS.find(x => x.id === s.id) || s;
+                                const customs = Storage._get('custom_supplements', []);
+                                const info = this.SUPPLEMENTS.find(x => x.id === s.id) || customs.find(x => x.id === s.id) || s;
                                 return `
                                     <div style="display:flex;align-items:center;gap:4px;padding:6px 10px;border-radius:10px;background:var(--primary-light);font-size:12px;font-weight:600;color:var(--primary)">
                                         <span>${info.icon || '💊'}</span>
@@ -95,7 +96,7 @@ const SupplementsPage = {
                             <button onclick="SupplementsPage.quickTake('${s.id}')"
                                 style="padding:8px 4px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);cursor:pointer;text-align:center;transition:all 0.2s">
                                 <div style="font-size:20px">${s.icon}</div>
-                                <div style="font-size:10px;font-weight:500;color:var(--text-secondary);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.name}</div>
+                                <div style="font-size:9px;font-weight:500;color:var(--text-secondary);margin-top:2px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;max-height:22px">${s.name}</div>
                             </button>
                         `).join('')}
                     </div>
