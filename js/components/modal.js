@@ -82,9 +82,18 @@ const Modal = {
 
     _onDirectInput(pickerId, val) {
         const grams = parseInt(val) || 1;
-        this._scrollWheelTo(pickerId, grams);
+        const slider = document.getElementById(pickerId);
+        if (slider) slider.value = Math.min(grams, 500);
         const input = document.getElementById('modal-grams');
-        if (input) { input.value = grams; input.dispatchEvent(new Event('input')); }
+        if (input) input.value = grams;
+        const qtyEl = document.getElementById('modal-qty');
+        const totalEl = document.getElementById('qty-total');
+        if (qtyEl && this._currentUnitWeight) {
+            qtyEl.value = Math.round((grams / this._currentUnitWeight) * 100) / 100;
+        }
+        if (totalEl) totalEl.textContent = grams + 'g';
+        if (this._currentFoodId) this.updatePreview(this._currentFoodId);
+        else this.updateCustomPreview();
     },
 
     _selectPortion(grams) {
@@ -92,14 +101,16 @@ const Modal = {
         if (input) input.value = grams;
         const direct = document.getElementById('gram-wheel-direct');
         if (direct) direct.value = grams;
+        const slider = document.getElementById('gram-wheel');
+        if (slider) slider.value = Math.min(grams, 500);
         const qtyInput = document.getElementById('modal-qty');
         if (qtyInput && this._currentUnitWeight) {
             qtyInput.value = Math.round((grams / this._currentUnitWeight) * 100) / 100;
         }
         const totalEl = document.getElementById('qty-total');
         if (totalEl) totalEl.textContent = grams + 'g';
-        this._scrollWheelTo('gram-wheel', grams);
-        if (input) input.dispatchEvent(new Event('input'));
+        if (this._currentFoodId) this.updatePreview(this._currentFoodId);
+        else this.updateCustomPreview();
     },
 
     _savePortionPref(foodName, grams) {
@@ -222,32 +233,30 @@ const Modal = {
 
     // === WHEEL PICKER HELPER ===
     _renderWheelPicker(currentValue, id) {
-        // Generate steps: 1-50 by 1, 50-200 by 5, 200-500 by 10, 500-2000 by 50
-        const steps = [];
-        for (let v = 1; v <= 50; v++) steps.push(v);
-        for (let v = 55; v <= 200; v += 5) steps.push(v);
-        for (let v = 210; v <= 500; v += 10) steps.push(v);
-        for (let v = 550; v <= 2000; v += 50) steps.push(v);
-
-        const items = steps.map(v => `<div class="wheel-picker-item" data-value="${v}">${v}</div>`).join('');
-
         return `
-            <div style="display:flex;align-items:center;gap:8px">
-                <div class="wheel-picker-container" id="${id}-container" style="flex:1">
-                    <div class="wheel-picker-mask wheel-picker-mask-top"></div>
-                    <div class="wheel-picker-highlight"></div>
-                    <div class="wheel-picker-unit">g</div>
-                    <div class="wheel-picker" id="${id}" data-current="${currentValue}">
-                        ${items}
-                    </div>
-                    <div class="wheel-picker-mask wheel-picker-mask-bottom"></div>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
-                    <input type="number" id="${id}-direct" value="${currentValue}" min="1" max="2000" style="width:60px;padding:8px;text-align:center;font-size:16px;font-weight:700;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text)" oninput="Modal._onDirectInput('${id}',this.value)">
-                    <span style="font-size:10px;color:var(--text-secondary)">grammes</span>
-                </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 0">
+                <input type="range" id="${id}" min="1" max="500" value="${currentValue}" style="flex:1;accent-color:var(--primary)" oninput="Modal._onSliderChange('${id}',this.value)">
+                <input type="number" id="${id}-direct" value="${currentValue}" min="1" max="2000" style="width:65px;padding:8px;text-align:center;font-size:16px;font-weight:700;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text)" oninput="Modal._onDirectInput('${id}',this.value)">
+                <span style="font-size:11px;color:var(--text-secondary)">g</span>
             </div>
         `;
+    },
+
+    _onSliderChange(id, val) {
+        const grams = parseInt(val) || 1;
+        const direct = document.getElementById(id + '-direct');
+        if (direct) direct.value = grams;
+        const input = document.getElementById('modal-grams');
+        if (input) input.value = grams;
+        const qtyEl = document.getElementById('modal-qty');
+        const totalEl = document.getElementById('qty-total');
+        if (qtyEl && this._currentUnitWeight) {
+            qtyEl.value = Math.round((grams / this._currentUnitWeight) * 100) / 100;
+        }
+        if (totalEl) totalEl.textContent = grams + 'g';
+        // Update nutrition
+        if (this._currentFoodId) this.updatePreview(this._currentFoodId);
+        else this.updateCustomPreview();
     },
 
     _initWheelPicker(id, onChange) {
@@ -383,20 +392,8 @@ const Modal = {
         this._currentFoodId = food.id;
         this.show(content);
 
-        // Init wheel picker
+        // Init slider sync
         setTimeout(() => {
-            this._initWheelPicker('gram-wheel', (val) => {
-                document.getElementById('modal-grams').value = val;
-                const qtyEl = document.getElementById('modal-qty');
-                const totalEl = document.getElementById('qty-total');
-                const directEl = document.getElementById('gram-wheel-direct');
-                if (qtyEl && this._currentUnitWeight) {
-                    qtyEl.value = Math.round((val / this._currentUnitWeight) * 100) / 100;
-                }
-                if (totalEl) totalEl.textContent = val + 'g';
-                if (directEl) directEl.value = val;
-                this.updatePreview(food.id);
-            });
         }, 100);
     },
 
@@ -465,15 +462,6 @@ const Modal = {
         this._customBaseWeight = baseWeight;
         this.show(content);
 
-        // Init wheel picker
-        setTimeout(() => {
-            this._initWheelPicker('gram-wheel', (val) => {
-                document.getElementById('modal-grams').value = val;
-                const directEl = document.getElementById('gram-wheel-direct');
-                if (directEl) directEl.value = val;
-                this.updateCustomPreview();
-            });
-        }, 100);
     },
 
     // === QUANTITY ADJUSTERS ===
@@ -495,7 +483,8 @@ const Modal = {
         if (totalEl) totalEl.textContent = grams + 'g';
         const directEl = document.getElementById('gram-wheel-direct');
         if (directEl) directEl.value = grams;
-        this._scrollWheelTo('gram-wheel', grams);
+        const slider = document.getElementById('gram-wheel');
+        if (slider) slider.value = Math.min(grams, 500);
         this.updatePreview(foodId);
     },
 
