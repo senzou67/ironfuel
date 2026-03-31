@@ -172,6 +172,28 @@ const SearchPage = {
         }
 
         let results = FoodDB.search(query);
+
+        // Also search community foods (scanned/manual/AI added)
+        const communityFoods = Storage._get('community_foods', []);
+        if (communityFoods.length > 0) {
+            const q = query.toLowerCase();
+            const communityMatches = communityFoods.filter(f => f.name && f.name.toLowerCase().includes(q)).map(f => ({
+                id: 'community_' + (f.barcode || f.name),
+                name: f.name,
+                n: [f.calories || 0, f.protein || 0, f.carbs || 0, f.fat || 0],
+                cat: 'plats',
+                grams: f.grams || 100,
+                _community: true,
+                barcode: f.barcode
+            }));
+            // Add community results that aren't already in FoodDB results
+            communityMatches.forEach(cf => {
+                if (!results.some(r => r.name.toLowerCase() === cf.name.toLowerCase())) {
+                    results.push(cf);
+                }
+            });
+        }
+
         if (this.currentCategory !== 'all') {
             results = results.filter(f => f.cat === this.currentCategory);
         }
