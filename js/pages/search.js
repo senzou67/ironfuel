@@ -54,23 +54,25 @@ const SearchPage = {
                             }).join('')}
                         </div>
                     ` : ''}
-                    ${Storage.getRecipes().length > 0 ? `
-                        <div style="margin-bottom:16px">
-                            <div class="section-header" style="display:flex;align-items:center;justify-content:space-between">
-                                <span>MES RECETTES</span>
-                                <button onclick="SearchPage._manageRecipes()" style="background:none;border:none;color:var(--primary);font-size:11px;font-weight:600;cursor:pointer">Gérer</button>
-                            </div>
-                            ${Storage.getRecipes().map(r => `
-                                <div class="search-result-item" onclick="SearchPage._addRecipe(${r.id})" style="cursor:pointer">
-                                    <div class="result-info">
-                                        <div class="result-name">📋 ${r.name}</div>
-                                        <div class="result-detail">${r.items.length} aliments · ${r.items.reduce((s,i) => s + (i.calories||0), 0)} kcal</div>
-                                    </div>
-                                    <span style="font-size:11px;color:var(--primary);font-weight:600">+ Ajouter</span>
-                                </div>
-                            `).join('')}
+                    <div style="margin-bottom:16px">
+                        <div class="section-header" style="display:flex;align-items:center;justify-content:space-between">
+                            <span>MES RECETTES</span>
+                            <button onclick="SearchPage._manageRecipes()" style="background:none;border:none;color:var(--primary);font-size:11px;font-weight:600;cursor:pointer">${Storage.getRecipes().length > 0 ? 'Gérer' : '+ Créer'}</button>
                         </div>
-                    ` : ''}
+                        ${Storage.getRecipes().length > 0 ? Storage.getRecipes().map(r => `
+                            <div class="search-result-item" onclick="SearchPage._addRecipe(${r.id})" style="cursor:pointer">
+                                <div class="result-info">
+                                    <div class="result-name">📋 ${r.name}</div>
+                                    <div class="result-detail">${r.items.length} aliments · ${r.items.reduce((s,i) => s + (i.calories||0), 0)} kcal</div>
+                                </div>
+                                <span style="font-size:11px;color:var(--primary);font-weight:600">+ Ajouter</span>
+                            </div>
+                        `).join('') : `
+                            <div onclick="SearchPage._manageRecipes()" style="text-align:center;padding:14px;color:var(--text-secondary);font-size:13px;cursor:pointer;border:1.5px dashed var(--border);border-radius:12px">
+                                📋 Crée ta première recette pour ajouter tes repas habituels en 1 clic
+                            </div>
+                        `}
+                    </div>
                     ${recent.length > 0 ? `
                         <div style="margin-bottom:16px">
                             <div class="section-header">RECENTS</div>
