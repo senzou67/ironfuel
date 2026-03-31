@@ -276,12 +276,13 @@ const Modal = {
         picker.addEventListener('scroll', () => {
             clearTimeout(scrollTimer);
             scrollTimer = setTimeout(() => {
+                if (this._programmaticScroll) return;
                 this._updateWheelActive(picker, itemH);
                 const activeItem = picker.querySelector('.wheel-picker-item.active');
                 if (activeItem && onChange) {
                     onChange(parseInt(activeItem.dataset.value));
                 }
-            }, 50);
+            }, 150);
         });
     },
 
@@ -503,7 +504,9 @@ const Modal = {
             const dist = Math.abs(parseInt(item.dataset.value) - value);
             if (dist < closestDist) { closestDist = dist; closestIdx = i; }
         });
+        this._programmaticScroll = true;
         picker.scrollTo({ top: closestIdx * 40, behavior: 'smooth' });
+        setTimeout(() => { this._programmaticScroll = false; }, 400);
     },
 
     adjustCustomQty(delta) {
