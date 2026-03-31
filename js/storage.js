@@ -138,24 +138,46 @@ const Storage = {
         return foodEntry;
     },
 
+    _BANNED_WORDS: ['fuck','shit','merde','putain','bite','couille','porn','xxx','sex','nazi','hitler','drogue','drug','cocaine','heroin','weed','cannabis'],
+
+    _isValidFood(food) {
+        if (!food || !food.name || !food.calories) return false;
+        const name = food.name.toLowerCase();
+        // Reject banned words
+        if (this._BANNED_WORDS.some(w => name.includes(w))) return false;
+        // Reject suspiciously short or long names
+        if (name.length < 2 || name.length > 100) return false;
+        // Reject absurd nutrition values (per 100g equivalent)
+        const g = food.grams || 100;
+        const cal100 = (food.calories / g) * 100;
+        if (cal100 < 0 || cal100 > 1000) return false; // Nothing exceeds 900 kcal/100g (pure fat)
+        if (food.protein < 0 || food.carbs < 0 || food.fat < 0) return false;
+        const macroTotal = ((food.protein || 0) + (food.carbs || 0) + (food.fat || 0));
+        if (macroTotal <= 0) return false;
+        // Reject if macros don't roughly match calories (±50%)
+        const macroCal = (food.protein || 0) * 4 + (food.carbs || 0) * 4 + (food.fat || 0) * 9;
+        if (macroCal > 0 && Math.abs(macroCal - food.calories) / food.calories > 0.5) return false;
+        return true;
+    },
+
     _saveToCommunityDB(food) {
         try {
+            if (!this._isValidFood(food)) return;
             const db = this._get('community_foods', []);
             const key = (food.barcode || food.name || '').toLowerCase().trim();
             if (!key || db.some(f => (f.barcode || f.name || '').toLowerCase().trim() === key)) return;
             db.push({
-                name: food.name,
+                name: food.name.substring(0, 100),
                 barcode: food.barcode || null,
-                calories: food.calories,
-                protein: food.protein,
-                carbs: food.carbs,
-                fat: food.fat,
-                fiber: food.fiber || 0,
+                calories: Math.round(food.calories),
+                protein: Math.round((food.protein || 0) * 10) / 10,
+                carbs: Math.round((food.carbs || 0) * 10) / 10,
+                fat: Math.round((food.fat || 0) * 10) / 10,
+                fiber: Math.round((food.fiber || 0) * 10) / 10,
                 grams: food.grams || 100,
                 source: food.source || 'user',
                 addedAt: new Date().toISOString()
             });
-            // Keep max 500 entries
             if (db.length > 500) db.splice(0, db.length - 500);
             this._set('community_foods', db);
         } catch {}
