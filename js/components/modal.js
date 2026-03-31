@@ -88,21 +88,22 @@ const Modal = {
     },
 
     _selectPortion(grams) {
-        // Update hidden grams
         const input = document.getElementById('modal-grams');
-        if (input) { input.value = grams; input.dispatchEvent(new Event('input')); }
-        // Update wheel picker
-        this._scrollWheelTo('gram-wheel', grams);
-        // Update direct input
+        if (input) input.value = grams;
         const direct = document.getElementById('gram-wheel-direct');
         if (direct) direct.value = grams;
-        // Update quantity field to match (set qty to 1, update total display)
         const qtyInput = document.getElementById('modal-qty');
         if (qtyInput && this._currentUnitWeight) {
             qtyInput.value = Math.round((grams / this._currentUnitWeight) * 100) / 100;
         }
         const totalEl = document.getElementById('qty-total');
         if (totalEl) totalEl.textContent = grams + 'g';
+        // Scroll wheel but lock to prevent override
+        this._wheelSyncLock = true;
+        this._scrollWheelTo('gram-wheel', grams);
+        setTimeout(() => { this._wheelSyncLock = false; }, 300);
+        // Update nutrition
+        if (input) input.dispatchEvent(new Event('input'));
     },
 
     _savePortionPref(foodName, grams) {
@@ -386,6 +387,7 @@ const Modal = {
         // Init wheel picker
         setTimeout(() => {
             this._initWheelPicker('gram-wheel', (val) => {
+                if (this._wheelSyncLock) return; // Don't override when qty/portion set the value
                 document.getElementById('modal-grams').value = val;
                 const qtyEl = document.getElementById('modal-qty');
                 const totalEl = document.getElementById('qty-total');
@@ -466,6 +468,7 @@ const Modal = {
         // Init wheel picker
         setTimeout(() => {
             this._initWheelPicker('gram-wheel', (val) => {
+                if (this._wheelSyncLock) return;
                 document.getElementById('modal-grams').value = val;
                 const directEl = document.getElementById('gram-wheel-direct');
                 if (directEl) directEl.value = val;
@@ -491,8 +494,12 @@ const Modal = {
         document.getElementById('modal-grams').value = grams;
         const totalEl = document.getElementById('qty-total');
         if (totalEl) totalEl.textContent = grams + 'g';
-        // Sync wheel picker position
+        const directEl = document.getElementById('gram-wheel-direct');
+        if (directEl) directEl.value = grams;
+        // Scroll wheel but prevent it from overriding our value
+        this._wheelSyncLock = true;
         this._scrollWheelTo('gram-wheel', grams);
+        setTimeout(() => { this._wheelSyncLock = false; }, 300);
         this.updatePreview(foodId);
     },
 
