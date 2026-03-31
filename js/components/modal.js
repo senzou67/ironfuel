@@ -98,11 +98,7 @@ const Modal = {
         }
         const totalEl = document.getElementById('qty-total');
         if (totalEl) totalEl.textContent = grams + 'g';
-        // Scroll wheel but lock to prevent override
-        this._wheelSyncLock = true;
         this._scrollWheelTo('gram-wheel', grams);
-        setTimeout(() => { this._wheelSyncLock = false; }, 300);
-        // Update nutrition
         if (input) input.dispatchEvent(new Event('input'));
     },
 
@@ -387,7 +383,6 @@ const Modal = {
         // Init wheel picker
         setTimeout(() => {
             this._initWheelPicker('gram-wheel', (val) => {
-                if (this._wheelSyncLock) return; // Don't override when qty/portion set the value
                 document.getElementById('modal-grams').value = val;
                 const qtyEl = document.getElementById('modal-qty');
                 const totalEl = document.getElementById('qty-total');
@@ -468,7 +463,6 @@ const Modal = {
         // Init wheel picker
         setTimeout(() => {
             this._initWheelPicker('gram-wheel', (val) => {
-                if (this._wheelSyncLock) return;
                 document.getElementById('modal-grams').value = val;
                 const directEl = document.getElementById('gram-wheel-direct');
                 if (directEl) directEl.value = val;
@@ -496,10 +490,7 @@ const Modal = {
         if (totalEl) totalEl.textContent = grams + 'g';
         const directEl = document.getElementById('gram-wheel-direct');
         if (directEl) directEl.value = grams;
-        // Scroll wheel but prevent it from overriding our value
-        this._wheelSyncLock = true;
         this._scrollWheelTo('gram-wheel', grams);
-        setTimeout(() => { this._wheelSyncLock = false; }, 300);
         this.updatePreview(foodId);
     },
 
