@@ -352,8 +352,10 @@ const Modal = {
             </div>
             <label class="form-label" style="margin-top:8px">Portion</label>
             ${this._renderPortionButtons(food.name, grams)}
-            <label class="form-label">Grammage précis</label>
-            ${this._renderWheelPicker(grams, 'gram-wheel')}
+            <details style="margin-bottom:4px">
+                <summary style="font-size:12px;color:var(--text-secondary);cursor:pointer;margin-bottom:4px">Grammage précis</summary>
+                ${this._renderWheelPicker(grams, 'gram-wheel')}
+            </details>
             <input type="hidden" id="modal-grams" value="${grams}">
             <div class="nutrition-preview" id="modal-nutrition">
                 <div class="nutrition-item cal">
@@ -431,8 +433,10 @@ const Modal = {
             ` : '<input type="hidden" id="modal-meal" value="' + mealType + '">'}
             <label class="form-label">Portion</label>
             ${this._renderPortionButtons(foodData.name, baseWeight)}
-            <label class="form-label">Grammage précis</label>
-            ${this._renderWheelPicker(baseWeight, 'gram-wheel')}
+            <details style="margin-bottom:4px">
+                <summary style="font-size:12px;color:var(--text-secondary);cursor:pointer;margin-bottom:4px">Grammage précis</summary>
+                ${this._renderWheelPicker(baseWeight, 'gram-wheel')}
+            </details>
             <input type="hidden" id="modal-grams" value="${baseWeight}">
             <div class="nutrition-preview" id="modal-nutrition">
                 <div class="nutrition-item cal">
