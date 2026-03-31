@@ -53,6 +53,10 @@ const ChatPage = {
         const text = input?.value?.trim();
         if (!text) { App.showToast('Décris ce que tu as mangé'); return; }
         if (this._loading) return;
+        // Filter suspicious input
+        if (Storage._BANNED_WORDS && Storage._BANNED_WORDS.some(w => text.toLowerCase().includes(w))) {
+            App.showToast('Contenu inapproprié détecté'); return;
+        }
 
         this._loading = true;
         this._selectedMeal = this._selectedMeal || Storage.getCurrentMealType();

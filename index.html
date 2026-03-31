@@ -169,7 +169,7 @@
         <main id="page-content"></main>
         <div id="fab-menu" class="fab-menu hidden">
             <div class="fab-overlay" onclick="App.closeFabMenu()"></div>
-            <div class="fab-options">
+            <div class="fab-options" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:16px;max-width:320px;margin:0 auto">
                 <button class="fab-option" onclick="App.navigate('chat')">
                     <span class="fab-icon">💬</span>
                     <span>Chat IA</span>
@@ -178,10 +178,6 @@
                     <span class="fab-icon">📷</span>
                     <span>Photo IA</span>
                 </button>
-                <button class="fab-option" onclick="App.navigate('voice')">
-                    <span class="fab-icon">🎤</span>
-                    <span>Vocal</span>
-                </button>
                 <button class="fab-option" onclick="App.navigate('search')">
                     <span class="fab-icon">🔍</span>
                     <span>Recherche</span>
@@ -189,6 +185,14 @@
                 <button class="fab-option" onclick="App.navigate('barcode')">
                     <span class="fab-icon">📊</span>
                     <span>Code-barres</span>
+                </button>
+                <button class="fab-option" onclick="App.navigate('voice')">
+                    <span class="fab-icon">🎤</span>
+                    <span>Vocal</span>
+                </button>
+                <button class="fab-option" onclick="SearchPage._manageRecipes();App.closeFabMenu()">
+                    <span class="fab-icon">📋</span>
+                    <span>Recettes</span>
                 </button>
             </div>
         </div>

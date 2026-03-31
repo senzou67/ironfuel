@@ -157,14 +157,31 @@ const CameraPage = {
             canvas.getContext('2d').drawImage(img, 0, 0);
             const base64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
 
-            const foods = await VisionService.analyzeImage(base64);
+            let foods = null;
+            for (let attempt = 0; attempt < 2; attempt++) {
+                try {
+                    foods = await VisionService.analyzeImage(base64);
+                    if (foods && foods.length > 0) break;
+                } catch (e) {
+                    if (attempt === 0) {
+                        App.showToast('Retry en cours...');
+                        continue;
+                    }
+                    throw e;
+                }
+            }
 
             document.getElementById('camera-loading').style.display = 'none';
-            this.showResults(foods);
+            if (foods && foods.length > 0) {
+                this.showResults(foods);
+            } else {
+                document.getElementById('camera-actions').style.display = 'block';
+                App.showToast('Aucun aliment détecté. Réessaie avec une photo plus claire.');
+            }
         } catch (err) {
             document.getElementById('camera-loading').style.display = 'none';
             document.getElementById('camera-actions').style.display = 'block';
-            App.showToast(err.message || 'Erreur lors de l\'analyse');
+            App.showToast(err.message || 'Erreur — réessaie');
         }
     },
 

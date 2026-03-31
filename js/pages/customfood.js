@@ -116,6 +116,10 @@ const CustomFoodPage = {
             App.showToast('Veuillez entrer un nom');
             return;
         }
+        if (!Storage._isValidFood({ name, calories, protein, carbs, fat, grams: 100 })) {
+            App.showToast('Nom ou valeurs nutritionnelles invalides');
+            return;
+        }
         if (isNaN(calories) || isNaN(protein) || isNaN(carbs) || isNaN(fat)) {
             App.showToast('Veuillez remplir les valeurs nutritionnelles');
             return;
