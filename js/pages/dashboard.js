@@ -170,28 +170,28 @@ const DashboardPage = {
 
                     <div class="macro-bars compact">
                         <div class="macro-bar">
-                            <span class="macro-bar-label">P</span>
+                            <span class="macro-bar-label">Prot.</span>
                             <div class="macro-bar-track">
                                 <div class="macro-bar-fill protein" style="width:${pctProt}%"></div>
                             </div>
                             <span class="macro-bar-value" style="color:var(--protein-color)">${Math.round(totals.protein)}/${goals.protein}g</span>
                         </div>
                         <div class="macro-bar">
-                            <span class="macro-bar-label">G</span>
+                            <span class="macro-bar-label">Gluc.</span>
                             <div class="macro-bar-track">
                                 <div class="macro-bar-fill carbs" style="width:${pctCarbs}%"></div>
                             </div>
                             <span class="macro-bar-value" style="color:var(--carbs-color)">${Math.round(totals.carbs)}/${goals.carbs}g</span>
                         </div>
                         <div class="macro-bar">
-                            <span class="macro-bar-label">L</span>
+                            <span class="macro-bar-label">Lip.</span>
                             <div class="macro-bar-track">
                                 <div class="macro-bar-fill fat" style="width:${pctFat}%"></div>
                             </div>
                             <span class="macro-bar-value" style="color:var(--fat-color)">${Math.round(totals.fat)}/${goals.fat}g</span>
                         </div>
                         <div class="macro-bar">
-                            <span class="macro-bar-label">F</span>
+                            <span class="macro-bar-label">Fib.</span>
                             <div class="macro-bar-track">
                                 <div class="macro-bar-fill fiber" style="width:${pctFiber}%"></div>
                             </div>
