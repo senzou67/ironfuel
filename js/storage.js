@@ -632,6 +632,35 @@ const Storage = {
     },
 
     // === CLOUD SYNC TRIGGER ===
+    // === RECETTES ===
+    getRecipes() { return this._get('recipes', []); },
+    saveRecipe(recipe) {
+        const recipes = this.getRecipes();
+        if (recipe.id) {
+            const idx = recipes.findIndex(r => r.id === recipe.id);
+            if (idx >= 0) recipes[idx] = recipe;
+            else recipes.push(recipe);
+        } else {
+            recipe.id = Date.now();
+            recipes.push(recipe);
+        }
+        this._set('recipes', recipes);
+        this._triggerSync();
+        return recipe;
+    },
+    deleteRecipe(id) {
+        const recipes = this.getRecipes().filter(r => r.id !== id);
+        this._set('recipes', recipes);
+        this._triggerSync();
+    },
+    addRecipeToMeal(recipeId, mealType, date) {
+        const recipe = this.getRecipes().find(r => r.id === recipeId);
+        if (!recipe) return;
+        recipe.items.forEach(item => {
+            this.addFoodToMeal(mealType, { ...item, id: undefined, fromRecipe: recipe.name });
+        });
+    },
+
     _triggerSync() {
         if (typeof SyncService !== 'undefined' && SyncService.autoSync) {
             SyncService.autoSync();

@@ -54,6 +54,23 @@ const SearchPage = {
                             }).join('')}
                         </div>
                     ` : ''}
+                    ${Storage.getRecipes().length > 0 ? `
+                        <div style="margin-bottom:16px">
+                            <div class="section-header" style="display:flex;align-items:center;justify-content:space-between">
+                                <span>MES RECETTES</span>
+                                <button onclick="SearchPage._manageRecipes()" style="background:none;border:none;color:var(--primary);font-size:11px;font-weight:600;cursor:pointer">Gérer</button>
+                            </div>
+                            ${Storage.getRecipes().map(r => `
+                                <div class="search-result-item" onclick="SearchPage._addRecipe(${r.id})" style="cursor:pointer">
+                                    <div class="result-info">
+                                        <div class="result-name">📋 ${r.name}</div>
+                                        <div class="result-detail">${r.items.length} aliments · ${r.items.reduce((s,i) => s + (i.calories||0), 0)} kcal</div>
+                                    </div>
+                                    <span style="font-size:11px;color:var(--primary);font-weight:600">+ Ajouter</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
                     ${recent.length > 0 ? `
                         <div style="margin-bottom:16px">
                             <div class="section-header">RECENTS</div>
@@ -349,5 +366,121 @@ const SearchPage = {
     _scrollCats(dir) {
         const el = document.getElementById('category-chips');
         if (el) el.scrollBy({ left: dir * 200, behavior: 'smooth' });
+    },
+
+    _addRecipe(recipeId) {
+        const mealType = this.currentMeal || Storage.getCurrentMealType();
+        Storage.addRecipeToMeal(recipeId, mealType);
+        const recipe = Storage.getRecipes().find(r => r.id === recipeId);
+        App.showToast(`📋 ${recipe?.name || 'Recette'} ajoutée !`);
+        App.haptic('success');
+    },
+
+    _manageRecipes() {
+        const recipes = Storage.getRecipes();
+        Modal.show(`
+            <div class="modal-title">Mes recettes</div>
+            ${recipes.length === 0 ? '<p style="color:var(--text-secondary);font-size:13px">Aucune recette. Crée-en une depuis un repas existant.</p>' : ''}
+            ${recipes.map(r => `
+                <div style="display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px">
+                    <div style="flex:1">
+                        <div style="font-weight:700;font-size:14px">${r.name}</div>
+                        <div style="font-size:11px;color:var(--text-secondary)">${r.items.length} aliments · ${r.items.reduce((s,i) => s + (i.calories||0), 0)} kcal</div>
+                    </div>
+                    <button onclick="SearchPage._editRecipe(${r.id})" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:12px;font-weight:600">Modifier</button>
+                    <button onclick="Storage.deleteRecipe(${r.id});SearchPage._manageRecipes()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:14px">✕</button>
+                </div>
+            `).join('')}
+            <button class="btn btn-primary" onclick="SearchPage._createRecipe()" style="width:100%;margin-top:12px">+ Créer une recette</button>
+        `);
+    },
+
+    _createRecipe() {
+        Modal.show(`
+            <div class="modal-title">Nouvelle recette</div>
+            <div class="form-group">
+                <label class="form-label">Nom de la recette</label>
+                <input type="text" class="form-input" id="recipe-name" placeholder="Ex: Mon bowl protéiné">
+            </div>
+            <p style="color:var(--text-secondary);font-size:12px;margin-bottom:12px">Tu pourras ajouter des aliments après la création.</p>
+            <button class="btn btn-primary" onclick="SearchPage._saveNewRecipe()" style="width:100%">Créer</button>
+        `);
+    },
+
+    _saveNewRecipe() {
+        const name = document.getElementById('recipe-name')?.value?.trim();
+        if (!name) { App.showToast('Donne un nom à ta recette'); return; }
+        Storage.saveRecipe({ name, items: [] });
+        Modal.close();
+        App.showToast('Recette créée ! Ajoute des aliments.');
+        this._manageRecipes();
+    },
+
+    _editRecipe(recipeId) {
+        const recipe = Storage.getRecipes().find(r => r.id === recipeId);
+        if (!recipe) return;
+        Modal.show(`
+            <div class="modal-title">${recipe.name}</div>
+            <div class="form-group">
+                <label class="form-label">Nom</label>
+                <input type="text" class="form-input" id="recipe-edit-name" value="${recipe.name}">
+            </div>
+            <div style="margin-bottom:12px">
+                <label class="form-label">Aliments (${recipe.items.length})</label>
+                ${recipe.items.length === 0 ? '<p style="color:var(--text-secondary);font-size:12px">Aucun aliment. Recherche et ajoute des aliments à cette recette.</p>' : ''}
+                ${recipe.items.map((item, i) => `
+                    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+                        <div style="flex:1;font-size:13px">${item.name} <span style="color:var(--text-secondary)">${item.grams || ''}g · ${item.calories} kcal</span></div>
+                        <button onclick="SearchPage._removeRecipeItem(${recipeId},${i})" style="background:none;border:none;color:var(--danger);cursor:pointer">✕</button>
+                    </div>
+                `).join('')}
+            </div>
+            <div style="display:flex;gap:8px">
+                <button class="btn btn-outline" onclick="SearchPage._addToRecipeMode(${recipeId})" style="flex:1">+ Ajouter un aliment</button>
+                <button class="btn btn-primary" onclick="SearchPage._saveEditedRecipe(${recipeId})" style="flex:1">Enregistrer</button>
+            </div>
+        `);
+    },
+
+    _removeRecipeItem(recipeId, itemIdx) {
+        const recipe = Storage.getRecipes().find(r => r.id === recipeId);
+        if (!recipe) return;
+        recipe.items.splice(itemIdx, 1);
+        Storage.saveRecipe(recipe);
+        this._editRecipe(recipeId);
+    },
+
+    _saveEditedRecipe(recipeId) {
+        const recipe = Storage.getRecipes().find(r => r.id === recipeId);
+        if (!recipe) return;
+        const name = document.getElementById('recipe-edit-name')?.value?.trim();
+        if (name) recipe.name = name;
+        Storage.saveRecipe(recipe);
+        Modal.close();
+        App.showToast('Recette mise à jour !');
+    },
+
+    _addToRecipeMode(recipeId) {
+        this._recipeMode = recipeId;
+        Modal.close();
+        App.showToast('Recherche un aliment et ajoute-le à la recette');
+    },
+
+    _addFoodToRecipe(food, grams) {
+        const recipe = Storage.getRecipes().find(r => r.id === this._recipeMode);
+        if (!recipe) return;
+        const n = FoodDB.getNutrition(food, grams);
+        recipe.items.push({
+            name: food.name,
+            foodId: food.id,
+            grams: grams,
+            calories: n.calories,
+            protein: n.protein,
+            carbs: n.carbs,
+            fat: n.fat
+        });
+        Storage.saveRecipe(recipe);
+        App.showToast(`${food.name} ajouté à "${recipe.name}"`);
+        this._recipeMode = null;
     }
 };
