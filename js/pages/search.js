@@ -198,6 +198,11 @@ const SearchPage = {
             results = results.filter(f => f.cat === this.currentCategory);
         }
 
+        // Also search cloud community DB (async)
+        if (query.length >= 2) {
+            this._searchCommunityCloud(query, results.map(r => r.name.toLowerCase()));
+        }
+
         if (results.length === 0) {
             resultsEl.innerHTML = `
                 <div class="empty-state">
@@ -390,6 +395,29 @@ const SearchPage = {
     _scrollCats(dir) {
         const el = document.getElementById('category-chips');
         if (el) el.scrollBy({ left: dir * 200, behavior: 'smooth' });
+    },
+
+    async _searchCommunityCloud(query, existingNames) {
+        try {
+            const res = await fetch('/.netlify/functions/community-foods?action=search&q=' + encodeURIComponent(query));
+            if (!res.ok) return;
+            const data = await res.json();
+            if (!data.foods || data.foods.length === 0) return;
+            const container = document.getElementById('online-results');
+            if (!container) return;
+            const newFoods = data.foods.filter(f => !existingNames.includes(f.name.toLowerCase()));
+            if (newFoods.length === 0) return;
+            container.innerHTML = `<div class="section-header" style="margin-top:12px">COMMUNAUTÉ</div>` +
+                newFoods.map(f => `
+                    <div class="search-result-item" onclick="Modal.showCustomFoodModal({name:'${f.name.replace(/'/g,"\\'")}',calories:${f.calories},protein:${f.protein},carbs:${f.carbs},fat:${f.fat},fiber:${f.fiber||0},weight_g:${f.grams||100}},{mealType:'${this.currentMeal}'})" style="cursor:pointer">
+                        <div class="result-info">
+                            <div class="result-name">🌐 ${f.name}</div>
+                            <div class="result-detail">${f.calories} kcal · P:${f.protein}g · G:${f.carbs}g · L:${f.fat}g${f.votes > 1 ? ' · 👍 ' + f.votes : ''}</div>
+                        </div>
+                        <span class="result-calories">${f.calories}</span>
+                    </div>
+                `).join('') + container.innerHTML;
+        } catch {}
     },
 
     _addRecipe(recipeId) {

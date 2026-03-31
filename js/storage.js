@@ -163,10 +163,11 @@ const Storage = {
     _saveToCommunityDB(food) {
         try {
             if (!this._isValidFood(food)) return;
+            // Save locally
             const db = this._get('community_foods', []);
             const key = (food.barcode || food.name || '').toLowerCase().trim();
             if (!key || db.some(f => (f.barcode || f.name || '').toLowerCase().trim() === key)) return;
-            db.push({
+            const entry = {
                 name: food.name.substring(0, 100),
                 barcode: food.barcode || null,
                 calories: Math.round(food.calories),
@@ -177,9 +178,16 @@ const Storage = {
                 grams: food.grams || 100,
                 source: food.source || 'user',
                 addedAt: new Date().toISOString()
-            });
+            };
+            db.push(entry);
             if (db.length > 500) db.splice(0, db.length - 500);
             this._set('community_foods', db);
+            // Also push to cloud community DB (fire and forget)
+            fetch('/.netlify/functions/community-foods?action=add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(entry)
+            }).catch(() => {});
         } catch {}
     },
 
