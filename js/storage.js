@@ -131,8 +131,8 @@ const Storage = {
         foodEntry.id = Date.now() + Math.random();
         log.meals[mealType].push(foodEntry);
         this.setDayLog(log);
-        // Save to community food database if it has verified nutrition data
-        if (foodEntry.name && foodEntry.calories && (foodEntry.source === 'usda' || foodEntry.source === 'openfoodfacts' || foodEntry.barcode)) {
+        // Save to community food database (all foods with nutrition data)
+        if (foodEntry.name && foodEntry.calories) {
             this._saveToCommunityDB(foodEntry);
         }
         return foodEntry;
