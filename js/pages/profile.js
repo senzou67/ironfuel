@@ -33,7 +33,6 @@ const ProfilePage = {
                 </div>
                 <h2 style="text-align:center;font-size:20px">${profile.name || 'Mon profil'}</h2>
                 ${authUser && authUser.email ? `<p style="text-align:center;font-size:12px;color:var(--text-secondary);margin-top:-4px">${authUser.email}</p>` : ''}
-                <button class="btn btn-outline" onclick="App.navigate('avatar')" style="margin:8px auto;display:block;font-size:12px;padding:6px 16px">Modifier mon avatar</button>
 
                 <div class="profile-stats">
                     <div class="profile-stat">

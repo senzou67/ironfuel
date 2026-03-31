@@ -57,6 +57,19 @@ const SupplementsPage = {
                     `}
                 </div>
 
+                <!-- Custom supplement add -->
+                <div class="card" style="padding:14px 16px;margin-bottom:12px">
+                    <div style="font-size:14px;font-weight:700;margin-bottom:10px">Ajouter un complément</div>
+                    <div style="display:flex;gap:8px;align-items:stretch">
+                        <input type="text" id="custom-suppl-name"
+                               placeholder="Ex: Spiruline..."
+                               class="form-input"
+                               style="flex:1 1 0%;min-width:0;font-size:16px;font-weight:600;padding:12px 14px;min-height:48px;border-radius:12px;color:#212121;background:#fff">
+                        <button class="btn btn-primary" onclick="SupplementsPage._addCustom()"
+                                style="flex:0 0 48px;width:48px;padding:0;font-size:20px;min-height:48px;border-radius:12px;font-weight:700;display:flex;align-items:center;justify-content:center">+</button>
+                    </div>
+                </div>
+
                 <!-- My Supplement Plan -->
                 <div class="card" style="padding:14px 16px;margin-bottom:12px">
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
@@ -86,33 +99,6 @@ const SupplementsPage = {
                             <button class="btn btn-primary" onclick="SupplementsPage._editPlan()" style="margin-top:10px;font-size:13px;padding:8px 20px">Configurer mon plan</button>
                         </div>
                     `}
-                </div>
-
-                <!-- Quick Add from library -->
-                <div class="card" style="padding:14px 16px">
-                    <div style="font-size:14px;font-weight:700;margin-bottom:10px">Prise rapide</div>
-                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-                        ${this.SUPPLEMENTS.slice(0, 8).map(s => `
-                            <button onclick="SupplementsPage.quickTake('${s.id}')"
-                                style="padding:8px 4px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);cursor:pointer;text-align:center;transition:all 0.2s">
-                                <div style="font-size:20px">${s.icon}</div>
-                                <div style="font-size:9px;font-weight:500;color:var(--text-secondary);margin-top:2px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;max-height:22px">${s.name}</div>
-                            </button>
-                        `).join('')}
-                    </div>
-                </div>
-
-                <!-- Custom supplement add -->
-                <div class="card" style="padding:14px 16px;margin-top:12px">
-                    <div style="font-size:14px;font-weight:700;margin-bottom:10px">Ajouter un complément</div>
-                    <div style="display:flex;gap:8px;align-items:stretch">
-                        <input type="text" id="custom-suppl-name"
-                               placeholder="Ex: Spiruline..."
-                               class="form-input"
-                               style="flex:1 1 0%;min-width:0;font-size:16px;font-weight:600;padding:12px 14px;min-height:48px;border-radius:12px;color:#212121;background:#fff">
-                        <button class="btn btn-primary" onclick="SupplementsPage._addCustom()"
-                                style="flex:0 0 48px;width:48px;padding:0;font-size:20px;min-height:48px;border-radius:12px;font-weight:700;display:flex;align-items:center;justify-content:center">+</button>
-                    </div>
                 </div>
 
                 <!-- Stats -->

@@ -57,7 +57,7 @@ const AvatarPage = {
         document.getElementById('page-title').textContent = playerName;
 
         content.innerHTML = `
-            <div class="creature-page fade-in">
+            <div class="creature-page fade-in" style="padding-bottom:80px">
                 <!-- Type-themed gradient background -->
                 <div class="creature-scene" style="background:linear-gradient(180deg, ${pal.bg1} 0%, ${pal.bg2} 60%, var(--bg) 100%)">
                     <!-- Large creature -->

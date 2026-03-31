@@ -52,6 +52,16 @@ const CameraPage = {
 
     async startCamera() {
         try {
+            // Check permission status first (avoid repeated prompts)
+            if (navigator.permissions) {
+                try {
+                    const perm = await navigator.permissions.query({ name: 'camera' });
+                    if (perm.state === 'denied') {
+                        App.showToast('Autorise la caméra dans les paramètres de ton navigateur');
+                        return;
+                    }
+                } catch {}
+            }
             this.stream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 960 } }
             });
