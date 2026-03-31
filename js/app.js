@@ -442,17 +442,18 @@ const App = {
     // R3: Post-onboarding tutorial
     _showTutorialIfNeeded() {
         try {
-            if (localStorage.getItem('nutritrack_tutorial_v2_done')) return;
+            if (localStorage.getItem('nutritrack_tutorial_v3_done')) return;
         } catch(e) { return; }
 
         const steps = [
-            { icon: '🍽️', title: 'Ajoute tes repas', desc: 'Utilise Photo IA, Vocal ou Recherche pour tracker tout ce que tu manges.' },
-            { icon: '💧', title: 'Hydratation', desc: 'Clique sur le réservoir d\'eau pour ajouter 250ml. Un bonus t\'attend à l\'objectif !' },
-            { icon: '💊', title: 'Compléments', desc: 'Configure ton plan de suppléments et coche-les chaque jour. (Premium)' },
-            { icon: '🏋️', title: 'Salle de sport', desc: 'Planifie tes séances Push/Pull/Legs et suis ton calendrier. (Premium)' },
-            { icon: '⚖️', title: 'Suivi du poids', desc: 'Note ton poids régulièrement pour voir ta courbe de progression. (Premium)' },
-            { icon: '🐣', title: 'Ta créature', desc: 'Plus tu es régulier, plus elle gagne d\'XP et évolue. Débloque des cosmétiques ! (Premium)' },
-            { icon: '⭐', title: 'OneFood Premium', desc: 'Débloque la créature, les compléments, la salle, le poids et bien plus !' }
+            { icon: '🍽️', title: 'Ajoute tes repas', desc: 'Appuie sur le + pour ajouter : Chat IA, Photo IA, Recherche, Code-barres ou Vocal.' },
+            { icon: '📋', title: 'Recettes favorites', desc: 'Crée tes recettes habituelles et ajoute-les en 1 clic depuis le bouton +.' },
+            { icon: '💧', title: 'Hydratation', desc: 'Clique sur le bouton eau pour ajouter 250ml. Un bonus t\'attend à l\'objectif !' },
+            { icon: '💊', title: 'Compléments', desc: 'Configure ton plan de suppléments et coche-les chaque jour.' },
+            { icon: '🏋️', title: 'Salle de sport', desc: 'Planifie ta routine hebdo et marque tes séances comme faites.' },
+            { icon: '⚖️', title: 'Suivi du poids', desc: 'Note ton poids régulièrement pour voir ta courbe de progression.' },
+            { icon: '🐣', title: 'Ta créature', desc: 'Plus tu es régulier, plus elle gagne d\'XP et évolue ! 3 types, 4 formes.' },
+            { icon: '🔔', title: 'Notifications', desc: 'Active les rappels dans Paramètres pour ne rien oublier : repas, eau, salle, compléments.' }
         ];
 
         let currentStep = 0;
@@ -495,7 +496,7 @@ const App = {
         this._closeTutorial = () => {
             const overlay = document.getElementById('tutorial-overlay');
             if (overlay) overlay.remove();
-            try { localStorage.setItem('nutritrack_tutorial_v2_done', '1'); } catch(e) {}
+            try { localStorage.setItem('nutritrack_tutorial_v3_done', '1'); } catch(e) {}
         };
 
         // Delay to let dashboard render first

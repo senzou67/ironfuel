@@ -68,7 +68,11 @@ const CameraPage = {
                 if (btn) btn.classList.remove('hidden');
             }
         } catch (err) {
-            App.showToast('Impossible d\'accéder à la caméra');
+            if (err.name === 'NotAllowedError') {
+                App.showToast('Autorise l\'accès caméra dans les paramètres de ton navigateur');
+            } else {
+                App.showToast('Impossible d\'accéder à la caméra');
+            }
         }
     },
 

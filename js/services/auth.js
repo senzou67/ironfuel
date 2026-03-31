@@ -247,7 +247,9 @@ const AuthService = {
             const result = await firebase.auth().createUserWithEmailAndPassword(email, password);
             this._user = result.user;
             this._saveUserProfile(result.user);
-            App.showToast('Compte créé ! Bienvenue !');
+            // Send verification email
+            try { await result.user.sendEmailVerification(); } catch {}
+            App.showToast('Compte créé ! Vérifie tes emails pour confirmer.');
             return result.user;
         } catch (err) {
             if (err.code === 'auth/email-already-in-use') {
