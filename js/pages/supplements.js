@@ -244,7 +244,8 @@ const SupplementsPage = {
     _editPlan() {
         const mySupplements = Storage._get('my_supplements', []);
         const customs = Storage._get('custom_supplements', []);
-        const allSupplements = [...this.SUPPLEMENTS, ...customs];
+        // Customs first, then predefined
+        const allSupplements = [...customs, ...this.SUPPLEMENTS];
 
         const html = allSupplements.map(s => {
             const planEntry = mySupplements.find(ms => ms.id === s.id);
@@ -261,6 +262,7 @@ const SupplementsPage = {
                             ${isCustom ? '<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:var(--accent);color:white">Perso</span>' : ''}
                         </div>
                     </div>
+                    ${isCustom ? `<button onclick="event.stopPropagation();SupplementsPage._deleteCustom('${s.id}')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:16px;padding:4px">✕</button>` : ''}
                     <div style="display:flex;align-items:center;gap:4px;flex-shrink:0" onclick="event.stopPropagation()">
                         <input type="number" class="suppl-dose-input" data-id="${s.id}" value="${dose}" min="1" max="99" style="width:42px;padding:4px 6px;font-size:13px;font-weight:600;text-align:center;border:1.5px solid var(--border);border-radius:8px;background:var(--surface)">
                         <span style="font-size:11px;color:var(--text-secondary)">${s.unit || ''}</span>
@@ -290,6 +292,19 @@ const SupplementsPage = {
                 };
             });
         }, 100);
+    },
+
+    _deleteCustom(id) {
+        let customs = Storage._get('custom_supplements', []);
+        customs = customs.filter(c => c.id !== id);
+        Storage._set('custom_supplements', customs);
+        // Also remove from plan
+        let plan = Storage._get('my_supplements', []);
+        plan = plan.filter(p => p.id !== id);
+        Storage._set('my_supplements', plan);
+        App.showToast('Complément supprimé');
+        Modal.close();
+        this._editPlan();
     },
 
     _savePlan() {
