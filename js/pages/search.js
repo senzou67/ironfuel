@@ -26,8 +26,17 @@ const SearchPage = {
         const suggestions = Storage.getTopFoods(currentMeal, 5);
 
         const content = document.getElementById('page-content');
+        const recipeBanner = this._recipeMode ? (() => {
+            const r = Storage.getRecipes().find(x => x.id === this._recipeMode);
+            return `<div style="background:var(--primary);color:white;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-radius:12px;margin-bottom:10px">
+                <span style="font-size:13px;font-weight:600">📋 Ajout à : ${r?.name || 'recette'} (${r?.items?.length || 0} aliments)</span>
+                <button onclick="SearchPage._finishRecipeMode()" style="background:white;color:var(--primary);border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer">Terminer</button>
+            </div>`;
+        })() : '';
+
         content.innerHTML = `
             <div class="search-container fade-in">
+                ${recipeBanner}
                 <div class="search-bar">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
@@ -467,10 +476,12 @@ const SearchPage = {
     _saveNewRecipe() {
         const name = document.getElementById('recipe-name')?.value?.trim();
         if (!name) { App.showToast('Donne un nom à ta recette'); return; }
-        Storage.saveRecipe({ name, items: [] });
+        const recipe = Storage.saveRecipe({ name, items: [] });
         Modal.close();
-        App.showToast('Recette créée ! Ajoute des aliments.');
-        this._manageRecipes();
+        // Go to search in recipe mode
+        this._recipeMode = recipe.id;
+        App.navigate('search');
+        App.showToast(`📋 "${name}" créée — recherche des aliments à ajouter`);
     },
 
     _editRecipe(recipeId) {
@@ -520,7 +531,9 @@ const SearchPage = {
     _addToRecipeMode(recipeId) {
         this._recipeMode = recipeId;
         Modal.close();
-        App.showToast('Recherche un aliment et ajoute-le à la recette');
+        App.navigate('search');
+        const recipe = Storage.getRecipes().find(r => r.id === recipeId);
+        App.showToast(`📋 Ajoute des aliments à "${recipe?.name || 'recette'}"`);
     },
 
     _addFoodToRecipe(food, grams) {
@@ -537,7 +550,17 @@ const SearchPage = {
             fat: n.fat
         });
         Storage.saveRecipe(recipe);
-        App.showToast(`${food.name} ajouté à "${recipe.name}"`);
+        App.showToast(`✓ ${food.name} ajouté à "${recipe.name}"`);
+        // Stay in recipe mode — re-render search to update banner count
+        this.render();
+    },
+
+    _finishRecipeMode() {
+        const recipe = Storage.getRecipes().find(r => r.id === this._recipeMode);
         this._recipeMode = null;
+        if (recipe && recipe.items.length > 0) {
+            App.showToast(`📋 "${recipe.name}" sauvegardée (${recipe.items.length} aliments)`);
+        }
+        this.render();
     }
 };
