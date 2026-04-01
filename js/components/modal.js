@@ -330,7 +330,9 @@ const Modal = {
         const mealNames = {};
         Storage.getMeals().forEach(m => mealNames[m.id] = m.name);
 
-        const btnText = editMode ? 'Modifier' : 'Ajouter au journal';
+        const isRecipeMode = typeof SearchPage !== 'undefined' && !!SearchPage._recipeMode;
+        const recipeName = isRecipeMode ? (Storage.getRecipes().find(r => r.id === SearchPage._recipeMode)?.name || 'recette') : '';
+        const btnText = editMode ? 'Modifier' : isRecipeMode ? `Ajouter à "${recipeName}"` : 'Ajouter au journal';
         const btnAction = editMode ? `Modal.updateFood(${foodIdParam})` : `Modal.addFood(${foodIdParam})`;
 
         const content = `
@@ -340,7 +342,7 @@ const Modal = {
                     ${isFav ? '\u2B50' : '\u2606'}
                 </button>
             </div>
-            ${!editMode ? `
+            ${!editMode && !isRecipeMode ? `
             <div class="form-group">
                 <label class="form-label">Repas</label>
                 <select class="form-select" id="modal-meal">
@@ -412,13 +414,15 @@ const Modal = {
         Storage.getMeals().forEach(m => mealNames[m.id] = m.name);
 
         const baseWeight = foodData.weight_g || 100;
-        const btnText = editMode ? 'Modifier' : 'Ajouter au journal';
+        const isRecipeMode = typeof SearchPage !== 'undefined' && !!SearchPage._recipeMode;
+        const recipeName = isRecipeMode ? (Storage.getRecipes().find(r => r.id === SearchPage._recipeMode)?.name || 'recette') : '';
+        const btnText = editMode ? 'Modifier' : isRecipeMode ? `Ajouter à "${recipeName}"` : 'Ajouter au journal';
         const btnAction = editMode ? 'Modal.updateCustomFood()' : 'Modal.addCustomFood()';
 
         const content = `
             <div class="modal-title">${foodData.name}</div>
             ${foodData.weight_g && !editMode ? `<p style="color:var(--text-secondary);margin-bottom:12px">Poids estim\u00e9 : ${foodData.weight_g}g</p>` : ''}
-            ${!editMode ? `
+            ${!editMode && !isRecipeMode ? `
             <div class="form-group">
                 <label class="form-label">Repas</label>
                 <select class="form-select" id="modal-meal">
