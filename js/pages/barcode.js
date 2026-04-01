@@ -266,7 +266,9 @@ const BarcodePage = {
             protein: n.protein,
             carbs: n.carbs,
             fat: n.fat,
-            fiber: n.fiber
+            fiber: n.fiber,
+            barcode: this._currentProduct.barcode || null,
+            source: 'barcode'
         });
     },
 

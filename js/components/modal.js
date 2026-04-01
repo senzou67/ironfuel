@@ -659,7 +659,10 @@ const Modal = {
             protein: Math.round(this._customFood.protein * ratio * 10) / 10,
             carbs: Math.round(this._customFood.carbs * ratio * 10) / 10,
             fat: Math.round(this._customFood.fat * ratio * 10) / 10,
-            fiber: Math.round((this._customFood.fiber || 0) * ratio * 10) / 10
+            fiber: Math.round((this._customFood.fiber || 0) * ratio * 10) / 10,
+            barcode: this._customFood.barcode || null,
+            source: this._customFood.source || 'custom',
+            micros: this._customFood.micros || null
         }, this._getModalDate());
 
         Storage.trackFoodUsage(this._customFood.name, mealType);
