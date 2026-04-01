@@ -685,10 +685,29 @@ const Storage = {
     },
     addRecipeToMeal(recipeId, mealType, date) {
         const recipe = this.getRecipes().find(r => r.id === recipeId);
-        if (!recipe) return;
-        recipe.items.forEach(item => {
-            this.addFoodToMeal(mealType, { ...item, id: undefined, fromRecipe: recipe.name });
-        });
+        if (!recipe || !recipe.items.length) return;
+        // Aggregate totals
+        const totals = recipe.items.reduce((acc, item) => {
+            acc.calories += item.calories || 0;
+            acc.protein += item.protein || 0;
+            acc.carbs += item.carbs || 0;
+            acc.fat += item.fat || 0;
+            acc.grams += item.grams || 0;
+            return acc;
+        }, { calories: 0, protein: 0, carbs: 0, fat: 0, grams: 0 });
+        // Add as single entry
+        this.addFoodToMeal(mealType, {
+            name: '📋 ' + recipe.name,
+            grams: totals.grams,
+            calories: Math.round(totals.calories),
+            protein: Math.round(totals.protein * 10) / 10,
+            carbs: Math.round(totals.carbs * 10) / 10,
+            fat: Math.round(totals.fat * 10) / 10,
+            isRecipe: true,
+            recipeId: recipe.id,
+            recipeItems: recipe.items.length,
+            source: 'recipe'
+        }, date);
     },
 
     _triggerSync() {
