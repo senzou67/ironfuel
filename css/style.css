@@ -1,6 +1,6 @@
 :root {
-    --primary: #C62828;
-    --primary-dark: #B71C1C;
+    --primary: #E53935;
+    --primary-dark: #C62828;
     --primary-light: #FFEBEE;
     --accent: #FF5252;
     --danger: #f44336;
@@ -3554,16 +3554,16 @@ body::before {
     width: 80px;
     height: 80px;
     border-radius: 22px;
-    background: linear-gradient(135deg, var(--primary), #EF5350);
+    background: #E53935;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
-    font-weight: 800;
+    font-size: 36px;
+    font-weight: 900;
     color: white;
     margin-bottom: 16px;
     animation: splashPulse 1.5s ease infinite;
-    box-shadow: 0 8px 32px rgba(230,74,25,0.35);
+    box-shadow: 0 8px 24px rgba(229,57,53,0.3);
 }
 @keyframes splashPulse {
     0%, 100% { transform: scale(1); box-shadow: 0 8px 32px rgba(230,74,25,0.35); }

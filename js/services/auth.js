@@ -333,7 +333,7 @@ const AuthService = {
                     ${inAppBanner}
                     <div class="login-logo">
                         <svg width="64" height="64" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="45" fill="#C62828"/>
+                            <rect x="5" y="5" width="90" height="90" rx="20" fill="#E53935"/>
                             <text x="50" y="62" text-anchor="middle" fill="white" font-size="42" font-weight="900">1</text>
                         </svg>
                     </div>

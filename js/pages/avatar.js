@@ -42,7 +42,7 @@ const AvatarPage = {
         let xpPct = 0, xpText = '';
         if (nextDays) {
             xpPct = Math.min(100, Math.round((days / nextDays) * 100));
-            xpText = `Jour ${days} / ${nextDays} → ${Creature.getSpeciesName(data.type, form + 1)}`;
+            xpText = `Jour ${days} / ${nextDays} → Évolution`;
         } else {
             xpPct = 100;
             xpText = `MAX — Jour ${days}`;
@@ -68,7 +68,7 @@ const AvatarPage = {
                     <!-- Name & species -->
                     <div class="creature-identity">
                         <div class="creature-player-name">${playerName}</div>
-                        <div class="creature-species">${Creature.TYPE_EMOJI[data.type]} ${speciesName}</div>
+                        <div class="creature-species">${Creature.TYPE_EMOJI[data.type]} ${Creature.FORMS[form].label}</div>
                     </div>
 
                     <!-- Stats -->
@@ -100,26 +100,6 @@ const AvatarPage = {
                     </div>
                 </div>
 
-                <!-- Evolution preview -->
-                <div class="card" style="padding:14px 16px;margin:0 16px 12px">
-                    <div style="font-size:14px;font-weight:700;margin-bottom:10px">Évolutions</div>
-                    <div style="display:flex;gap:8px;justify-content:center;align-items:flex-end">
-                        ${[0,1,2,3].map(f => {
-                            const name = Creature.getSpeciesName(data.type, f);
-                            const isActive = f === form;
-                            const isLocked = f > form;
-                            return `
-                                <div style="text-align:center;opacity:${isLocked ? '0.35' : '1'};flex:1">
-                                    <div style="margin:0 auto;${isActive ? `border:2px solid ${pal.main};border-radius:12px;padding:4px;background:${pal.bg1}` : 'padding:6px'}">
-                                        ${Creature.buildSVG(isActive ? 64 : 48, { creatureData: { type: data.type, form: f, chosen: true }, mood: isActive ? 'happy' : 'encouraging' })}
-                                    </div>
-                                    <div style="font-size:10px;font-weight:${isActive ? '700' : '500'};color:${isActive ? pal.main : 'var(--text-secondary)'};margin-top:4px">${name}</div>
-                                    <div style="font-size:9px;color:var(--text-secondary)">${Creature.FORMS[f].label}</div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
             </div>
         `;
 
