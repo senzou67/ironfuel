@@ -393,7 +393,8 @@ const VoicePage = {
                     calories: n.calories,
                     protein: n.protein,
                     carbs: n.carbs,
-                    fat: n.fat
+                    fat: n.fat,
+                    source: 'voice'
                 });
                 Storage.addCoins(5);
                 added++;

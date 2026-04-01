@@ -589,9 +589,17 @@ const Modal = {
         if (!food) return;
         const grams = parseInt(document.getElementById('modal-grams').value) || 100;
         const mealType = document.getElementById('modal-meal').value;
+        try { localStorage.setItem('onefood_last_meal', mealType); } catch {}
         const n = FoodDB.getNutrition(food, grams);
-        const date = this._getModalDate();
 
+        // If in recipe mode, add to recipe instead of meal
+        if (typeof SearchPage !== 'undefined' && SearchPage._recipeMode) {
+            SearchPage._addFoodToRecipe(food, grams);
+            this.close();
+            return;
+        }
+
+        const date = this._getModalDate();
         Storage.addFoodToMeal(mealType, {
             foodId: food.id,
             name: food.name,
@@ -650,6 +658,7 @@ const Modal = {
         if (!this._customFood) return;
         const grams = parseInt(document.getElementById('modal-grams').value) || 100;
         const mealType = document.getElementById('modal-meal').value;
+        try { localStorage.setItem('onefood_last_meal', mealType); } catch {}
         const ratio = grams / this._customBaseWeight;
 
         Storage.addFoodToMeal(mealType, {
