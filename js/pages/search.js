@@ -10,9 +10,14 @@ const SearchPage = {
     },
 
     render(params = {}) {
-        if (params.meal) this.currentMeal = params.meal;
+        if (params.meal) {
+            this.currentMeal = params.meal;
+            try { localStorage.setItem('onefood_last_meal', params.meal); } catch {}
+        } else if (!this.currentMeal || this.currentMeal === 'lunch') {
+            // Restore last used meal
+            this.currentMeal = localStorage.getItem('onefood_last_meal') || Storage.getCurrentMealType();
+        }
 
-        // Reset category to 'all' on each page render to avoid stale filter
         this.currentCategory = 'all';
 
         const favorites = Storage.getFavorites();

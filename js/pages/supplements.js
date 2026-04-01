@@ -126,7 +126,8 @@ const SupplementsPage = {
                 if (checkEl) checkEl.remove();
             }
         } else {
-            const info = this.SUPPLEMENTS.find(x => x.id === id) || { id, name: id };
+            const customs = Storage._get('custom_supplements', []);
+            const info = this.SUPPLEMENTS.find(x => x.id === id) || customs.find(x => x.id === id) || { id, name: id.startsWith('custom_') ? 'Complément' : id };
             taken.push({ id, name: info.name, time: new Date().toISOString() });
             Storage.addCoins(2);
             App.haptic('success');

@@ -4,7 +4,7 @@ const DashboardPage = {
         "Le brocoli contient plus de vitamine C que l'orange 🥦",
         "Manger des protéines au petit-déj réduit les fringales de 60% 🍳",
         "Le corps humain est composé à 60% d'eau 💧",
-        "Les amandes sont la noix la plus riche en protéines 🥜",
+        "Les amandes sont le fruit à coque le plus riche en protéines 🥜",
         "Le chocolat noir (70%+) est riche en antioxydants 🍫",
         "1kg de muscle brûle ~13 kcal/jour au repos, 1kg de graisse ~4.5 kcal 💪",
         "La banane contient autant de potassium que 2 verres de lait 🍌",
@@ -207,7 +207,7 @@ const DashboardPage = {
                     ).join('')}
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
                         ${emptyMeals.map(([type]) => `
-                            <button onclick="App.navigate('diary',{meal:'${type}'})" aria-label="Ajouter un aliment au ${mealNames[type]}" class="empty-meal-btn" style="display:flex;align-items:center;gap:8px;padding:14px 14px;font-size:14px">
+                            <button onclick="App.navigate('search',{meal:'${type}'})" aria-label="Ajouter un aliment au ${mealNames[type]}" class="empty-meal-btn" style="display:flex;align-items:center;gap:8px;padding:14px 14px;font-size:14px">
                                 <span aria-hidden="true" style="font-size:18px">${mealIcons[type]}</span>
                                 <span style="font-weight:600">+ ${mealNames[type]}</span>
                             </button>
