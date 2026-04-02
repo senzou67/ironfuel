@@ -661,9 +661,30 @@ const Modal = {
     addCustomFood() {
         if (!this._customFood) return;
         const grams = parseInt(document.getElementById('modal-grams').value) || 100;
-        const mealType = document.getElementById('modal-meal').value;
-        try { localStorage.setItem('onefood_last_meal', mealType); } catch {}
         const ratio = grams / this._customBaseWeight;
+
+        // If in recipe mode, add to recipe
+        if (typeof SearchPage !== 'undefined' && SearchPage._recipeMode) {
+            const recipe = Storage.getRecipes().find(r => r.id === SearchPage._recipeMode);
+            if (recipe) {
+                recipe.items.push({
+                    name: this._customFood.name,
+                    grams,
+                    calories: Math.round(this._customFood.calories * ratio),
+                    protein: Math.round(this._customFood.protein * ratio * 10) / 10,
+                    carbs: Math.round(this._customFood.carbs * ratio * 10) / 10,
+                    fat: Math.round(this._customFood.fat * ratio * 10) / 10,
+                });
+                Storage.saveRecipe(recipe);
+                App.showToast(`✓ ${this._customFood.name} ajouté à "${recipe.name}"`);
+                this.close();
+                SearchPage.render();
+                return;
+            }
+        }
+
+        const mealType = document.getElementById('modal-meal')?.value || Storage.getCurrentMealType();
+        try { localStorage.setItem('onefood_last_meal', mealType); } catch {}
 
         Storage.addFoodToMeal(mealType, {
             name: this._customFood.name,
