@@ -389,6 +389,26 @@ const SearchPage = {
         const food = FoodDB.getById(foodId);
         if (food) {
             Modal.showFoodModal(food, { mealType: this.currentMeal });
+            return;
+        }
+        // Community food — not in FoodDB
+        if (typeof foodId === 'string' && foodId.startsWith('community_')) {
+            const communityFoods = Storage._get('community_foods', []);
+            const key = foodId.replace('community_', '');
+            const cf = communityFoods.find(f => (f.barcode || f.name) === key || (f.barcode || f.name).toLowerCase() === key.toLowerCase());
+            if (cf) {
+                Modal.showCustomFoodModal({
+                    name: cf.name,
+                    weight_g: cf.grams || 100,
+                    calories: cf.calories || 0,
+                    protein: cf.protein || 0,
+                    carbs: cf.carbs || 0,
+                    fat: cf.fat || 0,
+                    fiber: cf.fiber || 0,
+                    barcode: cf.barcode || null,
+                    source: cf.source || 'community'
+                }, { mealType: this.currentMeal });
+            }
         }
     },
 
