@@ -281,6 +281,12 @@ const DashboardPage = {
 
         // Pop-up fun fact on first visit of the day
         if (isToday) this._showDailyPopup();
+
+        // Daily lootbox
+        if (isToday) this._checkDailyLootbox();
+
+        // Render daily challenge
+        if (isToday) this._renderDailyChallenge();
     },
 
     _showDailyPopup() {
@@ -302,6 +308,92 @@ const DashboardPage = {
         `);
     },
 
+
+    // === DAILY LOOTBOX ===
+    _checkDailyLootbox() {
+        const today = Storage._dateKey();
+        if (localStorage.getItem('onefood_lootbox') === today) return;
+        // Only show after user has logged at least 1 meal today
+        const log = Storage.getDayLog();
+        if (!Object.values(log.meals).some(m => m.length > 0)) return;
+        localStorage.setItem('onefood_lootbox', today);
+
+        const rewards = [
+            { emoji: '🪙', label: '+10 coins', action: () => Storage.addCoins(10) },
+            { emoji: '🪙', label: '+20 coins', action: () => Storage.addCoins(20) },
+            { emoji: '🪙', label: '+50 coins !', action: () => Storage.addCoins(50) },
+            { emoji: '⚡', label: '+20 XP créature', action: () => Storage.addCreatureXP(20) },
+            { emoji: '❄️', label: 'Freeze streak !', action: () => { const s = Storage.getCreatureStreak(); if (s.freezesOwned < 3) { s.freezesOwned++; Storage.setCreatureStreak(s); } else { Storage.addCoins(15); } } },
+        ];
+        const reward = rewards[Math.floor(Math.random() * rewards.length)];
+        reward.action();
+
+        setTimeout(() => {
+            Modal.show(`
+                <div style="text-align:center;padding:12px 0">
+                    <div style="font-size:56px;margin-bottom:8px;animation:creature-bounce 0.6s ease">${reward.emoji}</div>
+                    <div style="font-size:18px;font-weight:800;margin-bottom:4px">Bonus du jour !</div>
+                    <div style="font-size:15px;color:var(--primary);font-weight:700;margin-bottom:16px">${reward.label}</div>
+                    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px">Reviens chaque jour pour un nouveau bonus</p>
+                    <button class="btn btn-primary" onclick="Modal.close()" style="width:100%">Merci ! 🎉</button>
+                </div>
+            `);
+        }, 1500);
+    },
+
+    // === DAILY CHALLENGE ===
+    _dailyChallenges: [
+        { id: 'water6', text: 'Bois 6 verres d\'eau', check: () => Storage.getWater() >= 6, reward: 15 },
+        { id: 'protein100', text: 'Atteins 100g de protéines', check: () => Storage.getDayTotals().protein >= 100, reward: 20 },
+        { id: 'meals3', text: 'Log 3 repas aujourd\'hui', check: () => Object.values(Storage.getDayLog().meals).filter(m => m.length > 0).length >= 3, reward: 15 },
+        { id: 'fiber20', text: 'Mange 20g de fibres', check: () => Storage.getDayTotals().fiber >= 20, reward: 20 },
+        { id: 'cal80', text: 'Atteins 80% de ton objectif calorique', check: () => { const g = Storage.getGoals(), t = Storage.getDayTotals(); return g.calories > 0 && (t.calories / g.calories) >= 0.8; }, reward: 25 },
+        { id: 'water_goal', text: 'Atteins ton objectif eau', check: () => { const g = Storage.getGoals(); return Storage.getWater() >= (g.water || 12); }, reward: 20 },
+        { id: 'log_breakfast', text: 'Log ton petit-déjeuner', check: () => { const log = Storage.getDayLog(); return (log.meals.breakfast || []).length > 0; }, reward: 10 },
+    ],
+
+    _getTodayChallenge() {
+        const day = new Date().getDate();
+        return this._dailyChallenges[day % this._dailyChallenges.length];
+    },
+
+    _renderDailyChallenge() {
+        const challenge = this._getTodayChallenge();
+        const done = challenge.check();
+        const today = Storage._dateKey();
+        const claimed = localStorage.getItem('onefood_challenge_' + today);
+
+        if (done && !claimed) {
+            Storage.addCoins(challenge.reward);
+            localStorage.setItem('onefood_challenge_' + today, '1');
+            App.showToast(`🎯 Défi réussi ! +${challenge.reward} 🪙`);
+        }
+
+        const el = document.getElementById('daily-challenge');
+        if (!el) {
+            // Insert challenge card before the fun fact
+            const funFact = document.querySelector('#dashboard-ad-slot')?.previousElementSibling;
+            if (funFact) {
+                const card = document.createElement('div');
+                card.id = 'daily-challenge';
+                card.className = 'card';
+                card.style.cssText = 'padding:10px 16px;margin:4px 16px';
+                funFact.parentNode.insertBefore(card, funFact);
+            }
+        }
+        const container = document.getElementById('daily-challenge');
+        if (!container) return;
+        container.innerHTML = `
+            <div style="display:flex;align-items:center;gap:10px">
+                <div style="font-size:22px">${done ? '✅' : '🎯'}</div>
+                <div style="flex:1">
+                    <div style="font-size:10px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px">Défi du jour</div>
+                    <div style="font-size:13px;font-weight:600;${done ? 'text-decoration:line-through;opacity:0.6' : ''}">${challenge.text}</div>
+                </div>
+                <div style="font-size:12px;font-weight:700;color:${done ? 'var(--success)' : 'var(--accent)'}">${done ? 'Fait !' : '+' + challenge.reward + ' 🪙'}</div>
+            </div>
+        `;
+    },
 
     // Daily motivations used by FCM notifications (daily-notification.js)
     _dailyMotivations: [
