@@ -313,8 +313,9 @@ const SearchPage = {
 
     renderResultItem(food) {
         const cat = FoodDB.categories.find(c => c.id === food.cat);
-        const isCustom = food.isCustom;
-        const clickId = isCustom ? `'${food.id}'` : food.id;
+        const isCustom = food.isCustom || food._community;
+        const isStringId = typeof food.id === 'string';
+        const clickId = isStringId ? `'${food.id.replace(/'/g, "\\'")}'` : food.id;
         const isFav = Storage.isFavorite(food.id);
         const catColor = this._catColors[food.cat] || '#9E9E9E';
         const catIcon = cat ? cat.icon : '📦';
