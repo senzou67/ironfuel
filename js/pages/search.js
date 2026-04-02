@@ -539,19 +539,22 @@ const SearchPage = {
     _addFoodToRecipe(food, grams) {
         const recipe = Storage.getRecipes().find(r => r.id === this._recipeMode);
         if (!recipe) return;
-        const n = FoodDB.getNutrition(food, grams);
-        recipe.items.push({
-            name: food.name,
-            foodId: food.id,
-            grams: grams,
-            calories: n.calories,
-            protein: n.protein,
-            carbs: n.carbs,
-            fat: n.fat
-        });
+        let calories, protein, carbs, fat;
+        if (food.n) {
+            // FoodDB format
+            const n = FoodDB.getNutrition(food, grams);
+            calories = n.calories; protein = n.protein; carbs = n.carbs; fat = n.fat;
+        } else {
+            // Custom/community format — already has values per serving
+            const ratio = grams / (food.grams || food.weight_g || 100);
+            calories = Math.round((food.calories || 0) * ratio);
+            protein = Math.round((food.protein || 0) * ratio * 10) / 10;
+            carbs = Math.round((food.carbs || 0) * ratio * 10) / 10;
+            fat = Math.round((food.fat || 0) * ratio * 10) / 10;
+        }
+        recipe.items.push({ name: food.name, foodId: food.id, grams, calories, protein, carbs, fat });
         Storage.saveRecipe(recipe);
         App.showToast(`✓ ${food.name} ajouté à "${recipe.name}"`);
-        // Stay in recipe mode — re-render search to update banner count
         this.render();
     },
 
