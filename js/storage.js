@@ -494,10 +494,17 @@ const Storage = {
     },
 
     addCoins(amount) {
+        // Double coins boost check
+        if (amount > 0) {
+            try {
+                const boost = localStorage.getItem('onefood_double_coins');
+                if (boost && new Date(boost) > new Date()) amount *= 2;
+            } catch {}
+        }
         const current = this.getCoins();
-        this._set('coins', current + amount);
+        this._set('coins', Math.max(0, current + amount));
         this._triggerSync();
-        return current + amount;
+        return Math.max(0, current + amount);
     },
 
     spendCoins(amount) {

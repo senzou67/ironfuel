@@ -70,10 +70,18 @@ const Creature = {
             App.showToast('🧊 Freeze gagné ! Tu peux rater 1 jour sans perdre ton streak');
         }
         Storage.setCreatureStreak(streak);
+        // Streak multiplier for coins
+        const multiplier = streak.current >= 30 ? 5 : streak.current >= 14 ? 3 : streak.current >= 7 ? 2 : 1;
         const xp = 10 + Math.min(10, Math.floor(streak.current * 0.5));
         Storage.addCreatureXP(xp);
         Storage.markXPAwarded();
-        return { xp, streak };
+        // Award daily streak coins
+        const coinsEarned = 5 * multiplier;
+        Storage.addCoins(coinsEarned);
+        if (multiplier > 1) {
+            App.showToast(`🔥 Streak x${multiplier} ! +${coinsEarned} 🪙`);
+        }
+        return { xp, streak, multiplier, coinsEarned };
     },
 
     // ============================================
