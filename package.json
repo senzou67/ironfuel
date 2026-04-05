@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "node build.js",
-    "deploy": "npm run build && npx wrangler pages deploy public/ --project-name=onefood",
-    "preview": "npm run build && npx wrangler pages dev public/"
+    "build": "node build.js"
   },
   "dependencies": {
     "stripe": "^20.4.1",
