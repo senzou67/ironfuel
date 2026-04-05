@@ -669,6 +669,10 @@ body::before {
 .meal-name {
     font-weight: 600;
     font-size: 15px;
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .meal-calories {

@@ -182,8 +182,8 @@ const ChatPage = {
             source: 'chat-ai'
         };
 
-        Storage.addFoodToMeal(mealType, entry);
-        Storage.addCoins(5);
+        Storage.addFoodToMeal(mealType, entry, App.getSelectedDate());
+        if (App.isToday()) Storage.addCoins(5);
         App.haptic('success');
         App.showToast(`${food.name} ajouté ! +5 🪙`);
 

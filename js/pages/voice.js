@@ -395,8 +395,8 @@ const VoicePage = {
                     carbs: n.carbs,
                     fat: n.fat,
                     source: 'voice'
-                });
-                Storage.addCoins(5);
+                }, App.getSelectedDate());
+                if (App.isToday()) Storage.addCoins(5);
                 added++;
             }
         }
