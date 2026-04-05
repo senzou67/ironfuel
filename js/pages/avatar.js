@@ -100,6 +100,15 @@ const AvatarPage = {
                     </div>
                 </div>
 
+                <!-- Daily Deal -->
+                <div class="card" style="padding:14px 16px;margin:0 16px 12px;border:1.5px solid var(--accent)">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                        <span style="font-size:14px;font-weight:700">🔥 Offre du jour</span>
+                        <span style="font-size:10px;color:var(--text-secondary)">Change chaque jour</span>
+                    </div>
+                    ${AvatarPage._renderDailyDeal()}
+                </div>
+
                 <!-- Coin Shop -->
                 <div class="card" style="padding:14px 16px;margin:0 16px 12px">
                     <div style="font-size:14px;font-weight:700;margin-bottom:10px">Boutique 🪙</div>
@@ -175,6 +184,57 @@ const AvatarPage = {
             container.appendChild(p);
         }
         scene.appendChild(container);
+    },
+
+    // === DAILY DEALS ===
+    _dailyDeals: [
+        { id: 'mega_xp', emoji: '🚀', name: 'Méga XP', desc: '+200 XP créature', cost: 60, action: () => Storage.addCreatureXP(200) },
+        { id: 'triple_freeze', emoji: '🧊', name: 'Triple Freeze', desc: '3 freezes d\'un coup', cost: 100, action: () => { const s = Storage.getCreatureStreak(); s.freezesOwned = 3; Storage.setCreatureStreak(s); } },
+        { id: 'coin_rain', emoji: '🌧️', name: 'Pluie de coins', desc: '+100 coins', cost: 25, action: () => Storage.addCoins(100) },
+        { id: 'mega_loot', emoji: '👑', name: 'Mega Lootbox', desc: 'Récompense x3', cost: 75, action: () => { const r = [100,150,200]; Storage.addCoins(r[Math.floor(Math.random()*r.length)]); } },
+        { id: 'xp_rush', emoji: '⚡', name: 'XP Rush', desc: '+500 XP créature', cost: 120, action: () => Storage.addCreatureXP(500) },
+        { id: 'lucky_box', emoji: '🍀', name: 'Boîte Chance', desc: 'Coins ou XP aléatoire', cost: 35, action: () => { if (Math.random() > 0.5) { Storage.addCoins(80); App.showToast('+80 🪙'); } else { Storage.addCreatureXP(150); App.showToast('+150 XP ⚡'); } } },
+        { id: 'streak_shield', emoji: '🛡️', name: 'Bouclier Streak', desc: 'Freeze + 50 XP', cost: 70, action: () => { const s = Storage.getCreatureStreak(); s.freezesOwned = Math.min(3, s.freezesOwned+1); Storage.setCreatureStreak(s); Storage.addCreatureXP(50); } },
+    ],
+
+    _getTodayDeal() {
+        const day = new Date().getDate();
+        return this._dailyDeals[day % this._dailyDeals.length];
+    },
+
+    _isDealBought() {
+        return localStorage.getItem('onefood_daily_deal') === Storage._dateKey();
+    },
+
+    _renderDailyDeal() {
+        const deal = this._getTodayDeal();
+        const bought = this._isDealBought();
+        return `
+            <div style="display:flex;align-items:center;gap:12px">
+                <div style="font-size:36px">${deal.emoji}</div>
+                <div style="flex:1">
+                    <div style="font-size:14px;font-weight:700">${deal.name}</div>
+                    <div style="font-size:12px;color:var(--text-secondary)">${deal.desc}</div>
+                </div>
+                ${bought
+                    ? '<span style="font-size:12px;color:var(--success);font-weight:700">✓ Acheté</span>'
+                    : `<button onclick="AvatarPage._buyDailyDeal()" style="padding:10px 16px;border:none;border-radius:10px;background:var(--accent);color:white;font-weight:700;font-size:13px;cursor:pointer">${deal.cost} 🪙</button>`
+                }
+            </div>
+        `;
+    },
+
+    _buyDailyDeal() {
+        const deal = this._getTodayDeal();
+        if (this._isDealBought()) { App.showToast('Déjà acheté aujourd\'hui'); return; }
+        const coins = Storage.getCoins();
+        if (coins < deal.cost) { App.showToast(`Pas assez de coins (${coins}/${deal.cost} 🪙)`); return; }
+        Storage.addCoins(-deal.cost);
+        deal.action();
+        localStorage.setItem('onefood_daily_deal', Storage._dateKey());
+        App.haptic('success');
+        App.showToast(`${deal.emoji} ${deal.name} activé !`);
+        this.render();
     },
 
     _buyItem(type, cost) {
