@@ -217,7 +217,7 @@ const DashboardPage = {
 
                 <!-- QUICK ACTIONS (2×2 grid — water is fillable) -->
                 <div class="quick-actions compact" style="margin:0 16px 8px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
-                    <button class="quick-action-btn water-action-btn" onclick="DashboardPage.addWater()" style="position:relative;overflow:hidden;display:flex;align-items:center;gap:6px;justify-content:center;z-index:1">
+                    <button class="quick-action-btn water-action-btn" onclick="DashboardPage.addWater()" oncontextmenu="event.preventDefault();DashboardPage.addWater(2);return false" style="position:relative;overflow:hidden;display:flex;align-items:center;gap:6px;justify-content:center;z-index:1">
                         <div class="water-fill-bg" style="position:absolute;bottom:0;left:0;width:100%;height:${waterPct}%;background:linear-gradient(180deg,rgba(79,195,247,0.35) 0%,rgba(2,136,209,0.45) 100%);transition:height 0.5s cubic-bezier(0.4,0,0.2,1);z-index:-1;border-radius:0 0 12px 12px">
                             ${waterPct > 0 ? '<svg style="position:absolute;top:-4px;left:0;width:200%;height:8px;animation:waveMove 2s linear infinite" viewBox="0 0 1200 8" preserveAspectRatio="none"><path d="M0 4C200 0 400 8 600 4C800 0 1000 8 1200 4V8H0Z" fill="rgba(79,195,247,0.4)"/></svg>' : ''}
                         </div>
@@ -231,7 +231,7 @@ const DashboardPage = {
                         <span class="icon">${hasAccess && gymType ? gymType.icon : '🏋️'}</span>${!hasAccess ? 'Salle 🔒' : gymDone ? `<span style="font-weight:600">${gymType ? gymType.name : 'Fait'}</span> <span style="font-size:11px">✅</span>` : gymToday ? `<span style="font-weight:600">${gymType ? gymType.name : 'Planifié'}</span>` : 'Salle'}
                     </button>
                     <button class="quick-action-btn suppl-action-btn" onclick="${hasAccess ? "App.navigate('supplements')" : "TrialService.showFeatureLockedPrompt('supplements')"}" style="position:relative;overflow:hidden;display:flex;align-items:center;gap:6px;justify-content:center;z-index:1">
-                        ${hasAccess && mySupplements.length > 0 ? `<div style="position:absolute;bottom:0;left:0;width:100%;height:${Math.min(100, Math.round((supplCount / mySupplements.length) * 100))}%;background:linear-gradient(180deg,rgba(206,147,255,0.3) 0%,rgba(156,39,176,0.4) 100%);transition:height 0.5s cubic-bezier(0.4,0,0.2,1);z-index:-1;border-radius:0 0 12px 12px"></div>` : ''}
+                        ${hasAccess && mySupplements.length > 0 ? `<div style="position:absolute;bottom:0;left:0;width:100%;height:${Math.min(100, Math.round((supplCount / mySupplements.length) * 100))}%;background:linear-gradient(180deg,rgba(0,188,212,0.25) 0%,rgba(0,151,167,0.4) 100%);transition:height 0.5s cubic-bezier(0.4,0,0.2,1);z-index:-1;border-radius:0 0 12px 12px"></div>` : ''}
                         <span class="icon">💊</span>${!hasAccess ? 'Compléments 🔒' : mySupplements.length > 0 ? `<span style="font-weight:600">${supplCount}/${mySupplements.length}</span>${supplAllDone ? ' <span style="font-size:11px">✅</span>' : ''}` : 'Compléments'}
                     </button>
                     <button class="quick-action-btn" onclick="${hasAccess ? "App.navigate('weight')" : "TrialService.showFeatureLockedPrompt('weight')"}" style="position:relative;overflow:hidden;display:flex;align-items:center;gap:6px;justify-content:center;z-index:1">
@@ -420,7 +420,8 @@ const DashboardPage = {
         return this._dailyMotivations[dayOfYear % this._dailyMotivations.length];
     },
 
-    addWater() {
+    addWater(glasses) {
+        glasses = glasses || 1;
         const date = App.getSelectedDate();
         const current = Storage.getWater(date);
         const goals = Storage.getGoals();
@@ -430,11 +431,12 @@ const DashboardPage = {
             App.showToast(`Maximum atteint (${(maxGlasses * 0.25).toFixed(1)}L) 💧`);
             return;
         }
-        const newCount = current + 1;
+        const newCount = Math.min(current + glasses, maxGlasses);
+        const addedMl = (newCount - current) * 250;
         Storage.setWater(newCount, date);
         if (App.isToday()) this._checkWaterBonus(newCount);
         App.haptic('light');
-        App.showToast(`+250ml 💧 (${(newCount * 0.25).toFixed(newCount * 0.25 % 1 === 0 ? 0 : 1)}L)`);
+        App.showToast(`+${addedMl}ml 💧 (${(newCount * 0.25).toFixed(newCount * 0.25 % 1 === 0 ? 0 : 1)}L)`);
         this._updateWaterButton(newCount, waterGoal);
     },
 

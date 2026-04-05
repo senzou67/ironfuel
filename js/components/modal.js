@@ -385,6 +385,10 @@ const Modal = {
                     <span class="nutrition-item-value" id="np-fat">${nutrition.fat}g</span>
                     <span class="nutrition-item-label">Lipides</span>
                 </div>
+                <div class="nutrition-item" style="color:var(--text-secondary)">
+                    <span class="nutrition-item-value" id="np-fiber">${nutrition.fiber || 0}g</span>
+                    <span class="nutrition-item-label">Fibres</span>
+                </div>
             </div>
             <button class="btn btn-primary" onclick="${btnAction}">
                 ${btnText}
@@ -455,6 +459,10 @@ const Modal = {
                 <div class="nutrition-item fat">
                     <span class="nutrition-item-value" id="np-fat">${foodData.fat}g</span>
                     <span class="nutrition-item-label">Lipides</span>
+                </div>
+                <div class="nutrition-item" style="color:var(--text-secondary)">
+                    <span class="nutrition-item-value" id="np-fiber">${foodData.fiber || 0}g</span>
+                    <span class="nutrition-item-label">Fibres</span>
                 </div>
             </div>
             <button class="btn btn-primary" onclick="${btnAction}">
@@ -554,6 +562,8 @@ const Modal = {
         document.getElementById('np-prot').textContent = n.protein + 'g';
         document.getElementById('np-carb').textContent = n.carbs + 'g';
         document.getElementById('np-fat').textContent = n.fat + 'g';
+        const fiberEl = document.getElementById('np-fiber');
+        if (fiberEl) fiberEl.textContent = (n.fiber || 0) + 'g';
     },
 
     updateCustomPreview() {
@@ -564,6 +574,8 @@ const Modal = {
         document.getElementById('np-prot').textContent = Math.round(this._customFood.protein * ratio * 10) / 10 + 'g';
         document.getElementById('np-carb').textContent = Math.round(this._customFood.carbs * ratio * 10) / 10 + 'g';
         document.getElementById('np-fat').textContent = Math.round(this._customFood.fat * ratio * 10) / 10 + 'g';
+        const fiberEl = document.getElementById('np-fiber');
+        if (fiberEl) fiberEl.textContent = Math.round((this._customFood.fiber || 0) * ratio * 10) / 10 + 'g';
     },
 
     toggleFav(foodId) {
@@ -696,7 +708,9 @@ const Modal = {
             fiber: Math.round((this._customFood.fiber || 0) * ratio * 10) / 10,
             barcode: this._customFood.barcode || null,
             source: this._customFood.source || 'custom',
-            micros: this._customFood.micros || null
+            micros: this._customFood.micros ? Object.fromEntries(
+                Object.entries(this._customFood.micros).map(([k, v]) => [k, Math.round((v || 0) * ratio * 10) / 10])
+            ) : null
         }, this._getModalDate());
 
         Storage.trackFoodUsage(this._customFood.name, mealType);

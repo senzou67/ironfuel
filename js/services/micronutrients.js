@@ -80,10 +80,11 @@ const MicronutrientService = {
                 const grams = entry.grams || entry.qty || 100;
                 const factor = grams / 100;
 
-                // If entry has explicit micro data (from OpenFoodFacts), use it
+                // If entry has explicit micro data (from API), use it directly
+                // (micros are already scaled to the entry's weight)
                 if (entry.micros) {
                     Object.keys(entry.micros).forEach(k => {
-                        if (micros[k] !== undefined) micros[k] += (entry.micros[k] || 0) * factor;
+                        if (micros[k] !== undefined) micros[k] += (entry.micros[k] || 0);
                     });
                     return;
                 }
@@ -234,7 +235,7 @@ const MicronutrientService = {
 
         if (entry.micros) {
             Object.keys(entry.micros).forEach(k => {
-                if (micros[k] !== undefined) micros[k] += (entry.micros[k] || 0) * factor;
+                if (micros[k] !== undefined) micros[k] += (entry.micros[k] || 0);
             });
         } else {
             let cat = entry.category || entry.cat;

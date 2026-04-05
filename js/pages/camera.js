@@ -164,8 +164,11 @@ const CameraPage = {
         try {
             const canvas = document.createElement('canvas');
             const img = new Image();
-            img.src = photo.src;
-            await new Promise(resolve => img.onload = resolve);
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+                img.src = photo.src;
+            });
             canvas.width = img.width;
             canvas.height = img.height;
             canvas.getContext('2d').drawImage(img, 0, 0);
