@@ -33,7 +33,7 @@ Estime le poids de manière réaliste en te basant sur la taille apparente des p
             }
         } catch(e) {}
 
-        const response = await fetch('/.netlify/functions/analyze', {
+        const response = await fetch('/api/analyze', {
             method: 'POST',
             headers: reqHeaders,
             body: JSON.stringify({ image: base64Image })

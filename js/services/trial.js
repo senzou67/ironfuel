@@ -359,7 +359,7 @@ const TrialService = {
                 ? AuthService.getCurrentUser().uid
                 : Storage._get('device_id', this._generateDeviceId());
 
-            const res = await fetch('/.netlify/functions/trial-check', {
+            const res = await fetch('/api/trial-check', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'check', userId })
@@ -425,7 +425,7 @@ const TrialService = {
                 } catch(e) {}
             }
 
-            await fetch('/.netlify/functions/trial-check', {
+            await fetch('/api/trial-check', {
                 method: 'POST',
                 headers: reqHeaders,
                 body: JSON.stringify({ action, userId })
@@ -554,7 +554,7 @@ const TrialService = {
         }
 
         try {
-            const res = await fetch('/.netlify/functions/create-checkout', {
+            const res = await fetch('/api/create-checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -628,7 +628,7 @@ const TrialService = {
                     const user = AuthService.getCurrentUser();
                     if (user) reqHeaders['Authorization'] = 'Bearer ' + await user.getIdToken();
                 } catch(e) {}
-                const res = await fetch('/.netlify/functions/verify-payment', {
+                const res = await fetch('/api/verify-payment', {
                     method: 'POST',
                     headers: reqHeaders,
                     body: JSON.stringify({ sessionId })

@@ -540,7 +540,7 @@ const SettingsPage = {
             if (user) {
                 try { reqHeaders['Authorization'] = 'Bearer ' + await user.getIdToken(); } catch(e) {}
             }
-            const res = await fetch('/.netlify/functions/create-portal-session', {
+            const res = await fetch('/api/create-portal-session', {
                 method: 'POST',
                 headers: reqHeaders,
                 body: JSON.stringify({
@@ -563,7 +563,7 @@ const SettingsPage = {
         Modal.close();
 
         try {
-            const res = await fetch('/.netlify/functions/create-checkout', {
+            const res = await fetch('/api/create-checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

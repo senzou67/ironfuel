@@ -479,7 +479,7 @@ const AuthService = {
     async _saveEmailConsent(user, consent) {
         if (!user || !user.email) return;
         try {
-            const res = await fetch('/.netlify/functions/save-email', {
+            const res = await fetch('/api/save-email', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

@@ -63,7 +63,7 @@ const PayPalService = {
                 }
 
                 try {
-                    const res = await fetch('/.netlify/functions/create-paypal-order', {
+                    const res = await fetch('/api/create-paypal-order', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -83,7 +83,7 @@ const PayPalService = {
 
             onApprove: async (data) => {
                 try {
-                    const res = await fetch('/.netlify/functions/capture-paypal-order', {
+                    const res = await fetch('/api/capture-paypal-order', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -178,7 +178,7 @@ const PayPalService = {
                 // Save to Firestore via webhook (PayPal will call our webhook)
                 // Also notify server
                 try {
-                    await fetch('/.netlify/functions/capture-paypal-order', {
+                    await fetch('/api/capture-paypal-order', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({

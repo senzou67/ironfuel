@@ -76,7 +76,7 @@ const ChatPage = {
             const headers = { 'Content-Type': 'application/json' };
             if (user) { try { headers['Authorization'] = 'Bearer ' + await user.getIdToken(); } catch {} }
 
-            const res = await fetch('/.netlify/functions/analyze-text', {
+            const res = await fetch('/api/analyze-text', {
                 method: 'POST',
                 headers,
                 body: JSON.stringify({ text })

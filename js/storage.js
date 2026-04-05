@@ -183,7 +183,7 @@ const Storage = {
             if (db.length > 500) db.splice(0, db.length - 500);
             this._set('community_foods', db);
             // Also push to cloud community DB (fire and forget)
-            fetch('/.netlify/functions/community-foods?action=add', {
+            fetch('/api/community-foods?action=add', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(entry)
