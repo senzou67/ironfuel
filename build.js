@@ -12,7 +12,7 @@ const EXCLUDE = new Set([
     'wrangler.toml', 'wrangler.jsonc', '.gitignore', '.assetsignore',
     '.github', 'netlify.toml', 'RECAP-IRONFUEL.md', 'bump.sh',
     'generate-icons.js', 'generate-png-icons.js', 'desktop',
-    'functions'
+    'functions', 'worker.js'
 ]);
 
 function copyDir(src, dest) {
