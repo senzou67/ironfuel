@@ -434,7 +434,7 @@ const SearchPage = {
 
     async _searchCommunityCloud(query, existingNames) {
         try {
-            const res = await fetch('/.netlify/functions/community-foods?action=search&q=' + encodeURIComponent(query));
+            const res = await fetch('/api/community-foods?action=search&q=' + encodeURIComponent(query));
             if (!res.ok) return;
             const data = await res.json();
             if (!data.foods || data.foods.length === 0) return;
