@@ -11,7 +11,8 @@ const EXCLUDE = new Set([
     'public', 'build.js', 'package.json', 'package-lock.json',
     'wrangler.toml', 'wrangler.jsonc', '.gitignore', '.assetsignore',
     '.github', 'netlify.toml', 'RECAP-IRONFUEL.md', 'bump.sh',
-    'generate-icons.js', 'generate-png-icons.js', 'desktop'
+    'generate-icons.js', 'generate-png-icons.js', 'desktop',
+    'functions'
 ]);
 
 function copyDir(src, dest) {

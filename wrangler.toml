@@ -1,0 +1,13 @@
+name = "onefood"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "."
+
+# Cron trigger for daily notifications (every 30 minutes)
+# Note: Cron triggers require a separate Worker, not Pages Functions.
+# Set up via Cloudflare dashboard: Workers & Pages > onefood-cron > Triggers > Cron
+# Or use the daily-notification API endpoint with an external cron service.
+
+# KV namespace for trial IP tracking
+# Bind in Cloudflare dashboard: Pages > onefood > Settings > Functions > KV namespace bindings
+# Variable name: TRIAL_KV
