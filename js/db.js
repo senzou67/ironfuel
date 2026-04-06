@@ -735,12 +735,22 @@ const FoodDB = {
         return this.foods.filter(f => f.cat === catId);
     },
 
+    _index: null,
+
+    _buildIndex() {
+        this._index = new Map();
+        for (const food of this.foods) {
+            this._index.set(food.id, food);
+        }
+    },
+
     getById(id) {
         // Check custom foods first for string IDs
         if (typeof id === 'string' && id.startsWith('custom_')) {
             return Storage.getCustomFoods().find(f => f.id === id);
         }
-        return this.foods.find(f => f.id === id);
+        if (!this._index) this._buildIndex();
+        return this._index.get(id) || null;
     },
 
     getNutrition(food, grams) {

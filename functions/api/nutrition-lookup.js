@@ -3,10 +3,21 @@
 
 const USDA_CACHE = {};
 
+function _evictCache() {
+    const keys = Object.keys(USDA_CACHE);
+    if (keys.length <= 500) return;
+    // Sort by timestamp ascending, remove oldest half
+    keys.sort((a, b) => USDA_CACHE[a].ts - USDA_CACHE[b].ts);
+    const toRemove = Math.floor(keys.length / 2);
+    for (let i = 0; i < toRemove; i++) {
+        delete USDA_CACHE[keys[i]];
+    }
+}
+
 function cached(key, ttlMs, fn) {
     const entry = USDA_CACHE[key];
     if (entry && Date.now() - entry.ts < ttlMs) return Promise.resolve(entry.val);
-    return fn().then(val => { USDA_CACHE[key] = { val, ts: Date.now() }; return val; });
+    return fn().then(val => { USDA_CACHE[key] = { val, ts: Date.now() }; _evictCache(); return val; });
 }
 
 async function searchUSDA(query, apiKey) {

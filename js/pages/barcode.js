@@ -269,7 +269,7 @@ const BarcodePage = {
             fiber: n.fiber,
             barcode: this._currentProduct.barcode || null,
             source: 'barcode'
-        });
+        }, { dateStr: App._localDateKey(App.getSelectedDate()) });
     },
 
     rescan() {

@@ -333,8 +333,8 @@ const SyncService = {
 
     startPolling() {
         if (this._pollingInterval) return;
-        this._pollingInterval = setInterval(() => this._pollForChanges(), 30000); // 30s for multi-device sync
-        this._log('Polling started (every 30s)');
+        this._pollingInterval = setInterval(() => this._pollForChanges(), 120000); // 120s for multi-device sync
+        this._log('Polling started (every 120s)');
 
         // Also sync when tab becomes visible (instant sync when switching devices/tabs)
         if (!this._visibilityHandler) {

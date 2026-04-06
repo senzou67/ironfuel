@@ -79,7 +79,18 @@ Regles:
 
         if (!result) return errorResponse('Pas de réponse de Gemini.');
 
-        const enriched = await enrichFoods(result.foods || [], env.USDA_API_KEY || 'DEMO_KEY');
+        let enriched;
+        try {
+            enriched = await enrichFoods(result.foods || [], env.USDA_API_KEY || 'DEMO_KEY');
+        } catch (enrichErr) {
+            console.error('enrichFoods failed, using raw Gemini results:', enrichErr.message);
+            enriched = (result.foods || []).map(f => ({
+                name: f.name, weight_g: f.weight_g || 100,
+                calories: f.calories || 0, protein: f.protein || 0,
+                carbs: f.carbs || 0, fat: f.fat || 0, fiber: f.fiber || 0,
+                source: 'estimate'
+            }));
+        }
         return jsonResponse({ foods: enriched });
     } catch (err) {
         return errorResponse(err.message || 'Erreur serveur.');

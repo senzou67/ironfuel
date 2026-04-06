@@ -256,7 +256,7 @@ const CameraPage = {
     addResult(index) {
         const food = this._results[index];
         if (!food) return;
-        Modal.showCustomFoodModal(food);
+        Modal.showCustomFoodModal(food, { dateStr: App._localDateKey(App.getSelectedDate()) });
     },
 
     cleanup() {

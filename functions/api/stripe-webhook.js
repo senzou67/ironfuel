@@ -127,7 +127,7 @@ export async function onRequestPost(context) {
             }
         }
     } catch (err) {
-        console.error('Webhook processing error:', err.message);
+        console.error('Webhook processing error:', err.message, { type, eventId: stripeEvent.id, stack: err.stack });
     }
 
     return jsonResponse({ received: true });
