@@ -255,6 +255,10 @@ const DashboardPage = {
                     </div>
                 </div>
 
+                <div style="text-align:center;padding:8px 16px;margin-bottom:8px">
+                    <div style="font-size:10px;color:var(--text-secondary);opacity:0.6">OneFood ne remplace pas un avis médical. Consultez un professionnel de santé pour tout conseil nutritionnel personnalisé.</div>
+                </div>
+
                 <div id="dashboard-ad-slot"></div>
             </div>
         `;
