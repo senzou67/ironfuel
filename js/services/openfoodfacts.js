@@ -1,6 +1,13 @@
 const OpenFoodFactsService = {
     async getProduct(barcode) {
-        const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        let response;
+        try {
+            response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`, { signal: controller.signal });
+        } finally {
+            clearTimeout(timeout);
+        }
         if (!response.ok) throw new Error('Produit non trouvé');
 
         const data = await response.json();
@@ -44,7 +51,14 @@ const OpenFoodFactsService = {
 
         const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&json=1&page_size=15&page=${page}&lc=fr&fields=product_name_fr,product_name,brands,image_front_small_url,nutriments,nutriscore_grade,code`;
 
-        const response = await fetch(url);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        let response;
+        try {
+            response = await fetch(url, { signal: controller.signal });
+        } finally {
+            clearTimeout(timeout);
+        }
         if (!response.ok) throw new Error('Erreur de recherche');
         const data = await response.json();
 

@@ -153,7 +153,7 @@ const WeightPage = {
                     </div>
                     <button onclick="WeightPage._adjustWeight(0.1)" class="btn btn-outline" style="padding:8px 14px;font-size:18px">+</button>
                 </div>
-                <input type="date" id="weight-date" value="${App._localDateKey()}" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;background:var(--surface);color:var(--text);margin-bottom:16px">
+                <input type="date" id="weight-date" value="${App._localDateKey()}" max="${App._localDateKey(new Date())}" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;background:var(--surface);color:var(--text);margin-bottom:16px">
                 <button class="btn btn-primary" onclick="WeightPage._saveWeight()" style="width:100%;padding:12px;font-size:15px">Enregistrer</button>
             </div>
         `);

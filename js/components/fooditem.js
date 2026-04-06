@@ -8,17 +8,17 @@ const FoodItem = {
         return `
             <div class="food-item" onclick="FoodItem.edit('${mealType}', ${item.id}, '${dateStr || ''}')" style="cursor:pointer">
                 <div class="food-item-info">
-                    <div class="food-item-name">${item.name}</div>
+                    <div class="food-item-name">${_esc(item.name)}</div>
                     <div class="food-item-detail">
                         ${item.isRecipe ? `${item.recipeItems} aliments · ` : `${item.grams || item.qty || '—'}g · `}P:${Math.round(item.protein)}g · G:${Math.round(item.carbs)}g · L:${Math.round(item.fat)}g
                     </div>
                     ${microBadges}
                 </div>
                 <span class="food-item-calories">${item.calories} kcal</span>
-                <button class="food-item-delete" onclick="event.stopPropagation();FoodItem.remove('${mealType}', ${item.id}, '${dateStr || ''}')" title="Supprimer" aria-label="Supprimer ${item.name}">
+                <button class="food-item-delete" onclick="event.stopPropagation();FoodItem.remove('${mealType}', ${item.id}, '${dateStr || ''}')" title="Supprimer" aria-label="Supprimer ${_esc(item.name).replace(/"/g, '&quot;')}">
                     ✕
                 </button>
-                <button class="food-item-move" onclick="event.stopPropagation();FoodItem.showMoveModal('${mealType}', ${item.id}, '${dateStr || ''}')" title="Changer de repas" aria-label="Déplacer ${item.name}" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;font-size:14px;padding:4px;margin-right:2px">
+                <button class="food-item-move" onclick="event.stopPropagation();FoodItem.showMoveModal('${mealType}', ${item.id}, '${dateStr || ''}')" title="Changer de repas" aria-label="Déplacer ${_esc(item.name).replace(/"/g, '&quot;')}" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;font-size:14px;padding:4px;margin-right:2px">
                     ↔
                 </button>
             </div>

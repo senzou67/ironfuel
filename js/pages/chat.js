@@ -169,6 +169,10 @@ const ChatPage = {
         const mealType = this._selectedMeal || Storage.getCurrentMealType();
         const weightInput = document.getElementById('chat-weight-' + idx);
         const newWeight = weightInput ? parseInt(weightInput.value) : food.weight_g;
+        if (isNaN(newWeight) || newWeight < 1 || newWeight > 2000) {
+            App.showToast('Poids invalide (1-2000g)');
+            return;
+        }
         const ratio = newWeight / food.weight_g;
 
         const entry = {
