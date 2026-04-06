@@ -12,4 +12,4 @@ desktop/dist/
 *.exe
 desktop/__pycache__/
 *.pyc
-.claude/
+.claude/settings*
