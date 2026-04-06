@@ -249,12 +249,13 @@ const Storage = {
 
     getMealTotals(mealType, date) {
         const log = this.getDayLog(date);
-        let totals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+        let totals = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
         (log.meals[mealType] || []).forEach(entry => {
             totals.calories += entry.calories || 0;
             totals.protein += entry.protein || 0;
             totals.carbs += entry.carbs || 0;
             totals.fat += entry.fat || 0;
+            totals.fiber += entry.fiber || 0;
         });
         return totals;
     },
@@ -699,9 +700,10 @@ const Storage = {
             acc.protein += item.protein || 0;
             acc.carbs += item.carbs || 0;
             acc.fat += item.fat || 0;
+            acc.fiber += item.fiber || 0;
             acc.grams += item.grams || 0;
             return acc;
-        }, { calories: 0, protein: 0, carbs: 0, fat: 0, grams: 0 });
+        }, { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, grams: 0 });
         // Add as single entry
         this.addFoodToMeal(mealType, {
             name: '📋 ' + recipe.name,
@@ -710,6 +712,7 @@ const Storage = {
             protein: Math.round(totals.protein * 10) / 10,
             carbs: Math.round(totals.carbs * 10) / 10,
             fat: Math.round(totals.fat * 10) / 10,
+            fiber: Math.round(totals.fiber * 10) / 10,
             isRecipe: true,
             recipeId: recipe.id,
             recipeItems: recipe.items.length,

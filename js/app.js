@@ -14,6 +14,9 @@ window.addEventListener('unhandledrejection', function(e) {
     localStorage.setItem('ironfuel_errors', JSON.stringify(errors));
 });
 
+// Global HTML escape to prevent XSS
+function _esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
 const App = {
     currentPage: 'dashboard',
     previousPage: null,

@@ -384,7 +384,8 @@ const VoicePage = {
                     calories: Math.round(food.n[0] * r.parsed.weight / 100),
                     protein: Math.round(food.n[1] * r.parsed.weight / 100),
                     carbs: Math.round(food.n[2] * r.parsed.weight / 100),
-                    fat: Math.round(food.n[3] * r.parsed.weight / 100)
+                    fat: Math.round(food.n[3] * r.parsed.weight / 100),
+                    fiber: Math.round((food.n[4] || 0) * r.parsed.weight / 100)
                 };
                 Storage.addFoodToMeal(mealType, {
                     foodId: food.id,
@@ -394,6 +395,7 @@ const VoicePage = {
                     protein: n.protein,
                     carbs: n.carbs,
                     fat: n.fat,
+                    fiber: n.fiber,
                     source: 'voice'
                 }, App.getSelectedDate());
                 if (App.isToday()) Storage.addCoins(5);

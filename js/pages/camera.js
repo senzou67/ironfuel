@@ -220,7 +220,7 @@ const CameraPage = {
             <h3 style="margin:0 0 12px;font-size:16px">Aliments détectés :</h3>
             ${foods.map((food, i) => `
                 <div class="ai-result-card">
-                    <div class="ai-result-title">${food.name}</div>
+                    <div class="ai-result-title">${_esc(food.name)}</div>
                     <div class="ai-result-weight">~${food.weight_g}g ${food.source === 'usda' ? '· <span style="color:var(--success);font-weight:600">USDA</span>' : food.source === 'openfoodfacts' ? '· <span style="color:var(--success);font-weight:600">OFF</span>' : '· estimé'}</div>
                     <div class="nutrition-preview">
                         <div class="nutrition-item cal">

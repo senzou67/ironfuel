@@ -121,7 +121,7 @@ const ChatPage = {
             <div class="card" style="padding:12px 16px;margin-bottom:8px" id="chat-food-${i}">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
                     <div style="flex:1">
-                        <div style="font-size:15px;font-weight:700">${food.name}</div>
+                        <div style="font-size:15px;font-weight:700">${_esc(food.name)}</div>
                         <div style="font-size:12px;color:var(--text-secondary)">~${food.weight_g}g ${food.source === 'usda' ? '<span style="color:var(--success);font-weight:600">USDA</span>' : food.source === 'openfoodfacts' ? '<span style="color:var(--success);font-weight:600">OFF</span>' : '<span style="opacity:0.6">estimé</span>'}</div>
                     </div>
                     <div style="display:flex;align-items:center;gap:6px">

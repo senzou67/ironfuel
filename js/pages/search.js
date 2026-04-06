@@ -442,17 +442,27 @@ const SearchPage = {
             if (!container) return;
             const newFoods = data.foods.filter(f => !existingNames.includes(f.name.toLowerCase()));
             if (newFoods.length === 0) return;
+            this._communityResults = newFoods;
             container.innerHTML = `<div class="section-header" style="margin-top:12px">COMMUNAUTÉ</div>` +
-                newFoods.map(f => `
-                    <div class="search-result-item" onclick="Modal.showCustomFoodModal({name:'${f.name.replace(/'/g,"\\'")}',calories:${f.calories},protein:${f.protein},carbs:${f.carbs},fat:${f.fat},fiber:${f.fiber||0},weight_g:${f.grams||100}},{mealType:'${this.currentMeal}'})" style="cursor:pointer">
+                newFoods.map((f, i) => `
+                    <div class="search-result-item" onclick="SearchPage._addCommunityFood(${i})" style="cursor:pointer">
                         <div class="result-info">
-                            <div class="result-name">🌐 ${f.name}</div>
+                            <div class="result-name">🌐 ${_esc(f.name)}</div>
                             <div class="result-detail">${f.calories} kcal · P:${f.protein}g · G:${f.carbs}g · L:${f.fat}g${f.votes > 1 ? ' · 👍 ' + f.votes : ''}</div>
                         </div>
                         <span class="result-calories">${f.calories}</span>
                     </div>
                 `).join('') + container.innerHTML;
         } catch {}
+    },
+
+    _addCommunityFood(index) {
+        const f = this._communityResults?.[index];
+        if (!f) return;
+        Modal.showCustomFoodModal({
+            name: f.name, calories: f.calories, protein: f.protein,
+            carbs: f.carbs, fat: f.fat, fiber: f.fiber || 0, weight_g: f.grams || 100
+        }, { mealType: this.currentMeal });
     },
 
     _addRecipe(recipeId) {

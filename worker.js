@@ -85,8 +85,6 @@ export default {
                     response = await handler.onRequestGet(context);
                 } else if (handler.onRequest) {
                     response = await handler.onRequest(context);
-                } else if (method === 'POST' && handler.onRequest) {
-                    response = await handler.onRequest(context);
                 } else {
                     response = new Response(JSON.stringify({ error: 'Method not allowed' }), {
                         status: 405,
