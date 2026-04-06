@@ -313,7 +313,9 @@ const SupplementsPage = {
             const id = cb.value;
             const info = this.SUPPLEMENTS.find(x => x.id === id) || Storage._get('custom_supplements', []).find(x => x.id === id) || { id };
             const doseInput = document.querySelector(`.suppl-dose-input[data-id="${id}"]`);
-            const dose = doseInput ? parseInt(doseInput.value) || 1 : (info.defaultDose || 1);
+            const defaultDose = info.defaultDose || 1;
+            const parsed = doseInput ? parseInt(doseInput.value) : NaN;
+            const dose = (!Number.isFinite(parsed) || parsed <= 0) ? defaultDose : parsed;
             selected.push({ id, name: info.name, dose, unit: info.unit || '' });
         });
         Storage._set('my_supplements', selected);

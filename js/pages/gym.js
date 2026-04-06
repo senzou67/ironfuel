@@ -511,7 +511,7 @@ const GymPage = {
 
     _applyRoutine() {
         const routine = this._getRoutine();
-        const dayKeys = ['dim','lun','mar','mer','jeu','ven','sam'];
+        const dayKeys = ['lun','mar','mer','jeu','ven','sam','dim'];
         const today = new Date();
         const dayOfWeek = (today.getDay() + 6) % 7; // Monday = 0
         for (let i = 0; i < 7; i++) {

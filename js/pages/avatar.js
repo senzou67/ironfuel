@@ -41,7 +41,7 @@ const AvatarPage = {
 
         let xpPct = 0, xpText = '';
         if (nextDays) {
-            xpPct = Math.min(100, Math.round((days / nextDays) * 100));
+            xpPct = Math.min(100, Math.round((days / (nextDays || 1)) * 100));
             xpText = `Jour ${days} / ${nextDays} → Évolution`;
         } else {
             xpPct = 100;

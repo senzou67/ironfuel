@@ -543,7 +543,7 @@ const DashboardPage = {
                             <div style="width:${Math.min(n.pct, 100)}%;height:100%;background:${color};border-radius:2px"></div>
                         </div>
                     </div>
-                    <span style="font-size:9px;color:${color};font-weight:700">${n.pct}%</span>
+                    <span style="font-size:11px;color:${color};font-weight:700">${n.pct}%</span>
                 </div>
             `;
         }).join('');

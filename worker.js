@@ -58,7 +58,7 @@ export default {
             }
 
             // Match route (strip query string)
-            const routePath = path.replace(/\/$/, '');
+            const routePath = path.replace(/\/+$/, '');
             const handler = ROUTES[routePath];
 
             if (!handler) {
