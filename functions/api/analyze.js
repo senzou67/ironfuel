@@ -38,7 +38,7 @@ Regles:
 - Si tu vois une assiette, estime par rapport a la taille standard d'une assiette (26cm).
 - name_en doit etre le nom generique de l'aliment en anglais (ex: "grilled chicken breast", "white rice", "banana").`;
 
-        const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
+        const models = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.0-flash-lite'];
         let text = null;
         let lastError = null;
 
@@ -74,14 +74,25 @@ Regles:
 
         if (!text) return errorResponse(lastError || 'Pas de réponse de Gemini.');
 
-        let jsonStr = text;
-        const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-        if (jsonMatch) { jsonStr = jsonMatch[1].trim(); }
-        else { const s = text.indexOf('{'), e = text.lastIndexOf('}'); if (s !== -1 && e > s) jsonStr = text.substring(s, e + 1); }
-
-        let result;
-        try { result = JSON.parse(jsonStr); }
-        catch { return errorResponse('Réponse IA mal formée. Réessaie.'); }
+        let result = null;
+        // Try parsing as-is first (responseMimeType: application/json)
+        try { result = JSON.parse(text); } catch {}
+        // Try extracting from markdown code block
+        if (!result) {
+            const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+            if (jsonMatch) { try { result = JSON.parse(jsonMatch[1].trim()); } catch {} }
+        }
+        // Try extracting first { ... } block
+        if (!result) {
+            const s = text.indexOf('{'), e = text.lastIndexOf('}');
+            if (s !== -1 && e > s) { try { result = JSON.parse(text.substring(s, e + 1)); } catch {} }
+        }
+        // Try extracting first [ ... ] block (array of foods directly)
+        if (!result) {
+            const s = text.indexOf('['), e = text.lastIndexOf(']');
+            if (s !== -1 && e > s) { try { const arr = JSON.parse(text.substring(s, e + 1)); result = { foods: arr }; } catch {} }
+        }
+        if (!result) return errorResponse('Réponse IA mal formée. Réessaie.');
 
         let enriched;
         try {

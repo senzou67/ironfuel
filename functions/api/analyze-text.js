@@ -41,7 +41,7 @@ Regles:
 - Separe chaque aliment distinct (ex: "poulet et riz" = 2 aliments).
 - name_en doit etre le nom generique de l'aliment en anglais (ex: "grilled chicken breast", "white rice", "banana").`;
 
-        const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
+        const models = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.0-flash-lite'];
         let result = null;
 
         for (const model of models) {
@@ -67,12 +67,18 @@ Regles:
 
                 const raw = candidate.content?.parts?.[0]?.text?.trim();
                 if (raw) {
-                    let jsonStr = raw;
+                    // Try direct parse first
+                    try { result = JSON.parse(raw); break; } catch {}
+                    // Try markdown code block
                     const m = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
-                    if (m) jsonStr = m[1].trim();
-                    else { const s = raw.indexOf('{'), e = raw.lastIndexOf('}'); if (s !== -1 && e > s) jsonStr = raw.substring(s, e + 1); }
-                    try { result = JSON.parse(jsonStr); } catch { continue; }
-                    break;
+                    if (m) { try { result = JSON.parse(m[1].trim()); break; } catch {} }
+                    // Try extracting { ... }
+                    const s = raw.indexOf('{'), e = raw.lastIndexOf('}');
+                    if (s !== -1 && e > s) { try { result = JSON.parse(raw.substring(s, e + 1)); break; } catch {} }
+                    // Try extracting [ ... ]
+                    const s2 = raw.indexOf('['), e2 = raw.lastIndexOf(']');
+                    if (s2 !== -1 && e2 > s2) { try { const arr = JSON.parse(raw.substring(s2, e2 + 1)); result = { foods: arr }; break; } catch {} }
+                    continue;
                 }
             } catch {}
         }
