@@ -7,10 +7,6 @@
     "enabled": true
   },
   "assets": {
-    "directory": "./public",
-    "binding": "ASSETS"
-  },
-  "triggers": {
-    "crons": ["*/30 * * * *"]
+    "directory": "./public"
   }
 }
