@@ -1,11 +1,17 @@
-import { verifyAuth, jsonResponse, errorResponse } from './_shared.js';
+import { hasAuthToken, checkRateLimit, jsonResponse, errorResponse } from './_shared.js';
 import { enrichFoods } from './nutrition-lookup.js';
 
 export async function onRequestPost(context) {
     const { env, request } = context;
 
-    if (!await verifyAuth(request, env)) {
+    if (!hasAuthToken(request)) {
         return errorResponse('Authentification requise.', 401);
+    }
+
+    // Rate limit: 20 analyses/hour per IP
+    const ip = request.headers.get('cf-connecting-ip') || 'unknown';
+    if (!await checkRateLimit(env, `analyze-text:${ip}`, 20)) {
+        return errorResponse('Trop de requêtes. Réessaie dans quelques minutes.', 429);
     }
 
     const GEMINI_KEY = env.GEMINI_API_KEY;

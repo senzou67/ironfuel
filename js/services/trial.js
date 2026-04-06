@@ -7,16 +7,19 @@ const TrialService = {
     PRICE_ANNUAL: '14,99€',
     PRICE_MONTHLY: '2,99€',
     _serverChecked: false,
-    _premiumVerified: (() => { try { return !!new URLSearchParams(window.location.search).get('admin_mode'); } catch { return false; } })(),
+    _premiumVerified: false,
     _premiumPromise: null,     // resolves when all premium checks done
 
     // === PREMIUM FEATURES (locked after trial for free users) ===
     PREMIUM_FEATURES: ['creature', 'custom_macros', 'camera', 'voice', 'barcode', 'gym', 'weight', 'supplements', 'shop', 'chat'],
 
+    // Admin secret key — change this to your own secret
+    _ADMIN_SECRET: 'onefood-admin-2026-secret',
+
     init() {
-        // Admin force-premium via URL (for owner/dev only)
+        // Admin force-premium via URL (requires secret key)
         const params = new URLSearchParams(window.location.search);
-        if (params.get('admin_premium') === 'true') {
+        if (params.get('admin_premium') === this._ADMIN_SECRET) {
             this.markPaid('admin-force', 'annual');
             App.showToast('Premium activé manuellement ✅');
             window.history.replaceState({}, '', window.location.pathname + window.location.hash);

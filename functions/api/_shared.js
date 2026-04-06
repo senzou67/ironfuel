@@ -1,4 +1,4 @@
-// Shared utilities for Cloudflare Pages Functions
+// Shared utilities for Cloudflare Workers Functions
 import admin from 'firebase-admin';
 
 let _adminInitialized = false;
@@ -29,7 +29,7 @@ export function getDb(env) {
 
 export async function verifyAuth(request, env) {
     const a = initFirebase(env);
-    if (!a) return true; // No admin = skip auth
+    if (!a) return true; // No admin SDK = skip auth (dev mode)
     const authHeader = request.headers.get('Authorization') || '';
     const token = authHeader.replace('Bearer ', '');
     if (!token) return false;
@@ -37,9 +37,32 @@ export async function verifyAuth(request, env) {
         await a.auth().verifyIdToken(token);
         return true;
     } catch {
-        // If verification fails (e.g. Worker env limitations), allow anyway
-        // The token was provided, so the user attempted auth
+        return false;
+    }
+}
+
+// Lightweight auth check: just verify a token is present (no Firebase verification)
+// Use this for endpoints where Firebase Admin may not work in Workers env
+export function hasAuthToken(request) {
+    const authHeader = request.headers.get('Authorization') || '';
+    const token = authHeader.replace('Bearer ', '');
+    return token.length > 20; // A real Firebase token is always 800+ chars
+}
+
+// Simple rate limiter using KV (if available)
+export async function checkRateLimit(env, key, maxPerHour) {
+    if (!env.RATE_LIMIT_KV) return true; // No KV bound = allow
+    const now = Date.now();
+    const hour = Math.floor(now / 3600000);
+    const kvKey = `rl:${key}:${hour}`;
+    try {
+        const val = await env.RATE_LIMIT_KV.get(kvKey);
+        const count = val ? parseInt(val) : 0;
+        if (count >= maxPerHour) return false;
+        await env.RATE_LIMIT_KV.put(kvKey, String(count + 1), { expirationTtl: 7200 });
         return true;
+    } catch {
+        return true; // KV error = allow
     }
 }
 
