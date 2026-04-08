@@ -1388,7 +1388,7 @@ body::before {
 .nutrition-item.prot .nutrition-item-value { color: var(--protein-color); }
 .nutrition-item.carb .nutrition-item-value { color: var(--carbs-color); }
 .nutrition-item.fat .nutrition-item-value { color: var(--fat-color); }
-.nutrition-item.fiber .nutrition-item-value { color: #8D6E63; }
+.nutrition-item.fiber .nutrition-item-value { color: var(--fiber-color); }
 
 /* Camera Page */
 .camera-container {
