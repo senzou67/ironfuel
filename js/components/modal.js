@@ -686,6 +686,7 @@ const Modal = {
                     protein: Math.round(this._customFood.protein * ratio * 10) / 10,
                     carbs: Math.round(this._customFood.carbs * ratio * 10) / 10,
                     fat: Math.round(this._customFood.fat * ratio * 10) / 10,
+                    fiber: Math.round((this._customFood.fiber || 0) * ratio * 10) / 10,
                 });
                 Storage.saveRecipe(recipe);
                 App.showToast(`✓ ${this._customFood.name} ajouté à "${recipe.name}"`);
