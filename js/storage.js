@@ -694,13 +694,21 @@ const Storage = {
     addRecipeToMeal(recipeId, mealType, date) {
         const recipe = this.getRecipes().find(r => r.id === recipeId);
         if (!recipe || !recipe.items.length) return;
-        // Aggregate totals
+        // Aggregate totals (backfill fiber from FoodDB for legacy items missing it)
         const totals = recipe.items.reduce((acc, item) => {
+            let fiber = item.fiber || 0;
+            if (!fiber && item.foodId && typeof FoodDB !== 'undefined') {
+                const dbFood = FoodDB.getById(item.foodId);
+                if (dbFood) {
+                    const n = FoodDB.getNutrition(dbFood, item.grams || 100);
+                    fiber = n.fiber || 0;
+                }
+            }
             acc.calories += item.calories || 0;
             acc.protein += item.protein || 0;
             acc.carbs += item.carbs || 0;
             acc.fat += item.fat || 0;
-            acc.fiber += item.fiber || 0;
+            acc.fiber += fiber;
             acc.grams += item.grams || 0;
             return acc;
         }, { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, grams: 0 });
