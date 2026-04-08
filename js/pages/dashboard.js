@@ -222,8 +222,8 @@ const DashboardPage = {
                             ${waterPct > 0 ? '<svg style="position:absolute;top:-4px;left:0;width:200%;height:8px;animation:waveMove 2s linear infinite" viewBox="0 0 1200 8" preserveAspectRatio="none"><path d="M0 4C200 0 400 8 600 4C800 0 1000 8 1200 4V8H0Z" fill="rgba(79,195,247,0.4)"/></svg>' : ''}
                         </div>
                         <span class="icon">💧</span>
-                        <span style="font-weight:600">${(water * 0.25).toFixed(water % 4 === 0 ? 0 : 1)}L</span>
-                        <span style="font-size:10px;color:var(--text-secondary)">/ ${(waterGoal * 0.25).toFixed(waterGoal % 4 === 0 ? 0 : 1)}L</span>
+                        <span style="font-weight:600">${(water * 0.25).toFixed(2).replace(/\.?0+$/, '')}L</span>
+                        <span style="font-size:10px;color:var(--text-secondary)">/ ${(waterGoal * 0.25).toFixed(2).replace(/\.?0+$/, '')}L</span>
                         ${water >= waterGoal ? '<span style="font-size:11px">✅</span>' : ''}
                     </button>
                     <button class="quick-action-btn gym-action-btn" onclick="${hasAccess ? "App.navigate('gym')" : "TrialService.showFeatureLockedPrompt('gym')"}" style="position:relative;overflow:hidden;display:flex;align-items:center;gap:6px;justify-content:center;z-index:1">
@@ -432,7 +432,7 @@ const DashboardPage = {
         const waterGoal = goals.water || 12;
         const maxGlasses = Math.min(waterGoal + 4, 20);
         if (current >= maxGlasses) {
-            App.showToast(`Maximum atteint (${(maxGlasses * 0.25).toFixed(1)}L) 💧`);
+            App.showToast(`Maximum atteint (${(maxGlasses * 0.25).toFixed(2).replace(/\.?0+$/, '')}L) 💧`);
             return;
         }
         const newCount = Math.min(current + glasses, maxGlasses);
@@ -440,7 +440,7 @@ const DashboardPage = {
         Storage.setWater(newCount, date);
         if (App.isToday()) this._checkWaterBonus(newCount);
         App.haptic('light');
-        App.showToast(`+${addedMl}ml 💧 (${(newCount * 0.25).toFixed(newCount * 0.25 % 1 === 0 ? 0 : 1)}L)`);
+        App.showToast(`+${addedMl}ml 💧 (${(newCount * 0.25).toFixed(2).replace(/\.?0+$/, '')}L)`);
         this._updateWaterButton(newCount, waterGoal);
     },
 
@@ -456,7 +456,7 @@ const DashboardPage = {
             }
         }
         const spans = btn.querySelectorAll('span');
-        if (spans[1]) spans[1].textContent = (water * 0.25).toFixed(water % 4 === 0 ? 0 : 1) + 'L';
+        if (spans[1]) spans[1].textContent = (water * 0.25).toFixed(2).replace(/\.?0+$/, '') + 'L';
         const check = btn.querySelector('span:last-child');
         if (water >= waterGoal && check && !check.textContent.includes('✅')) {
             const s = document.createElement('span');

@@ -386,11 +386,14 @@ const TrialService = {
                 this._serverAction('paid');
             }
 
-            if (!data.allowed) {
-                const local = this._getData();
-                local.startDate = new Date(Date.now() - (15 * 24 * 60 * 60 * 1000)).toISOString();
-                local.ipBlocked = true;
-                this._setData(local);
+            if (!data.allowed && data.reason !== 'error') {
+                // Only block if server explicitly says expired, and user isn't paid locally
+                if (!this._getData().paid) {
+                    const local = this._getData();
+                    local.startDate = new Date(Date.now() - (15 * 24 * 60 * 60 * 1000)).toISOString();
+                    local.ipBlocked = true;
+                    this._setData(local);
+                }
                 return false;
             }
 

@@ -10,7 +10,7 @@ const FoodItem = {
                 <div class="food-item-info">
                     <div class="food-item-name">${_esc(item.name)}</div>
                     <div class="food-item-detail">
-                        ${item.isRecipe ? `${item.recipeItems} aliments · ` : `${item.grams || item.qty || '—'}g · `}P:${Math.round(item.protein)}g · G:${Math.round(item.carbs)}g · L:${Math.round(item.fat)}g
+                        ${item.isRecipe ? `${item.recipeItems} aliments · ` : `${item.grams || item.qty || '—'}g · `}P:${Math.round(item.protein)}g · G:${Math.round(item.carbs)}g · L:${Math.round(item.fat)}g${item.fiber ? ` · F:${Math.round(item.fiber)}g` : ''}
                     </div>
                     ${microBadges}
                 </div>

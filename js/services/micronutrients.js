@@ -182,7 +182,7 @@ const MicronutrientService = {
         const details = this._microInfos[key];
         if (!info || !details) return;
 
-        const micros = this.estimateFromLog();
+        const micros = this.estimateFromLog(App.getSelectedDate());
         const value = micros[key] || 0;
         const pct = Math.min(Math.round((value / info.goal) * 100), 150);
         const color = info.isLimit

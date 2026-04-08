@@ -676,9 +676,11 @@ body::before {
 }
 
 .meal-calories {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-secondary);
     font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .meal-add-btn {
@@ -1358,7 +1360,7 @@ body::before {
 /* Nutrition preview */
 .nutrition-preview {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 8px;
     margin: 16px 0;
 }
@@ -1386,6 +1388,7 @@ body::before {
 .nutrition-item.prot .nutrition-item-value { color: var(--protein-color); }
 .nutrition-item.carb .nutrition-item-value { color: var(--carbs-color); }
 .nutrition-item.fat .nutrition-item-value { color: var(--fat-color); }
+.nutrition-item.fiber .nutrition-item-value { color: #8D6E63; }
 
 /* Camera Page */
 .camera-container {
@@ -4256,4 +4259,50 @@ input:focus, select:focus, textarea:focus {
 }
 .water-tank:active {
     transform: scale(0.98);
+}
+
+/* === RESPONSIVE — Small screens (320-360px) === */
+@media (max-width: 380px) {
+    .nutrition-preview {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+    }
+    .nutrition-item {
+        padding: 6px 4px;
+    }
+    .nutrition-item-value {
+        font-size: 14px;
+    }
+    .nutrition-item-label {
+        font-size: 9px;
+    }
+    .meal-name {
+        max-width: 80px;
+    }
+    .meal-calories {
+        font-size: 11px;
+    }
+    .food-item {
+        padding: 8px 10px;
+        gap: 8px;
+    }
+    .card {
+        margin-left: 12px;
+        margin-right: 12px;
+    }
+    .date-selector-bar {
+        gap: 2px;
+        padding: 8px 10px;
+    }
+    .date-label-btn {
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+    .quick-action-btn {
+        padding: 10px 4px;
+        font-size: 11px;
+    }
+    .btn {
+        padding: 12px 16px;
+    }
 }

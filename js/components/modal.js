@@ -385,7 +385,7 @@ const Modal = {
                     <span class="nutrition-item-value" id="np-fat">${nutrition.fat}g</span>
                     <span class="nutrition-item-label">Lipides</span>
                 </div>
-                <div class="nutrition-item" style="color:var(--text-secondary)">
+                <div class="nutrition-item fiber">
                     <span class="nutrition-item-value" id="np-fiber">${nutrition.fiber || 0}g</span>
                     <span class="nutrition-item-label">Fibres</span>
                 </div>
@@ -460,7 +460,7 @@ const Modal = {
                     <span class="nutrition-item-value" id="np-fat">${foodData.fat}g</span>
                     <span class="nutrition-item-label">Lipides</span>
                 </div>
-                <div class="nutrition-item" style="color:var(--text-secondary)">
+                <div class="nutrition-item fiber">
                     <span class="nutrition-item-value" id="np-fiber">${foodData.fiber || 0}g</span>
                     <span class="nutrition-item-label">Fibres</span>
                 </div>
