@@ -386,8 +386,8 @@ const TrialService = {
                 this._serverAction('paid');
             }
 
-            if (!data.allowed && data.reason !== 'error') {
-                // Only block if server explicitly says expired, and user isn't paid locally
+            if (!data.allowed && data.reason === 'expired') {
+                // Only block if server explicitly says "expired" and user isn't paid
                 if (!this._getData().paid) {
                     const local = this._getData();
                     local.startDate = new Date(Date.now() - (15 * 24 * 60 * 60 * 1000)).toISOString();
@@ -397,9 +397,12 @@ const TrialService = {
                 return false;
             }
 
+            // For any other non-allowed response (error, no KV, etc.) — trust local data
+            if (!data.allowed) return !this.isTrialExpired();
+
             if (data.reason === 'new') {
                 await this._serverAction('register');
-            } else if (data.reason === 'trial') {
+            } else if (data.reason === 'trial' && data.daysLeft > 0) {
                 const serverDays = data.daysLeft;
                 const localDays = this.daysLeft();
                 if (serverDays < localDays) {
