@@ -148,7 +148,7 @@ const ProfilePage = {
                 </div>
                 <div class="form-group">
                     <label class="form-label">Poids (kg)</label>
-                    <input type="number" class="form-input weight-input" id="p-weight" value="${profile.weight}" step="0.1" min="30" max="300">
+                    <input type="number" class="form-input" id="p-weight" value="${profile.weight}" step="0.1" min="30" max="300">
                 </div>
             </div>
             <div class="form-group">
