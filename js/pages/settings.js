@@ -130,10 +130,10 @@ const SettingsPage = {
                     const plan = trialData.plan === 'monthly' ? 'Mensuel' : 'Annuel';
                     return `
                 <div class="settings-group" style="border:2px solid var(--success);border-radius:var(--radius)">
-                    <div class="settings-group-title" style="color:#4CAF50">✅ Abonnement Premium actif</div>
+                    <div class="settings-group-title" style="color:var(--success)">✅ Abonnement Premium actif</div>
                     <div class="settings-item">
                         <span>Plan</span>
-                        <span style="color:#4CAF50;font-weight:600">${plan}</span>
+                        <span style="color:var(--success);font-weight:600">${plan}</span>
                     </div>
                     <div class="settings-item">
                         <span>Activé le</span>
@@ -141,12 +141,12 @@ const SettingsPage = {
                     </div>
                     <div class="settings-item">
                         <span>Expire dans</span>
-                        <span style="color:${daysLeft < 30 ? 'var(--danger)' : '#4CAF50'};font-weight:700">${daysLeft} jours</span>
+                        <span style="color:${daysLeft < 30 ? 'var(--danger)' : 'var(--success)'};font-weight:700">${daysLeft} jours</span>
                     </div>
                     ${daysLeft > 0 ? `
                     <div style="padding:0 16px 12px">
                         <div style="height:6px;border-radius:3px;background:var(--border);overflow:hidden">
-                            <div style="width:${Math.min(100, Math.round(daysLeft / (trialData.plan === 'monthly' ? 31 : 365) * 100))}%;height:100%;background:#4CAF50;border-radius:3px"></div>
+                            <div style="width:${Math.min(100, Math.round(daysLeft / (trialData.plan === 'monthly' ? 31 : 365) * 100))}%;height:100%;background:var(--success);border-radius:3px"></div>
                         </div>
                     </div>
                     ` : ''}

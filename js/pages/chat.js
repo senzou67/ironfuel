@@ -130,12 +130,27 @@ const ChatPage = {
                         <span style="font-size:12px;color:var(--text-secondary)">g</span>
                     </div>
                 </div>
-                <div style="display:flex;gap:8px;font-size:12px;margin-bottom:8px;flex-wrap:wrap">
-                    <span style="padding:4px 8px;border-radius:8px;background:var(--primary-light);color:var(--primary);font-weight:600" id="chat-cal-${i}">${food.calories} kcal</span>
-                    <span style="color:var(--protein-color);font-weight:600" id="chat-prot-${i}">P ${food.protein}g</span>
-                    <span style="color:var(--carbs-color);font-weight:600" id="chat-carbs-${i}">G ${food.carbs}g</span>
-                    <span style="color:var(--fat-color);font-weight:600" id="chat-fat-${i}">L ${food.fat}g</span>
-                    <span style="color:var(--fiber-color);font-weight:600" id="chat-fiber-${i}">Fib ${food.fiber || 0}g</span>
+                <div class="nutrition-preview" style="margin:8px 0;grid-template-columns:repeat(5,1fr);gap:4px">
+                    <div class="nutrition-item cal" style="padding:6px 4px">
+                        <span class="nutrition-item-value" style="font-size:14px" id="chat-cal-${i}">${food.calories}</span>
+                        <span class="nutrition-item-label">kcal</span>
+                    </div>
+                    <div class="nutrition-item prot" style="padding:6px 4px">
+                        <span class="nutrition-item-value" style="font-size:14px" id="chat-prot-${i}">${food.protein}g</span>
+                        <span class="nutrition-item-label">Prot.</span>
+                    </div>
+                    <div class="nutrition-item carb" style="padding:6px 4px">
+                        <span class="nutrition-item-value" style="font-size:14px" id="chat-carbs-${i}">${food.carbs}g</span>
+                        <span class="nutrition-item-label">Gluc.</span>
+                    </div>
+                    <div class="nutrition-item fat" style="padding:6px 4px">
+                        <span class="nutrition-item-value" style="font-size:14px" id="chat-fat-${i}">${food.fat}g</span>
+                        <span class="nutrition-item-label">Lip.</span>
+                    </div>
+                    <div class="nutrition-item fiber" style="padding:6px 4px">
+                        <span class="nutrition-item-value" style="font-size:14px" id="chat-fiber-${i}">${food.fiber || 0}g</span>
+                        <span class="nutrition-item-label">Fib.</span>
+                    </div>
                 </div>
                 <div style="display:flex;gap:6px">
                     <button class="btn btn-primary" onclick="ChatPage._addFood(${i})" style="flex:1;padding:8px;font-size:13px;border-radius:10px">Ajouter</button>
@@ -159,11 +174,11 @@ const ChatPage = {
         const carbs = document.getElementById('chat-carbs-' + idx);
         const fat = document.getElementById('chat-fat-' + idx);
         const fiber = document.getElementById('chat-fiber-' + idx);
-        if (cal) cal.textContent = Math.round(food.calories * ratio) + ' kcal';
-        if (prot) prot.textContent = 'P ' + (food.protein * ratio).toFixed(1) + 'g';
-        if (carbs) carbs.textContent = 'G ' + (food.carbs * ratio).toFixed(1) + 'g';
-        if (fat) fat.textContent = 'L ' + (food.fat * ratio).toFixed(1) + 'g';
-        if (fiber) fiber.textContent = 'Fib ' + ((food.fiber || 0) * ratio).toFixed(1) + 'g';
+        if (cal) cal.textContent = Math.round(food.calories * ratio);
+        if (prot) prot.textContent = (food.protein * ratio).toFixed(1) + 'g';
+        if (carbs) carbs.textContent = (food.carbs * ratio).toFixed(1) + 'g';
+        if (fat) fat.textContent = (food.fat * ratio).toFixed(1) + 'g';
+        if (fiber) fiber.textContent = ((food.fiber || 0) * ratio).toFixed(1) + 'g';
     },
 
     _addFood(idx) {

@@ -229,6 +229,10 @@ const BarcodePage = {
                             <span class="nutrition-item-value">${n.fat}g</span>
                             <span class="nutrition-item-label">Lip.</span>
                         </div>
+                        <div class="nutrition-item fiber">
+                            <span class="nutrition-item-value">${n.fiber || 0}g</span>
+                            <span class="nutrition-item-label">Fib.</span>
+                        </div>
                     </div>
                     <button class="btn btn-primary" onclick="BarcodePage.addProduct()" style="margin-top:12px">
                         Ajouter au journal

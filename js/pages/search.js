@@ -305,10 +305,17 @@ const SearchPage = {
     },
 
     // Food category colors for thumbnail circles
-    _catColors: {
-        feculents: '#FF9800', proteines: '#F44336', legumes: '#4CAF50', fruits: '#8BC34A',
-        laitiers: '#2196F3', matieres_grasses: '#FFC107', boissons: '#00BCD4',
-        snacks: '#9C27B0', sauces: '#795548', plats: '#607D8B'
+    _catColors: null,
+    _getCatColors() {
+        if (!this._catColors) {
+            const cs = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+            this._catColors = {
+                feculents: cs('--carbs-color') || '#F59E0B', proteines: cs('--protein-color') || '#3B82F6', legumes: cs('--fiber-color') || '#22C55E', fruits: '#8BC34A',
+                laitiers: '#2196F3', matieres_grasses: '#FFC107', boissons: '#00BCD4',
+                snacks: '#9C27B0', sauces: '#795548', plats: '#607D8B'
+            };
+        }
+        return this._catColors;
     },
 
     renderResultItem(food) {
@@ -317,7 +324,7 @@ const SearchPage = {
         const isStringId = typeof food.id === 'string';
         const clickId = isStringId ? `'${food.id.replace(/'/g, "\\'")}'` : food.id;
         const isFav = Storage.isFavorite(food.id);
-        const catColor = this._catColors[food.cat] || '#9E9E9E';
+        const catColor = this._getCatColors()[food.cat] || '#9E9E9E';
         const catIcon = cat ? cat.icon : '📦';
 
         // Check for photo: custom food photo > curated/cached image > category icon

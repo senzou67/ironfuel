@@ -101,7 +101,7 @@ const DashboardPage = {
         // This prevents false "Essai gratuit" banners for paying users
         const adBanner = premiumStillChecking ? '' :
             !isPremium && !TrialService.isTrialActive() ? `
-            <div class="trial-banner" onclick="App.navigate('settings')" style="background:linear-gradient(135deg,var(--primary),#EF5350);color:white;padding:10px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+            <div class="trial-banner" onclick="App.navigate('settings')" style="background:linear-gradient(135deg,var(--primary),var(--accent));color:white;padding:10px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">
                 <span style="font-size:13px;font-weight:600">⭐ Passe Premium — Photo IA, créature, micro-nutriments</span>
                 <span style="font-size:12px;opacity:0.9">Voir →</span>
             </div>
@@ -235,7 +235,7 @@ const DashboardPage = {
                         <span class="icon">💊</span>${!hasAccess ? 'Compléments 🔒' : mySupplements.length > 0 ? `<span style="font-weight:600">${supplCount}/${mySupplements.length}</span>${supplAllDone ? ' <span style="font-size:11px">✅</span>' : ''}` : 'Compléments'}
                     </button>
                     <button class="quick-action-btn" onclick="${hasAccess ? "App.navigate('weight')" : "TrialService.showFeatureLockedPrompt('weight')"}" style="position:relative;overflow:hidden;display:flex;align-items:center;gap:6px;justify-content:center;z-index:1">
-                        ${hasAccess && weightToday ? '<div style="position:absolute;bottom:0;left:0;width:100%;height:100%;background:linear-gradient(180deg,rgba(255,152,0,0.2) 0%,rgba(255,152,0,0.35) 100%);z-index:-1;border-radius:0 0 12px 12px"></div>' : ''}
+                        ${hasAccess && weightToday ? '<div style="position:absolute;bottom:0;left:0;width:100%;height:100%;background:linear-gradient(180deg,rgba(245,158,11,0.2) 0%,rgba(245,158,11,0.35) 100%);z-index:-1;border-radius:0 0 12px 12px"></div>' : ''}
                         <span class="icon">⚖️</span>${!hasAccess ? 'Poids 🔒' : weightToday ? `<span style="font-weight:600">${weightToday.weight}kg</span> <span style="font-size:11px">✅</span>` : 'Poids'}
                     </button>
                 </div>

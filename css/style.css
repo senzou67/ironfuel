@@ -130,7 +130,7 @@ body::before {
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(ellipse at 20% 50%, rgba(230,74,25,0.06) 0%, transparent 50%),
+    background: radial-gradient(ellipse at 20% 50%, rgba(239,68,68,0.06) 0%, transparent 50%),
                 radial-gradient(ellipse at 80% 20%, rgba(255,193,7,0.05) 0%, transparent 50%),
                 radial-gradient(ellipse at 50% 80%, rgba(33,150,243,0.04) 0%, transparent 50%);
     animation: meshFloat 20s ease-in-out infinite;
@@ -172,7 +172,7 @@ body::before {
     padding-right: 16px;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 1px 20px rgba(230,74,25,0.15);
+    box-shadow: 0 1px 20px rgba(239,68,68,0.15);
 }
 
 #app-header h1 {
@@ -208,7 +208,7 @@ body::before {
 /* Main content */
 #page-content {
     padding-top: calc(var(--header-height) + env(safe-area-inset-top, 0px));
-    padding-bottom: calc(var(--nav-height) + 16px);
+    padding-bottom: calc(var(--nav-height) + 20px);
     min-height: 100vh;
     overflow-x: hidden;
     max-width: 100%;
@@ -266,7 +266,7 @@ body::before {
     background: var(--primary);
     border-radius: 3px;
     transition: left 0.35s var(--transition-smooth), width 0.2s var(--transition-smooth);
-    box-shadow: 0 0 8px rgba(230,74,25,0.4);
+    box-shadow: 0 0 8px rgba(239,68,68,0.4);
 }
 
 .nav-btn span {
@@ -282,20 +282,20 @@ body::before {
 .fab-circle {
     width: 54px;
     height: 54px;
-    background: linear-gradient(135deg, var(--primary), #EF5350);
+    background: linear-gradient(135deg, var(--primary), var(--accent));
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-top: -20px;
-    box-shadow: 0 4px 18px rgba(230, 74, 25, 0.45);
+    box-shadow: 0 4px 18px rgba(239, 68, 68, 0.45);
     transition: transform 0.3s var(--transition-spring), background 0.3s;
     animation: fabBreathe 3s ease-in-out infinite;
 }
 
 @keyframes fabBreathe {
-    0%, 100% { box-shadow: 0 4px 18px rgba(230, 74, 25, 0.35); }
-    50% { box-shadow: 0 6px 28px rgba(230, 74, 25, 0.55); }
+    0%, 100% { box-shadow: 0 4px 18px rgba(239, 68, 68, 0.35); }
+    50% { box-shadow: 0 6px 28px rgba(239, 68, 68, 0.55); }
 }
 
 .fab-circle:active {
@@ -814,8 +814,8 @@ body::before {
 }
 
 .search-bar:focus-within {
-    box-shadow: var(--shadow-md), 0 0 0 2px rgba(230,74,25,0.15);
-    border-color: rgba(230,74,25,0.3);
+    box-shadow: var(--shadow-md), 0 0 0 2px rgba(239,68,68,0.15);
+    border-color: rgba(239,68,68,0.3);
 }
 
 .search-bar input {
@@ -1238,7 +1238,7 @@ body::before {
 }
 .form-input:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(230,74,25,0.12);
+    box-shadow: 0 0 0 3px rgba(239,68,68,0.12);
 }
 
 .form-input::placeholder {
@@ -1296,10 +1296,10 @@ body::before {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--primary), #EF5350);
+    background: linear-gradient(135deg, var(--primary), var(--accent));
     color: white;
     width: 100%;
-    box-shadow: 0 4px 16px rgba(230,74,25,0.3);
+    box-shadow: 0 4px 16px rgba(239,68,68,0.3);
 }
 
 .btn-primary:active {
@@ -1486,7 +1486,7 @@ body::before {
     color: white;
     font-size: 36px;
     cursor: pointer;
-    box-shadow: 0 6px 20px rgba(230,74,25,0.35);
+    box-shadow: 0 6px 20px rgba(239,68,68,0.35);
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
@@ -2816,7 +2816,7 @@ body::before {
 .starter-card.selected {
     border-color: var(--primary);
     background: var(--primary-light);
-    box-shadow: 0 0 0 3px rgba(230, 74, 25, 0.2);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
     transform: scale(1.03);
 }
 
@@ -3103,7 +3103,7 @@ body::before {
 }
 .paywall-promo-badge {
     display: inline-block;
-    background: linear-gradient(135deg, #C62828, #E53935);
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
     color: white;
     font-size: 12px;
     font-weight: 800;
@@ -3209,7 +3209,7 @@ body::before {
     background: var(--surface);
 }
 [data-theme="dark"] .paywall-plan.selected {
-    background: rgba(230, 74, 25, 0.15);
+    background: rgba(239, 68, 68, 0.15);
 }
 
 /* ===== LOGIN SCREEN ===== */
@@ -3565,7 +3565,7 @@ body::before {
     width: 80px;
     height: 80px;
     border-radius: 22px;
-    background: #E53935;
+    background: var(--primary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3577,8 +3577,8 @@ body::before {
     box-shadow: 0 8px 24px rgba(229,57,53,0.3);
 }
 @keyframes splashPulse {
-    0%, 100% { transform: scale(1); box-shadow: 0 8px 32px rgba(230,74,25,0.35); }
-    50% { transform: scale(1.06); box-shadow: 0 12px 40px rgba(230,74,25,0.5); }
+    0%, 100% { transform: scale(1); box-shadow: 0 8px 32px rgba(239,68,68,0.35); }
+    50% { transform: scale(1.06); box-shadow: 0 12px 40px rgba(239,68,68,0.5); }
 }
 
 .splash-title {
@@ -3592,7 +3592,7 @@ body::before {
     margin-top: 24px;
     width: 44px;
     height: 44px;
-    border: 3px solid rgba(230,74,25,0.15);
+    border: 3px solid rgba(239,68,68,0.15);
     border-top-color: var(--primary);
     border-right-color: rgba(255,193,7,0.6);
     border-radius: 50%;
@@ -3787,11 +3787,11 @@ body::before {
 
 /* Calorie ring glow (canvas-based via Chart.js) */
 .circular-progress canvas {
-    filter: drop-shadow(0 0 8px rgba(230,74,25,0.3));
+    filter: drop-shadow(0 0 8px rgba(239,68,68,0.3));
     transition: filter 0.5s var(--transition-smooth);
 }
 .circular-progress:hover canvas {
-    filter: drop-shadow(0 0 14px rgba(230,74,25,0.5));
+    filter: drop-shadow(0 0 14px rgba(239,68,68,0.5));
 }
 
 /* Macro bar animated fill */
@@ -3862,15 +3862,15 @@ body::before {
 
 /* Input focus glow */
 input:focus, select:focus, textarea:focus {
-    box-shadow: 0 0 0 3px rgba(230,74,25,0.12);
-    border-color: rgba(230,74,25,0.4) !important;
+    box-shadow: 0 0 0 3px rgba(239,68,68,0.12);
+    border-color: rgba(239,68,68,0.4) !important;
     transition: box-shadow 0.25s var(--transition-smooth), border-color 0.25s;
 }
 
 /* Creature aura glow — applied ONLY on SVG child, never on container div */
 /* Base shadow for all types + type-specific animation overrides below */
 .creature-display svg {
-    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15)) drop-shadow(0 0 18px var(--aura-color, rgba(230,74,25,0.4)));
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15)) drop-shadow(0 0 18px var(--aura-color, rgba(239,68,68,0.4)));
     animation: creatureAuraPulseFire 3s ease-in-out infinite;
     will-change: filter;
 }
@@ -3885,7 +3885,7 @@ input:focus, select:focus, textarea:focus {
     animation: creatureAuraPulsePlant 3s ease-in-out infinite;
 }
 .creature-display:hover svg {
-    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15)) drop-shadow(0 0 30px var(--aura-color, rgba(230,74,25,0.6)));
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15)) drop-shadow(0 0 30px var(--aura-color, rgba(239,68,68,0.6)));
 }
 /* When SVG contains internal aura elements, disable CSS drop-shadow glow to avoid rectangular artifact */
 .creature-display.has-svg-aura svg {
@@ -4067,9 +4067,9 @@ input:focus, select:focus, textarea:focus {
     overflow: hidden;
 }
 .empty-meal-btn:hover, .empty-meal-btn:active {
-    border-color: rgba(230,74,25,0.3);
+    border-color: rgba(239,68,68,0.3);
     color: var(--primary);
-    background: rgba(230,74,25,0.04);
+    background: rgba(239,68,68,0.04);
     transform: translateY(-1px);
     box-shadow: var(--shadow-sm);
 }
@@ -4077,7 +4077,7 @@ input:focus, select:focus, textarea:focus {
     content: '';
     position: absolute;
     top: 0; left: -100%; width: 60%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(230,74,25,0.04), transparent);
+    background: linear-gradient(90deg, transparent, rgba(239,68,68,0.04), transparent);
     transition: left 0.5s;
 }
 .empty-meal-btn:hover::after {
@@ -4086,7 +4086,7 @@ input:focus, select:focus, textarea:focus {
 
 /* Skeleton loading enhanced */
 .skeleton {
-    background: linear-gradient(90deg, var(--surface) 25%, rgba(230,74,25,0.04) 50%, var(--surface) 75%);
+    background: linear-gradient(90deg, var(--surface) 25%, rgba(239,68,68,0.04) 50%, var(--surface) 75%);
     background-size: 200% 100%;
 }
 
@@ -4123,12 +4123,12 @@ input:focus, select:focus, textarea:focus {
 /* ===== MOBILE — SIGNIFICANTLY boost all effects (small screens, lower contrast) ===== */
 @media (max-width: 768px) {
     body::before {
-        background: radial-gradient(ellipse at 20% 50%, rgba(230,74,25,0.22) 0%, transparent 50%),
-                    radial-gradient(ellipse at 80% 20%, rgba(255,193,7,0.18) 0%, transparent 50%),
-                    radial-gradient(ellipse at 50% 80%, rgba(33,150,243,0.15) 0%, transparent 50%);
+        background: radial-gradient(ellipse at 20% 50%, rgba(239,68,68,0.22) 0%, transparent 50%),
+                    radial-gradient(ellipse at 80% 20%, rgba(245,158,11,0.18) 0%, transparent 50%),
+                    radial-gradient(ellipse at 50% 80%, rgba(59,130,246,0.15) 0%, transparent 50%);
     }
     .circular-progress canvas {
-        filter: drop-shadow(0 0 18px rgba(230,74,25,0.65));
+        filter: drop-shadow(0 0 18px rgba(239,68,68,0.65));
     }
     .macro-bar-fill::after {
         background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
@@ -4154,20 +4154,20 @@ input:focus, select:focus, textarea:focus {
         background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
     }
     .streak-badge {
-        text-shadow: 0 0 12px rgba(230,74,25,0.5);
+        text-shadow: 0 0 12px rgba(239,68,68,0.5);
     }
 }
 
 /* Desktop creature aura pulse — includes base body shadow + type-colored glow */
 @keyframes creatureAuraPulseFire {
-    0%, 100% { filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15)) drop-shadow(0 0 18px rgba(230,74,25,0.45)); }
-    50% { filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15)) drop-shadow(0 0 30px rgba(230,74,25,0.7)); }
+    0%, 100% { filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15)) drop-shadow(0 0 18px rgba(239,68,68,0.45)); }
+    50% { filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15)) drop-shadow(0 0 30px rgba(239,68,68,0.7)); }
 }
 
 /* Mobile creature aura pulse — MUCH stronger + includes body shadow to prevent artifact */
 @keyframes creatureAuraPulseMobileFire {
-    0%, 100% { filter: drop-shadow(0 4px 10px rgba(0,0,0,0.12)) drop-shadow(0 0 28px rgba(230,74,25,0.7)) drop-shadow(0 0 6px rgba(230,74,25,0.4)); }
-    50% { filter: drop-shadow(0 4px 10px rgba(0,0,0,0.12)) drop-shadow(0 0 45px rgba(230,74,25,0.9)) drop-shadow(0 0 12px rgba(230,74,25,0.6)); }
+    0%, 100% { filter: drop-shadow(0 4px 10px rgba(0,0,0,0.12)) drop-shadow(0 0 28px rgba(239,68,68,0.7)) drop-shadow(0 0 6px rgba(239,68,68,0.4)); }
+    50% { filter: drop-shadow(0 4px 10px rgba(0,0,0,0.12)) drop-shadow(0 0 45px rgba(239,68,68,0.9)) drop-shadow(0 0 12px rgba(239,68,68,0.6)); }
 }
 @keyframes creatureAuraPulseMobileWater {
     0%, 100% { filter: drop-shadow(0 4px 10px rgba(0,0,0,0.12)) drop-shadow(0 0 28px rgba(33,150,243,0.7)) drop-shadow(0 0 6px rgba(33,150,243,0.4)); }
@@ -4179,7 +4179,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* Creature type-specific aura color vars */
-.creature-display[data-type="fire"] svg { --aura-color: rgba(230,74,25,0.6); }
+.creature-display[data-type="fire"] svg { --aura-color: rgba(239,68,68,0.6); }
 .creature-display[data-type="water"] svg { --aura-color: rgba(33,150,243,0.6); }
 .creature-display[data-type="plant"] svg { --aura-color: rgba(76,175,80,0.6); }
 
@@ -4308,5 +4308,81 @@ input:focus, select:focus, textarea:focus {
     }
     .btn {
         padding: 12px 16px;
+    }
+
+    /* Circular progress ring — scale down on very small screens */
+    .circular-progress {
+        width: 130px;
+        height: 130px;
+    }
+    .circular-progress.compact {
+        width: 100px;
+        height: 100px;
+    }
+    .circular-progress canvas {
+        width: 100% !important;
+        height: 100% !important;
+    }
+    .compact .calories-value {
+        font-size: 18px !important;
+    }
+    .compact .calories-label {
+        font-size: 10px !important;
+    }
+
+    /* Form inputs — adequate touch targets on small screens */
+    .form-input {
+        padding: 10px 12px;
+        min-height: 44px;
+        font-size: 16px;
+    }
+    input[type="number"],
+    input[type="text"],
+    textarea,
+    select {
+        min-height: 44px;
+    }
+
+    /* FAB button — prevent overlap with bottom content */
+    .fab-circle {
+        width: 48px;
+        height: 48px;
+        margin-top: -16px;
+    }
+    .fab-circle svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Macro bars — tighter on small screens */
+    .macro-bar-label {
+        font-size: 10px;
+        min-width: 28px;
+    }
+    .macro-bar-value {
+        font-size: 10px;
+        min-width: 52px;
+    }
+
+    /* Search result items — tighter layout */
+    .search-result-item {
+        padding: 8px 10px;
+    }
+    .result-name {
+        font-size: 13px;
+    }
+    .result-detail {
+        font-size: 10px;
+    }
+    .food-thumb {
+        width: 34px;
+        height: 34px;
+    }
+}
+
+/* Ensure main content has extra padding-bottom on small screens so FAB doesn't overlap */
+@media (max-width: 480px) {
+    #page-content {
+        padding-bottom: calc(var(--nav-height) + 28px);
     }
 }

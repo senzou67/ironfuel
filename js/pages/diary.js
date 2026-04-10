@@ -33,7 +33,7 @@ const DiaryPage = {
                             <div style="font-size:24px;font-weight:700;color:var(--primary)">${totals.calories}</div>
                             <div style="font-size:12px;color:var(--text-secondary)">/ ${goals.calories} kcal</div>
                         </div>
-                        <div class="nutrition-preview" style="margin:0;flex:1;max-width:280px">
+                        <div class="nutrition-preview" style="margin:0;flex:1;max-width:280px;grid-template-columns:repeat(4,1fr)">
                             <div class="nutrition-item prot">
                                 <span class="nutrition-item-value">${Math.round(totals.protein)}g</span>
                                 <span class="nutrition-item-label">Prot.</span>
@@ -45,6 +45,10 @@ const DiaryPage = {
                             <div class="nutrition-item fat">
                                 <span class="nutrition-item-value">${Math.round(totals.fat)}g</span>
                                 <span class="nutrition-item-label">Lip.</span>
+                            </div>
+                            <div class="nutrition-item fiber">
+                                <span class="nutrition-item-value">${Math.round(totals.fiber || 0)}g</span>
+                                <span class="nutrition-item-label">Fib.</span>
                             </div>
                         </div>
                     </div>
