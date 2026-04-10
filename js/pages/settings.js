@@ -129,7 +129,7 @@ const SettingsPage = {
                     const paidDate = trialData.paidDate ? new Date(trialData.paidDate).toLocaleDateString('fr-FR') : '—';
                     const plan = trialData.plan === 'monthly' ? 'Mensuel' : 'Annuel';
                     return `
-                <div class="settings-group" style="border:2px solid #4CAF50;border-radius:var(--radius)">
+                <div class="settings-group" style="border:2px solid var(--success);border-radius:var(--radius)">
                     <div class="settings-group-title" style="color:#4CAF50">✅ Abonnement Premium actif</div>
                     <div class="settings-item">
                         <span>Plan</span>

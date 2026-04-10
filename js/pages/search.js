@@ -338,7 +338,7 @@ const SearchPage = {
                 <div class="result-info" style="flex:1;min-width:0">
                     <div class="result-name">${food.name}${isCustom ? ' <span class="custom-badge">perso</span>' : ''}</div>
                     <div class="result-detail">
-                        P:${food.n[1]}g · G:${food.n[2]}g · L:${food.n[3]}g /100g
+                        P:${food.n[1]}g · G:${food.n[2]}g · L:${food.n[3]}g${food.n[4] ? ' · <span style="color:var(--fiber-color)">Fib:' + food.n[4] + 'g</span>' : ''} /100g
                     </div>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
@@ -362,7 +362,7 @@ const SearchPage = {
                     <div>
                         <div class="result-name">${safeName}</div>
                         <div class="result-detail">
-                            ${safeBrand ? safeBrand + ' · ' : ''}P:${food.n[1]}g · G:${food.n[2]}g · L:${food.n[3]}g /100g
+                            ${safeBrand ? safeBrand + ' · ' : ''}P:${food.n[1]}g · G:${food.n[2]}g · L:${food.n[3]}g${food.n[4] ? ' · <span style="color:var(--fiber-color)">Fib:' + food.n[4] + 'g</span>' : ''} /100g
                         </div>
                     </div>
                 </div>

@@ -1,6 +1,10 @@
 const Charts = {
     instances: {},
 
+    _cssVar(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    },
+
     destroy(id) {
         if (this.instances[id]) {
             this.instances[id].destroy();
@@ -17,6 +21,12 @@ const Charts = {
         const canvas = document.getElementById(canvasId);
         if (!canvas) return;
 
+        const proteinColor = this._cssVar('--protein-color') || '#3B82F6';
+        const carbsColor = this._cssVar('--carbs-color') || '#F59E0B';
+        const fatColor = this._cssVar('--fat-color') || '#EF4444';
+        const primaryDark = this._cssVar('--primary-dark') || '#DC2626';
+        const borderColor = this._cssVar('--border') || '#e0e0e0';
+
         let data, colors;
         if (macros && (macros.protein || macros.carbs || macros.fat)) {
             // Macro-segmented ring: protein (cal) + carbs (cal) + fat (cal) + remaining
@@ -25,12 +35,12 @@ const Charts = {
             const fatCal = (macros.fat || 0) * 9;
             const remaining = Math.max(goal - consumed, 0);
             data = [protCal, carbsCal, fatCal, remaining];
-            colors = ['#2196F3', '#FF9800', '#f44336', '#e0e0e0'];
+            colors = [proteinColor, carbsColor, fatColor, borderColor];
         } else {
             const remaining = Math.max(goal - consumed, 0);
-            const color = consumed > goal ? '#f44336' : '#C62828';
+            const color = consumed > goal ? fatColor : primaryDark;
             data = [consumed, remaining];
-            colors = [color, '#e0e0e0'];
+            colors = [color, borderColor];
         }
 
         this.instances[canvasId] = new Chart(canvas, {
@@ -74,7 +84,7 @@ const Charts = {
                 datasets: [{
                     label: 'Calories',
                     data: data.map(d => d.calories),
-                    backgroundColor: data.map(d => d.calories > goal ? '#f4433690' : '#C6282890'),
+                    backgroundColor: data.map(d => d.calories > goal ? (this._cssVar('--fat-color') || '#EF4444') + '90' : (this._cssVar('--primary-dark') || '#DC2626') + '90'),
                     borderRadius: 6,
                     borderSkipped: false
                 }]
@@ -113,13 +123,17 @@ const Charts = {
         const total = protein + carbs + fat;
         if (total === 0) return;
 
+        const proteinColor = this._cssVar('--protein-color') || '#3B82F6';
+        const carbsColor = this._cssVar('--carbs-color') || '#F59E0B';
+        const fatColor = this._cssVar('--fat-color') || '#EF4444';
+
         this.instances[canvasId] = new Chart(canvas, {
             type: 'doughnut',
             data: {
                 labels: ['Protéines', 'Glucides', 'Lipides'],
                 datasets: [{
                     data: [protein, carbs, fat],
-                    backgroundColor: ['#2196F3', '#FF9800', '#f44336'],
+                    backgroundColor: [proteinColor, carbsColor, fatColor],
                     borderWidth: 0
                 }]
             },
@@ -168,12 +182,12 @@ const Charts = {
                 datasets: [{
                     label: 'Poids (kg)',
                     data: data.map(d => d.weight),
-                    borderColor: '#C62828',
-                    backgroundColor: '#C6282820',
+                    borderColor: this._cssVar('--primary-dark') || '#DC2626',
+                    backgroundColor: (this._cssVar('--primary-dark') || '#DC2626') + '20',
                     fill: true,
                     tension: 0.4,
                     pointRadius: 4,
-                    pointBackgroundColor: '#C62828'
+                    pointBackgroundColor: this._cssVar('--primary-dark') || '#DC2626'
                 }]
             },
             options: {

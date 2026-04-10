@@ -72,9 +72,9 @@ const NutritionService = {
     },
 
     getBMICategory(bmi) {
-        if (bmi < 18.5) return { label: 'Insuffisance pondérale', color: '#2196F3' };
-        if (bmi < 25) return { label: 'Poids normal', color: '#4CAF50' };
-        if (bmi < 30) return { label: 'Surpoids', color: '#FF9800' };
-        return { label: 'Obésité', color: '#f44336' };
+        if (bmi < 18.5) return { label: 'Insuffisance pondérale', color: 'var(--protein-color)' };
+        if (bmi < 25) return { label: 'Poids normal', color: 'var(--success)' };
+        if (bmi < 30) return { label: 'Surpoids', color: 'var(--carbs-color)' };
+        return { label: 'Obésité', color: 'var(--danger)' };
     }
 };

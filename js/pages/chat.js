@@ -130,11 +130,12 @@ const ChatPage = {
                         <span style="font-size:12px;color:var(--text-secondary)">g</span>
                     </div>
                 </div>
-                <div style="display:flex;gap:8px;font-size:12px;margin-bottom:8px">
+                <div style="display:flex;gap:8px;font-size:12px;margin-bottom:8px;flex-wrap:wrap">
                     <span style="padding:4px 8px;border-radius:8px;background:var(--primary-light);color:var(--primary);font-weight:600" id="chat-cal-${i}">${food.calories} kcal</span>
                     <span style="color:var(--protein-color);font-weight:600" id="chat-prot-${i}">P ${food.protein}g</span>
                     <span style="color:var(--carbs-color);font-weight:600" id="chat-carbs-${i}">G ${food.carbs}g</span>
                     <span style="color:var(--fat-color);font-weight:600" id="chat-fat-${i}">L ${food.fat}g</span>
+                    <span style="color:var(--fiber-color);font-weight:600" id="chat-fiber-${i}">Fib ${food.fiber || 0}g</span>
                 </div>
                 <div style="display:flex;gap:6px">
                     <button class="btn btn-primary" onclick="ChatPage._addFood(${i})" style="flex:1;padding:8px;font-size:13px;border-radius:10px">Ajouter</button>
@@ -157,10 +158,12 @@ const ChatPage = {
         const prot = document.getElementById('chat-prot-' + idx);
         const carbs = document.getElementById('chat-carbs-' + idx);
         const fat = document.getElementById('chat-fat-' + idx);
+        const fiber = document.getElementById('chat-fiber-' + idx);
         if (cal) cal.textContent = Math.round(food.calories * ratio) + ' kcal';
         if (prot) prot.textContent = 'P ' + (food.protein * ratio).toFixed(1) + 'g';
         if (carbs) carbs.textContent = 'G ' + (food.carbs * ratio).toFixed(1) + 'g';
         if (fat) fat.textContent = 'L ' + (food.fat * ratio).toFixed(1) + 'g';
+        if (fiber) fiber.textContent = 'Fib ' + ((food.fiber || 0) * ratio).toFixed(1) + 'g';
     },
 
     _addFood(idx) {

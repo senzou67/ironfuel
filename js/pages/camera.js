@@ -239,6 +239,10 @@ const CameraPage = {
                             <span class="nutrition-item-value">${food.fat}g</span>
                             <span class="nutrition-item-label">Lip.</span>
                         </div>
+                        <div class="nutrition-item fiber">
+                            <span class="nutrition-item-value">${food.fiber || 0}g</span>
+                            <span class="nutrition-item-label">Fib.</span>
+                        </div>
                     </div>
                     <button class="btn btn-primary" onclick="CameraPage.addResult(${i})" style="margin-top:8px">
                         Ajouter au journal

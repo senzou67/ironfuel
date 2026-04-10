@@ -31,6 +31,15 @@ const TrialService = {
             this._setData(data);
         }
 
+        // Fix: clean up corrupted trial data from Cloudflare migration
+        // Users who were wrongly blocked got ipBlocked=true and startDate set 15 days ago
+        if (data.ipBlocked && !data.paid) {
+            delete data.ipBlocked;
+            data.startDate = new Date().toISOString(); // Reset trial to now
+            this._setData(data);
+            console.log('[Trial] Cleaned up corrupted ipBlocked state — trial reset');
+        }
+
         // Layer 2: restore from cookie if localStorage was cleared
         if (!data.paid) this._restoreFromCookie();
 

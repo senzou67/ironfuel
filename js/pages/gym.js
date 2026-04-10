@@ -52,7 +52,7 @@ const GymPage = {
                         <div style="font-size:11px;color:var(--text-secondary)">meilleure série</div>
                     </div>
                     <div class="card" style="flex:1;padding:12px;text-align:center">
-                        <div style="font-size:24px;font-weight:800;color:#FF9800">${monthStats.restDays}</div>
+                        <div style="font-size:24px;font-weight:800;color:var(--carbs-color)">${monthStats.restDays}</div>
                         <div style="font-size:11px;color:var(--text-secondary)">jours repos</div>
                     </div>
                 </div>
