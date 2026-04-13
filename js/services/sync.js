@@ -22,7 +22,7 @@ const SyncService = {
         'custom_foods', 'weight_log', 'food_stats', 'settings', 'theme',
         'daily_cal_bonus', 'daily_water_bonus', 'daily_suppl_bonus', 'log_dates', 'trial',
         'gym_goals', 'my_supplements', 'custom_supplements',
-        'user_meals', 'notification_prefs', 'community_foods', 'gym_routine', 'recipes'
+        'user_meals', 'notification_prefs', 'community_foods', 'gym_routine', 'recipes', 'meal_plan'
     ],
 
     init() {

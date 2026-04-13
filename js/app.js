@@ -1,17 +1,39 @@
 // === GLOBAL ERROR TRACKING ===
+// Also sends errors to /api/error-log for centralized debugging
+const _reportError = (errorData) => {
+    try {
+        // Local storage for fallback
+        const errors = JSON.parse(localStorage.getItem('ironfuel_errors') || '[]');
+        errors.push(errorData);
+        if (errors.length > 20) errors.shift();
+        localStorage.setItem('ironfuel_errors', JSON.stringify(errors));
+    } catch {}
+    // Remote log (fire and forget, throttled)
+    try {
+        const lastSent = parseInt(localStorage.getItem('ironfuel_last_error_sent') || '0');
+        if (Date.now() - lastSent < 10000) return; // Max 1 error every 10s
+        localStorage.setItem('ironfuel_last_error_sent', String(Date.now()));
+        const userId = (typeof AuthService !== 'undefined' && AuthService.getCurrentUser) ? AuthService.getCurrentUser()?.uid || 'anonymous' : 'anonymous';
+        fetch('/api/error-log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: errorData.msg,
+                stack: errorData.stack,
+                url: window.location.href,
+                userAgent: navigator.userAgent,
+                userId,
+                page: window.location.hash || '#dashboard'
+            }),
+            keepalive: true
+        }).catch(() => {});
+    } catch {}
+};
 window.onerror = function(msg, src, line, col, err) {
-    const error = { msg, src: src?.split('/').pop(), line, col, stack: err?.stack?.substring(0, 300), ts: new Date().toISOString() };
-    const errors = JSON.parse(localStorage.getItem('ironfuel_errors') || '[]');
-    errors.push(error);
-    if (errors.length > 20) errors.shift();
-    localStorage.setItem('ironfuel_errors', JSON.stringify(errors));
+    _reportError({ msg, src: src?.split('/').pop(), line, col, stack: err?.stack?.substring(0, 2000), ts: new Date().toISOString() });
 };
 window.addEventListener('unhandledrejection', function(e) {
-    const error = { msg: 'Promise: ' + (e.reason?.message || e.reason || 'unknown'), ts: new Date().toISOString() };
-    const errors = JSON.parse(localStorage.getItem('ironfuel_errors') || '[]');
-    errors.push(error);
-    if (errors.length > 20) errors.shift();
-    localStorage.setItem('ironfuel_errors', JSON.stringify(errors));
+    _reportError({ msg: 'Promise: ' + (e.reason?.message || e.reason || 'unknown'), stack: e.reason?.stack?.substring(0, 2000), ts: new Date().toISOString() });
 });
 
 // Global HTML escape to prevent XSS
@@ -93,6 +115,7 @@ const App = {
         customfood: { title: 'Nouvel aliment', render: () => CustomFoodPage.render(), nav: false, cleanup: () => CustomFoodPage.cleanup() },
         gym: { title: 'Salle', render: () => GymPage.render(), nav: false },
         shop: { title: 'Boutique', render: () => ShopPage.render(), nav: false },
+        mealplanner: { title: 'Planificateur', render: () => MealPlannerPage.render(), nav: false },
         avatar: { title: 'Créature', render: () => AvatarPage.render(), nav: true, cleanup: () => AvatarPage.cleanup() },
         supplements: { title: 'Compléments', render: () => SupplementsPage.render(), nav: false },
         weight: { title: 'Poids', render: () => WeightPage.render(), nav: false },
@@ -243,7 +266,7 @@ const App = {
 
         // Check premium feature access (freemium model)
         // avatar page shows its own locked state — don't block navigation to it
-        const premiumPages = { camera: 'camera', voice: 'voice', barcode: 'barcode', shop: 'shop', gym: 'gym', weight: 'weight', supplements: 'supplements', chat: 'chat' };
+        const premiumPages = { camera: 'camera', voice: 'voice', barcode: 'barcode', shop: 'shop', gym: 'gym', weight: 'weight', supplements: 'supplements', chat: 'chat', mealplanner: 'mealplanner' };
         if (premiumPages[page] && TrialService.isFeatureLocked(premiumPages[page])) {
             TrialService.showFeatureLockedPrompt(premiumPages[page]);
             return;

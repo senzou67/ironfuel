@@ -199,6 +199,29 @@ export async function onRequest(context) {
             return jsonResponse({ sent, failed });
         }
 
+        if (action === 'errors') {
+            // List recent error logs (last 50)
+            const errors = [];
+            try {
+                const snap = await db.collection('error_logs').orderBy('createdAt', 'desc').limit(50).get();
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    errors.push({
+                        id: doc.id,
+                        message: d.message,
+                        stack: d.stack,
+                        url: d.url,
+                        userAgent: d.userAgent,
+                        userId: d.userId,
+                        page: d.page,
+                        country: d.country,
+                        timestamp: d.timestamp
+                    });
+                });
+            } catch (e) { return jsonResponse({ errors: [], error: e.message }); }
+            return jsonResponse({ errors });
+        }
+
         return errorResponse('Unknown action', 400);
     } catch (e) {
         return errorResponse(e.message);

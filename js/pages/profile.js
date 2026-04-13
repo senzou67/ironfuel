@@ -95,6 +95,10 @@ const ProfilePage = {
                     <span>Historique & statistiques</span>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
+                <button class="profile-menu-item" onclick="App.navigate('mealplanner')">
+                    <span>📅 Planificateur de repas</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
                 <button class="profile-menu-item" onclick="App.navigate('settings')">
                     <span>Paramètres</span>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>

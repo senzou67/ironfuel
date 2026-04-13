@@ -674,6 +674,13 @@ const Modal = {
             return;
         }
 
+        // If in meal planner mode, add to plan instead of diary
+        if (typeof SearchPage !== 'undefined' && SearchPage._plannerMode && typeof MealPlannerPage !== 'undefined') {
+            MealPlannerPage.addToPlan(food, grams);
+            this.close();
+            return;
+        }
+
         const date = this._getModalDate();
         Storage.addFoodToMeal(mealType, {
             foodId: food.id,
