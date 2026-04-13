@@ -27,7 +27,7 @@ const SW_VERSION = 115;
 const ASSETS = [
     '/',
     '/index.html',
-    '/css/fonts.css',
+    // css/fonts.css is now inlined into index.html — no longer precached.
     '/css/style.css',
     '/lib/chart.min.js',
     '/lib/html5-qrcode.min.js',
@@ -125,7 +125,13 @@ self.addEventListener('activate', (e) => {
     );
 });
 
-// Fetch — cache-first for versioned assets, network-first for HTML/API
+// Fetch — tiered caching strategy:
+//  • version.json / nuke.html   → network-only (cache-busting control plane)
+//  • HTML documents              → network-first (always get fresh shell)
+//  • Versioned assets (?v=NN)    → cache-first, immutable (fingerprinted URL)
+//  • Fonts / images / icons      → cache-first with background revalidate
+//  • Firebase / gstatic CDN      → stale-while-revalidate (runtime cache)
+//  • Other same-origin JS/CSS    → stale-while-revalidate
 self.addEventListener('fetch', (e) => {
     if (e.request.method !== 'GET') return;
     const url = new URL(e.request.url);
@@ -136,27 +142,90 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
-    // Network-first for CDN assets
-    if (url.hostname !== location.hostname) {
+    const isCDN = url.hostname !== location.hostname;
+    const isFirebaseSDK = url.hostname === 'www.gstatic.com' && url.pathname.indexOf('/firebasejs/') !== -1;
+    const isFirebaseAPI = /\.(googleapis|firebaseio)\.com$/.test(url.hostname);
+    const isFontAsset = /\.(woff2?|ttf|otf|eot)$/i.test(url.pathname);
+    const isImageAsset = /\.(png|jpe?g|gif|webp|avif|svg|ico)$/i.test(url.pathname);
+    const isVersioned = url.searchParams.has('v');
+    const isHTML = e.request.mode === 'navigate' ||
+                   (e.request.headers.get('accept') || '').indexOf('text/html') !== -1;
+
+    // Never cache Firebase API traffic (auth/firestore/FCM) — always live
+    if (isFirebaseAPI) {
+        e.respondWith(fetch(e.request).catch(() => new Response('', { status: 503 })));
+        return;
+    }
+
+    // CDN: stale-while-revalidate for Firebase SDK, network-first fallback otherwise
+    if (isCDN) {
+        if (isFirebaseSDK) {
+            e.respondWith(staleWhileRevalidate(e.request));
+            return;
+        }
         e.respondWith(
             fetch(e.request).catch(() => caches.match(e.request))
         );
         return;
     }
 
-    // Network-first for ALL local assets (including versioned ?v=XX)
-    e.respondWith(
-        fetch(e.request).then(response => {
-            if (response.ok) {
+    // Same-origin HTML → network-first (always fresh shell, fall back to cache offline)
+    if (isHTML) {
+        e.respondWith(
+            fetch(e.request).then(response => {
+                if (response.ok) {
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+                }
+                return response;
+            }).catch(() => caches.match(e.request) || caches.match('/index.html'))
+        );
+        return;
+    }
+
+    // Versioned assets (?v=NN) are immutable — cache-first is safe and fast
+    if (isVersioned) {
+        e.respondWith(cacheFirst(e.request));
+        return;
+    }
+
+    // Fonts / images / icons — cache-first (long TTL)
+    if (isFontAsset || isImageAsset) {
+        e.respondWith(cacheFirst(e.request));
+        return;
+    }
+
+    // Other same-origin JS/CSS → stale-while-revalidate
+    e.respondWith(staleWhileRevalidate(e.request));
+});
+
+// Cache-first: return cached copy immediately; fall back to network + populate cache.
+function cacheFirst(request) {
+    return caches.match(request).then(cached => {
+        if (cached) return cached;
+        return fetch(request).then(response => {
+            if (response && response.ok) {
                 const clone = response.clone();
-                caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+                caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
             }
             return response;
-        }).catch(() => {
-            return caches.match(e.request);
-        })
-    );
-});
+        });
+    });
+}
+
+// Stale-while-revalidate: serve cached copy instantly, revalidate in background.
+function staleWhileRevalidate(request) {
+    return caches.match(request).then(cached => {
+        const networkFetch = fetch(request).then(response => {
+            if (response && response.ok) {
+                const clone = response.clone();
+                caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+            }
+            return response;
+        }).catch(() => cached);
+        return cached || networkFetch;
+    });
+}
 
 // Message handler — FCM handles push notifications now (see onBackgroundMessage above)
 // Legacy SCHEDULE_NOTIFICATION messages are ignored — FCM server sends daily pushes via daily-notification.js

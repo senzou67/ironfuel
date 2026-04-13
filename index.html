@@ -19,11 +19,18 @@
 
     <!-- Preload critical resources -->
     <link rel="preload" href="css/style.css?v=74" as="style">
-    <link rel="preload" href="css/fonts.css" as="style">
     <link rel="preload" href="js/app.js?v=74" as="script">
     <link rel="preload" href="js/db.js?v=74" as="script">
     <link rel="preload" href="assets/fonts/inter-500.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="assets/fonts/inter-600.woff2" as="font" type="font/woff2" crossorigin>
+    <!-- Inline @font-face (replaces css/fonts.css) to save one render-blocking request -->
+    <style>
+        @font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap; src: url('/assets/fonts/inter-400.woff2') format('woff2'); }
+        @font-face { font-family: 'Inter'; font-style: normal; font-weight: 500; font-display: swap; src: url('/assets/fonts/inter-500.woff2') format('woff2'); }
+        @font-face { font-family: 'Inter'; font-style: normal; font-weight: 600; font-display: swap; src: url('/assets/fonts/inter-600.woff2') format('woff2'); }
+        @font-face { font-family: 'Inter'; font-style: normal; font-weight: 700; font-display: swap; src: url('/assets/fonts/inter-700.woff2') format('woff2'); }
+        @font-face { font-family: 'Inter'; font-style: normal; font-weight: 800; font-display: swap; src: url('/assets/fonts/inter-800.woff2') format('woff2'); }
+    </style>
     <!-- DNS prefetch + preconnect for critical origins -->
     <link rel="dns-prefetch" href="https://www.gstatic.com">
     <link rel="dns-prefetch" href="https://world.openfoodfacts.org">
@@ -198,25 +205,25 @@
         }
     </script>
 
-    <link rel="stylesheet" href="css/fonts.css">
     <link rel="stylesheet" href="css/style.css?v=74">
-    <!-- Chart.js is only needed on dashboard/history/weight — defer keeps order & non-blocking -->
+    <!-- Chart.js is only needed on dashboard/history/weight — defer keeps order & non-blocking.
+         Served from local /lib so it benefits from the service worker cache and avoids a CDN RTT. -->
     <script src="lib/chart.min.js" defer></script>
     <!-- html5-qrcode is only needed on barcode page — loaded on-demand by barcode.js -->
-    <!-- Firebase Auth + Messaging (defer — non-blocking, executes before app.js which also defers) -->
+    <!-- Firebase Auth (defer — non-blocking, executes before app.js which also defers) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" defer></script>
     <!-- Firestore SDK removed — SyncService uses REST API directly -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js" defer></script>
+    <!-- Firebase Messaging is only required once user enables push notifications — lazy-injected after window.load -->
 </head>
 <body>
     <!-- Skip to main content (accessibility) -->
     <a href="#page-content" class="skip-link">Aller au contenu principal</a>
     <!-- R5: Splash Screen -->
-    <div id="splash" class="splash-screen">
-        <div class="splash-logo">1</div>
-        <div class="splash-title">OneFood</div>
-        <div class="splash-loading"></div>
+    <div id="splash" class="splash-screen" role="status" aria-live="polite" aria-label="Chargement de OneFood">
+        <div class="splash-logo" aria-hidden="true">1</div>
+        <div class="splash-title" aria-hidden="true">OneFood</div>
+        <div class="splash-loading" aria-hidden="true"></div>
     </div>
 
     <div id="app">
@@ -316,7 +323,10 @@
          navigates to those pages, which requires at least one user interaction after load. -->
     <script>
         (function(){
-            var lazyPages = [
+            // Non-critical page scripts + third-party SDKs loaded after window.load
+            // to keep TBT/FCP/LCP low. All consumers defensively feature-detect
+            // these globals before use, so ordering after initial paint is safe.
+            var lazyScripts = [
                 'js/pages/camera.js?v=74',
                 'js/pages/voice.js?v=74',
                 'js/pages/chat.js?v=74',
@@ -327,13 +337,17 @@
                 'js/pages/weight.js?v=74',
                 'js/pages/shop.js?v=74',
                 'js/pages/avatar.js?v=74',
-                'js/pages/mealplanner.js?v=74'
+                'js/pages/mealplanner.js?v=74',
+                // Firebase Messaging (push notifications) — only needed once user enables push.
+                // Not required for initial paint; NotificationService.init() feature-detects.
+                'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js'
             ];
             function inject() {
-                lazyPages.forEach(function(src){
+                lazyScripts.forEach(function(src){
                     var s = document.createElement('script');
                     s.src = src;
                     s.defer = true;
+                    if (src.indexOf('http') === 0) s.crossOrigin = 'anonymous';
                     document.head.appendChild(s);
                 });
             }
