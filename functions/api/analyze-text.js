@@ -47,7 +47,7 @@ Regles:
 - Separe chaque aliment distinct (ex: "poulet et riz" = 2 aliments).
 - name_en doit etre le nom generique de l'aliment en anglais (ex: "grilled chicken breast", "white rice", "banana").`;
 
-        const models = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.0-flash-lite'];
+        const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash-lite'];
         let result = null;
 
         for (const model of models) {

@@ -234,8 +234,8 @@ const DashboardPage = {
                         <span class="icon">${hasAccess && gymType ? gymType.icon : '🏋️'}</span>${!hasAccess ? 'Salle 🔒' : gymDone ? `<span style="font-weight:600">${gymType ? gymType.name : 'Fait'}</span> <span style="font-size:11px">✅</span>` : gymToday ? `<span style="font-weight:600">${gymType ? gymType.name : 'Planifié'}</span>` : 'Salle'}
                     </button>
                     <button class="quick-action-btn suppl-action-btn" onclick="${hasAccess ? "App.navigate('supplements')" : "TrialService.showFeatureLockedPrompt('supplements')"}" style="position:relative;overflow:hidden;display:flex;align-items:center;gap:6px;justify-content:center;z-index:1">
-                        ${hasAccess && mySupplements.length > 0 ? `<div style="position:absolute;bottom:0;left:0;width:100%;height:${Math.min(100, Math.round((supplCount / mySupplements.length) * 100))}%;background:linear-gradient(180deg,rgba(0,188,212,0.25) 0%,rgba(0,151,167,0.4) 100%);transition:height 0.5s cubic-bezier(0.4,0,0.2,1);z-index:-1;border-radius:0 0 12px 12px"></div>` : ''}
-                        <span class="icon">💊</span>${!hasAccess ? 'Compléments 🔒' : mySupplements.length > 0 ? `<span style="font-weight:600">${supplCount}/${mySupplements.length}</span>${supplAllDone ? ' <span style="font-size:11px">✅</span>' : ''}` : 'Compléments'}
+                        ${hasAccess && (mySupplements.length > 0 || takenSuppl.length > 0) ? `<div style="position:absolute;bottom:0;left:0;width:100%;height:${mySupplements.length > 0 ? Math.min(100, Math.round((supplCount / mySupplements.length) * 100)) : (takenSuppl.length > 0 ? 100 : 0)}%;background:linear-gradient(180deg,rgba(0,188,212,0.25) 0%,rgba(0,151,167,0.4) 100%);transition:height 0.5s cubic-bezier(0.4,0,0.2,1);z-index:-1;border-radius:0 0 12px 12px"></div>` : ''}
+                        <span class="icon">💊</span>${!hasAccess ? 'Compléments 🔒' : mySupplements.length > 0 ? `<span style="font-weight:600">${supplCount}/${mySupplements.length}</span>${supplAllDone ? ' <span style="font-size:11px">✅</span>' : ''}` : takenSuppl.length > 0 ? `<span style="font-weight:600">${takenSuppl.length} pris</span>` : 'Compléments'}
                     </button>
                     <button class="quick-action-btn" onclick="${hasAccess ? "App.navigate('weight')" : "TrialService.showFeatureLockedPrompt('weight')"}" style="position:relative;overflow:hidden;display:flex;align-items:center;gap:6px;justify-content:center;z-index:1">
                         ${hasAccess && weightToday ? '<div style="position:absolute;bottom:0;left:0;width:100%;height:100%;background:linear-gradient(180deg,rgba(245,158,11,0.2) 0%,rgba(245,158,11,0.35) 100%);z-index:-1;border-radius:0 0 12px 12px"></div>' : ''}
@@ -246,6 +246,18 @@ const DashboardPage = {
 
                 <!-- MICRO-NUTRIMENTS compact (top 4 lowest, clickable) -->
                 ${microSummary}
+
+                <!-- Meal Planner quick access -->
+                ${hasAccess ? `
+                <div class="card" onclick="App.navigate('mealplanner')" style="padding:12px 16px;margin:4px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;border:1px solid var(--border)">
+                    <span style="font-size:24px;flex-shrink:0">📅</span>
+                    <div style="flex:1;min-width:0">
+                        <div style="font-size:13px;font-weight:700">Planificateur de repas</div>
+                        <div style="font-size:11px;color:var(--text-secondary)">Planifie tes repas pour la semaine</div>
+                    </div>
+                    <span style="color:var(--text-secondary);font-size:18px">›</span>
+                </div>
+                ` : ''}
 
                 <!-- Daily Fun Fact -->
                 <div class="card" style="padding:10px 16px;margin:4px 16px">
