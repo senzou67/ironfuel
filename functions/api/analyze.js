@@ -44,7 +44,9 @@ Regles:
 - Si tu vois une assiette, estime par rapport a la taille standard d'une assiette (26cm).
 - name_en doit etre le nom generique de l'aliment en anglais (ex: "grilled chicken breast", "white rice", "banana").`;
 
-        const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+        // Stable models only — gemini-2.0-flash and gemini-2.0-flash-lite are restricted
+        // for new API keys. gemini-2.5-flash is the most reliable choice.
+        const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'];
         let text = null;
         let lastError = null;
 
@@ -64,8 +66,12 @@ Regles:
 
                 const rawText = await response.text();
                 let data;
-                try { data = JSON.parse(rawText); } catch { lastError = `Réponse invalide de Gemini (${model})`; continue; }
-                if (!response.ok) { lastError = data.error?.message || `Erreur Gemini (${model}): ${response.status}`; continue; }
+                try { data = JSON.parse(rawText); } catch { lastError = `Réponse invalide de Gemini (${model})`; console.error('[analyze] Invalid JSON from', model, rawText.substring(0, 200)); continue; }
+                if (!response.ok) {
+                    lastError = data.error?.message || `Erreur Gemini (${model}): ${response.status}`;
+                    console.error('[analyze] Model failed:', model, 'status:', response.status, 'error:', lastError);
+                    continue;
+                }
 
                 const candidate = data.candidates?.[0];
                 if (!candidate || candidate.finishReason === 'SAFETY') { lastError = 'Gemini a refusé l\'image (filtre de sécurité)'; continue; }
