@@ -51,7 +51,7 @@ Estime le poids de manière réaliste en te basant sur la taille apparente des p
     },
 
     async _analyzeWithGemini(base64Image, apiKey) {
-        const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
+        const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash-lite'];
         let lastError = null;
 
         for (const model of models) {

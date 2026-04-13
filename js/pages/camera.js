@@ -169,23 +169,37 @@ const CameraPage = {
                 img.onerror = reject;
                 img.src = photo.src;
             });
-            canvas.width = img.width;
-            canvas.height = img.height;
-            canvas.getContext('2d').drawImage(img, 0, 0);
-            const base64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+            // Resize to max 1280px to reduce Gemini API load and latency
+            const MAX_SIZE = 1280;
+            let w = img.width, h = img.height;
+            if (w > MAX_SIZE || h > MAX_SIZE) {
+                const ratio = Math.min(MAX_SIZE / w, MAX_SIZE / h);
+                w = Math.round(w * ratio);
+                h = Math.round(h * ratio);
+            }
+            canvas.width = w;
+            canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            const base64 = canvas.toDataURL('image/jpeg', 0.82).split(',')[1];
 
             let foods = null;
-            for (let attempt = 0; attempt < 2; attempt++) {
+            let lastError = null;
+            for (let attempt = 0; attempt < 3; attempt++) {
                 try {
                     foods = await VisionService.analyzeImage(base64);
                     if (foods && foods.length > 0) break;
+                    lastError = new Error('Aucun aliment détecté');
                 } catch (e) {
-                    if (attempt === 0) {
-                        App.showToast('Retry en cours...');
-                        continue;
-                    }
-                    throw e;
+                    lastError = e;
                 }
+                if (attempt < 2 && (!foods || foods.length === 0)) {
+                    App.showToast(`Nouvel essai... (${attempt + 2}/3)`);
+                    // Exponential backoff: 800ms, 1600ms
+                    await new Promise(r => setTimeout(r, 800 * (attempt + 1)));
+                }
+            }
+            if ((!foods || foods.length === 0) && lastError && lastError.message !== 'Aucun aliment détecté') {
+                throw lastError;
             }
 
             document.getElementById('camera-loading').style.display = 'none';
