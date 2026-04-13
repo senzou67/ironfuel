@@ -46,7 +46,7 @@ export async function onRequestPost(context) {
             });
             const price = await stripe.prices.create({
                 product: product.id,
-                unit_amount: isMonthly ? 299 : 1499,
+                unit_amount: isMonthly ? 399 : 1499,
                 currency: 'eur',
                 recurring: { interval: isMonthly ? 'month' : 'year' }
             });

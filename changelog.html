@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog — OneFood</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #121212; color: #e0e0e0; line-height: 1.7; }
+        .container { max-width: 700px; margin: 0 auto; padding: 24px 16px 60px; }
+        .back-link { display: inline-flex; align-items: center; gap: 6px; color: #EF4444; text-decoration: none; font-weight: 600; font-size: 14px; margin-bottom: 20px; }
+        .back-link:hover { text-decoration: underline; }
+        h1 { font-size: 26px; font-weight: 800; margin-bottom: 6px; color: #EF4444; }
+        .sub { font-size: 13px; color: #9e9e9e; margin-bottom: 28px; }
+        .release { border-left: 3px solid #333; padding-left: 20px; margin-bottom: 28px; position: relative; }
+        .release::before { content: ''; position: absolute; left: -7px; top: 6px; width: 11px; height: 11px; border-radius: 50%; background: #EF4444; }
+        .release.latest::before { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2); }
+        .release-date { font-size: 12px; color: #757575; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .release-title { font-size: 17px; font-weight: 700; margin: 4px 0 10px; color: #f5f5f5; }
+        .release-badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 6px; background: #EF4444; color: white; margin-left: 8px; vertical-align: middle; font-weight: 600; }
+        ul { padding-left: 18px; margin-bottom: 4px; }
+        li { font-size: 14px; color: #bdbdbd; margin-bottom: 4px; }
+        li strong { color: #e0e0e0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/index.html" class="back-link">&larr; Retour à OneFood</a>
+        <h1>Changelog</h1>
+        <p class="sub">Historique des mises à jour récentes</p>
+
+        <div class="release latest">
+            <div class="release-date">6 avril 2026</div>
+            <div class="release-title">Polish UX complet<span class="release-badge">NOUVEAU</span></div>
+            <ul>
+                <li>✨ <strong>55 améliorations UX</strong> : transitions, touch feedback, focus trap des modals</li>
+                <li>🎨 Design modernisé avec une palette Tailwind (rouge #EF4444, amber, vert vif)</li>
+                <li>♿ Accessibilité WCAG AA : focus-visible, ARIA labels, skip link</li>
+                <li>📱 Responsive amélioré : landscape mobile, écrans &lt;340px, tablette</li>
+                <li>🔍 Recherche : debounce 120ms, loading spinner, lazy-load des thumbnails</li>
+                <li>📋 Diary : position de scroll préservée par date, empty state avec CTA</li>
+            </ul>
+        </div>
+
+        <div class="release">
+            <div class="release-date">5 avril 2026</div>
+            <div class="release-title">Migration Cloudflare Workers</div>
+            <ul>
+                <li>🚀 Migration de Netlify vers Cloudflare Workers (bandwidth illimité)</li>
+                <li>🔐 Variables d'environnement sécurisées + KV namespaces</li>
+                <li>⚡ Temps de réponse API divisé par 2</li>
+                <li>🛡️ Rate limiting (20 req/h par IP sur les endpoints IA)</li>
+            </ul>
+        </div>
+
+        <div class="release">
+            <div class="release-date">4 avril 2026</div>
+            <div class="release-title">Correction bugs nutrition</div>
+            <ul>
+                <li>🌾 Fibres désormais comptabilisées partout (modal, totaux, recettes)</li>
+                <li>💧 Affichage eau : 0,25L par verre (au lieu de 0,3L arrondi)</li>
+                <li>🧪 Correction double-scaling des micronutriments USDA</li>
+                <li>📅 Ajout d'aliments à une date passée (voice, chat, camera)</li>
+            </ul>
+        </div>
+
+        <div class="release">
+            <div class="release-date">3 avril 2026</div>
+            <div class="release-title">Modernisation du design</div>
+            <ul>
+                <li>🎨 Nouvelle palette de couleurs (inspirée Tailwind)</li>
+                <li>🔴 Primary red #EF4444 (au lieu de l'ancien #E53935)</li>
+                <li>🟡 Glucides amber #F59E0B (au lieu de l'orange)</li>
+                <li>🟢 Fibres vert vif #22C55E</li>
+            </ul>
+        </div>
+
+        <div class="release">
+            <div class="release-date">2 avril 2026</div>
+            <div class="release-title">IA Photo + Chat</div>
+            <ul>
+                <li>📸 Analyse photo améliorée avec Gemini 2.0 Flash</li>
+                <li>💬 Chat IA : décris ton repas en texte</li>
+                <li>🔄 Fallback automatique vers USDA/OpenFoodFacts</li>
+            </ul>
+        </div>
+
+        <div class="release">
+            <div class="release-date">1 avril 2026</div>
+            <div class="release-title">Sécurité et RGPD</div>
+            <ul>
+                <li>🔒 Consentement explicite au premier lancement (RGPD Art. 9)</li>
+                <li>🗑️ Suppression de compte avec effacement Firestore</li>
+                <li>⚖️ Mentions légales, CGU et politique de confidentialité</li>
+            </ul>
+        </div>
+
+        <div class="release">
+            <div class="release-date">28 mars 2026</div>
+            <div class="release-title">Synchronisation cloud</div>
+            <ul>
+                <li>☁️ Sync Firestore toutes les 2 minutes</li>
+                <li>📱 Données accessibles sur tous les appareils</li>
+                <li>🔐 4 couches de persistance (local + cookie + IndexedDB + cloud)</li>
+            </ul>
+        </div>
+
+        <p style="text-align:center;font-size:12px;color:#555;margin-top:40px">
+            Suggestions, bugs ? Écris-nous à <a href="mailto:contact@1food.fr" style="color:#EF4444">contact@1food.fr</a>
+        </p>
+    </div>
+</body>
+</html>

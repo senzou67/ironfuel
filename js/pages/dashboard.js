@@ -155,7 +155,10 @@ const DashboardPage = {
                 ${downloadBanner}
 
                 <!-- CALORIES & MACROS — EN PREMIER -->
-                <div class="card" style="padding:14px 16px;margin:0 16px 8px">
+                <div class="card" style="padding:14px 16px;margin:0 16px 8px;position:relative">
+                    <button onclick="DashboardPage.shareStats()" aria-label="Partager mes stats" title="Partager" style="position:absolute;top:10px;right:10px;background:var(--primary-light);border:none;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--primary);z-index:2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="11.49"/></svg>
+                    </button>
                     <div class="circular-progress compact">
                         <canvas id="cal-ring" width="140" height="140"></canvas>
                         <div class="progress-text">
@@ -291,6 +294,66 @@ const DashboardPage = {
 
         // Render daily challenge
         if (isToday) this._renderDailyChallenge();
+    },
+
+    async shareStats() {
+        try {
+            const goals = Storage.getGoals();
+            const totals = Storage.getDayTotals();
+            const streak = Storage.getStreak() || 0;
+            const cal = Math.round(totals.calories || 0);
+            const goal = Math.round(goals.calories || 0);
+            const streakText = streak > 0
+                ? `, ${streak} jour${streak > 1 ? 's' : ''} de suite ! 💪`
+                : ' 💪';
+            const text = `🔥 Mon suivi OneFood aujourd'hui: ${cal} kcal / ${goal} objectif${streakText}`;
+            const url = 'https://1food.fr';
+            const shareData = {
+                title: 'OneFood',
+                text: text,
+                url: url
+            };
+
+            App.haptic && App.haptic('light');
+
+            if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+                try {
+                    await navigator.share(shareData);
+                    return;
+                } catch (err) {
+                    // User cancelled or share failed — fall through to clipboard
+                    if (err && err.name === 'AbortError') return;
+                }
+            } else if (navigator.share) {
+                try {
+                    await navigator.share(shareData);
+                    return;
+                } catch (err) {
+                    if (err && err.name === 'AbortError') return;
+                }
+            }
+
+            // Fallback: copy to clipboard
+            const fullText = `${text} ${url}`;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(fullText);
+                App.showToast('📋 Copié dans le presse-papier !');
+            } else {
+                // Last-resort fallback using a hidden textarea
+                const ta = document.createElement('textarea');
+                ta.value = fullText;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); } catch (e) {}
+                document.body.removeChild(ta);
+                App.showToast('📋 Copié !');
+            }
+        } catch (err) {
+            console.error('shareStats error', err);
+            App.showToast('Erreur lors du partage');
+        }
     },
 
     _showDailyPopup() {

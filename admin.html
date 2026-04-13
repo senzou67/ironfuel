@@ -31,11 +31,21 @@
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
         .stat-card { background: #1a1a1a; border-radius: 12px; padding: 12px; border: 1px solid #1e1e1e; }
         .stat-card .label { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+        .stat-card .sub { font-size: 9px; color: #555; margin-top: 2px; }
         .stat-card .value { font-size: 24px; font-weight: 800; }
         .stat-card .value.accent { color: #C62828; }
         .stat-card .value.green { color: #4CAF50; }
         .stat-card .value.blue { color: #1E88E5; }
         .stat-card .value.gold { color: #FFB300; }
+        .stat-card .value.purple { color: #AB47BC; }
+        .stat-card .value.cyan { color: #26C6DA; }
+
+        /* Metrics grid — 2 cols mobile, 3 cols wider */
+        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        @media (min-width: 600px) { .metrics-grid { grid-template-columns: repeat(3, 1fr); } }
+        .section-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .section-title-row h2 { margin-bottom: 0; }
+        .metrics-updated { font-size: 9px; color: #444; }
 
         /* Sections */
         .section { background: #1a1a1a; border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid #1e1e1e; }
@@ -119,6 +129,14 @@
 
         <!-- TAB: Dashboard -->
         <div class="tab-panel active" id="panel-dashboard">
+            <div class="section">
+                <div class="section-title-row">
+                    <h2>📈 Métriques <span id="metrics-updated" class="metrics-updated"></span></h2>
+                    <button class="btn-sm btn-outline" onclick="loadMetrics()">🔄 Refresh</button>
+                </div>
+                <div class="metrics-grid" id="metrics"><div class="loading">Chargement...</div></div>
+            </div>
+
             <div class="stats-grid" id="stats"><div class="loading">Chargement...</div></div>
 
             <div class="section">
@@ -228,7 +246,37 @@
             return fetch(API + '?action=' + action, { ...opts, headers: { 'X-Admin-Key': KEY, 'Content-Type': 'application/json', ...(opts?.headers || {}) } }).then(r => r.json());
         }
 
+        async function loadMetrics() {
+            const el = document.getElementById('metrics');
+            el.innerHTML = '<div class="loading">Chargement...</div>';
+            try {
+                const m = await api('metrics');
+                const fmt = (n) => (n ?? 0).toLocaleString('fr-FR');
+                const pct = (n) => (n ?? 0).toFixed(2) + '%';
+                const eur = (n) => (n ?? 0).toFixed(2) + '€';
+                el.innerHTML = `
+                    <div class="stat-card"><div class="label">DAU · 24h</div><div class="value accent">${fmt(m.dau)}</div><div class="sub">Actifs aujourd'hui</div></div>
+                    <div class="stat-card"><div class="label">WAU · 7j</div><div class="value blue">${fmt(m.wau)}</div><div class="sub">Actifs 7 jours</div></div>
+                    <div class="stat-card"><div class="label">MAU · 30j</div><div class="value blue">${fmt(m.mau)}</div><div class="sub">Actifs 30 jours</div></div>
+                    <div class="stat-card"><div class="label">MRR</div><div class="value green">${eur(m.mrr)}</div><div class="sub">${m.subscriptions.monthly} mens. + ${m.subscriptions.annual} ann.</div></div>
+                    <div class="stat-card"><div class="label">ARR</div><div class="value green">${eur(m.arr)}</div><div class="sub">Annualisé</div></div>
+                    <div class="stat-card"><div class="label">ARPU</div><div class="value gold">${eur(m.arpu)}</div><div class="sub">Revenu / user</div></div>
+                    <div class="stat-card"><div class="label">Conversion</div><div class="value purple">${pct(m.conversionRate)}</div><div class="sub">${fmt(m.premiumUsers)} / ${fmt(m.totalUsers)} payants</div></div>
+                    <div class="stat-card"><div class="label">Churn 30j</div><div class="value accent">${pct(m.churnRate)}</div><div class="sub">${fmt(m.churnedLast30d)} résiliés</div></div>
+                    <div class="stat-card"><div class="label">Rétention Premium</div><div class="value green">${pct(m.retentionRate)}</div><div class="sub">Sur 30 jours</div></div>
+                    <div class="stat-card"><div class="label">Signups 24h</div><div class="value cyan">${fmt(m.newSignups.last24h)}</div><div class="sub">Nouveaux / jour</div></div>
+                    <div class="stat-card"><div class="label">Signups 7j</div><div class="value cyan">${fmt(m.newSignups.last7d)}</div><div class="sub">Nouveaux 7j</div></div>
+                    <div class="stat-card"><div class="label">Signups 30j</div><div class="value cyan">${fmt(m.newSignups.last30d)}</div><div class="sub">Nouveaux 30j</div></div>
+                `;
+                const t = m.generatedAt ? new Date(m.generatedAt).toLocaleTimeString('fr-FR') : '';
+                document.getElementById('metrics-updated').textContent = t ? '· ' + t : '';
+            } catch (e) {
+                el.innerHTML = '<p style="color:#444;font-size:12px">Erreur de chargement</p>';
+            }
+        }
+
         async function refresh() {
+            loadMetrics();
             const stats = await api('stats');
             document.getElementById('stats').innerHTML = `
                 <div class="stat-card"><div class="label">Users</div><div class="value accent">${stats.users.total}</div></div>

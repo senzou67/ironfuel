@@ -111,7 +111,7 @@ const SettingsPage = {
                             </div>
                             <div class="settings-plan-card" id="settings-plan-monthly" onclick="SettingsPage._selectPlan('monthly')" style="flex:1;padding:12px;border:2px solid var(--border);border-radius:10px;text-align:center;cursor:pointer">
                                 <div style="font-size:10px;font-weight:700;color:transparent;margin-bottom:4px">.</div>
-                                <div style="font-weight:800;font-size:18px">2,99€</div>
+                                <div style="font-weight:800;font-size:18px">3,99€</div>
                                 <div style="font-size:11px;color:var(--text-secondary)">/mois</div>
                             </div>
                         </div>
@@ -212,12 +212,16 @@ const SettingsPage = {
 
                 <div class="settings-group">
                     <div class="settings-group-title">Légal</div>
-                    <button class="settings-item" onclick="window.open('/privacy.html','_blank')">
-                        <span>🔒 Politique de confidentialité</span>
+                    <button class="settings-item" onclick="window.open('/mentions-legales.html','_blank')">
+                        <span>⚖️ Mentions légales</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                     </button>
                     <button class="settings-item" onclick="window.open('/terms.html','_blank')">
-                        <span>📄 Conditions d'utilisation</span>
+                        <span>📄 CGU</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                    <button class="settings-item" onclick="window.open('/privacy.html','_blank')">
+                        <span>🔒 Politique de confidentialité</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                     </button>
                 </div>
@@ -433,7 +437,7 @@ const SettingsPage = {
         }
         const btn = document.getElementById('settings-sub-btn');
         if (btn) {
-            btn.textContent = plan === 'annual' ? 'S\'abonner — 14,99€/an' : 'S\'abonner — 2,99€/mois';
+            btn.textContent = plan === 'annual' ? 'S\'abonner — 14,99€/an' : 'S\'abonner — 3,99€/mois';
         }
         TrialService._selectedPlan = plan;
     },
@@ -589,7 +593,7 @@ const SettingsPage = {
         const trialData = Storage._get('trial', {});
         const daysLeft = TrialService.subscriptionDaysLeft();
         const paidDate = trialData.paidDate ? new Date(trialData.paidDate).toLocaleDateString('fr-FR') : '—';
-        const plan = trialData.plan === 'monthly' ? 'Mensuel (2,99€/mois)' : 'Annuel (14,99€/an)';
+        const plan = trialData.plan === 'monthly' ? 'Mensuel (3,99€/mois)' : 'Annuel (14,99€/an)';
         const expiryDate = trialData.paidDate ? new Date(new Date(trialData.paidDate).getTime() + (trialData.plan === 'monthly' ? 31 : 365) * 86400000).toLocaleDateString('fr-FR') : '—';
 
         Modal.show(`

@@ -101,14 +101,23 @@ const App = {
 
     init() {
         // Apply saved theme (or auto-detect system preference)
-        const theme = Storage.getTheme();
-        if (theme === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark');
-        } else if (theme === 'light') {
-            document.documentElement.setAttribute('data-theme', 'light');
-        } else {
-            // 'auto': remove attribute, let CSS @media handle it
-            document.documentElement.removeAttribute('data-theme');
+        this._applyTheme();
+
+        // Watch for system theme changes — only has effect when theme === 'auto'
+        if (window.matchMedia) {
+            const mql = window.matchMedia('(prefers-color-scheme: dark)');
+            const listener = () => {
+                if ((Storage.getTheme() || 'auto') === 'auto') {
+                    this._applyTheme();
+                }
+            };
+            if (mql.addEventListener) {
+                mql.addEventListener('change', listener);
+            } else if (mql.addListener) {
+                // Safari < 14 fallback
+                mql.addListener(listener);
+            }
+            this._themeMql = mql;
         }
 
         // Show skeleton loader while loading

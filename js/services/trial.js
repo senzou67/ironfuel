@@ -5,7 +5,7 @@ const TrialService = {
     TRIAL_DAYS: 14,
     SUBSCRIPTION_DAYS: 365,
     PRICE_ANNUAL: '14,99€',
-    PRICE_MONTHLY: '2,99€',
+    PRICE_MONTHLY: '3,99€',
     _serverChecked: false,
     _premiumVerified: false,
     _premiumPromise: null,     // resolves when all premium checks done
@@ -524,12 +524,12 @@ const TrialService = {
                                 <span class="paywall-amount">14,99€</span>
                                 <span class="paywall-period">/an</span>
                             </div>
-                            <div class="paywall-plan-detail">Soit 2,99€/mois</div>
+                            <div class="paywall-plan-detail">Soit 3,99€/mois</div>
                         </div>
                         <div class="paywall-plan" id="plan-monthly" onclick="TrialService._selectPlan('monthly')">
                             <div class="paywall-plan-name">Mensuel</div>
                             <div class="paywall-plan-price">
-                                <span class="paywall-amount">2,99€</span>
+                                <span class="paywall-amount">3,99€</span>
                                 <span class="paywall-period">/mois</span>
                             </div>
                             <div class="paywall-plan-detail">15€/an</div>
@@ -559,7 +559,7 @@ const TrialService = {
         if (btn) {
             btn.textContent = plan === 'annual'
                 ? 'S\'abonner — 14,99€/an'
-                : 'S\'abonner — 2,99€/mois';
+                : 'S\'abonner — 3,99€/mois';
         }
     },
 
