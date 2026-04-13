@@ -7,8 +7,17 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="OneFood">
-    <meta name="theme-color" content="#E53935">
+    <meta name="theme-color" content="#E53935" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a0a0f" media="(prefers-color-scheme: dark)">
+    <meta name="color-scheme" content="light dark">
+    <meta name="format-detection" content="telephone=no">
     <meta name="description" content="Suivi nutrition et musculation intelligent — Photo IA, vocal, 500+ aliments, avatar fitness">
+
+    <!-- Preload critical resources -->
+    <link rel="preload" href="css/style.css?v=74" as="style">
+    <link rel="preload" href="css/fonts.css" as="style">
+    <link rel="dns-prefetch" href="https://www.gstatic.com">
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
     <link rel="canonical" href="https://1food.fr/">
     <meta name="google-site-verification" content="9JsMSwlddzUz8mGffeWkkV1epL3RpXHXStPk8TZ01Lg" />
     <meta name="google-site-verification" content="BQJudT-tniipd_MKUR8wJ8iAHlutWyRaLluf1-wut5c" />
@@ -48,6 +57,24 @@
         /* Safe area insets for iOS notch */
         body { padding-top: env(safe-area-inset-top); }
         #bottom-nav { padding-bottom: env(safe-area-inset-bottom); }
+        /* Prevent double-tap zoom on interactive elements */
+        button, a, [role="button"], .nav-btn, .fab-option, .card, input[type="button"], input[type="submit"] {
+            touch-action: manipulation;
+        }
+        /* Skip link (visible only on focus) */
+        .skip-link {
+            position: absolute;
+            left: -9999px;
+            top: 0;
+            background: #000;
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 0 0 8px 0;
+            z-index: 10001;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .skip-link:focus { left: 0; }
     </style>
 
     <!-- Force cache bust — fetches /version.json DIRECTLY from server bypassing SW -->
@@ -152,6 +179,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
 </head>
 <body>
+    <!-- Skip to main content (accessibility) -->
+    <a href="#page-content" class="skip-link">Aller au contenu principal</a>
     <!-- R5: Splash Screen -->
     <div id="splash" class="splash-screen">
         <div class="splash-logo">1</div>
@@ -166,7 +195,7 @@
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             </button>
         </header>
-        <main id="page-content"></main>
+        <main id="page-content" tabindex="-1"></main>
         <div id="fab-menu" class="fab-menu hidden">
             <div class="fab-overlay" onclick="App.closeFabMenu()"></div>
             <div class="fab-options" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:16px;max-width:320px;margin:0 auto">
