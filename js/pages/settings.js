@@ -224,6 +224,10 @@ const SettingsPage = {
                         <span>🔒 Politique de confidentialité</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                     </button>
+                    <button class="settings-item" onclick="window.open('/changelog.html','_blank')">
+                        <span>📝 Changelog</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
                 </div>
             </div>
         `;
