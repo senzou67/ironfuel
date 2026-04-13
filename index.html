@@ -2,8 +2,9 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <script src="https://js-de.sentry-cdn.com/47e63ac7e54639dd7801f7dd2de01759.min.js" crossorigin="anonymous" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <!-- Sentry: moved after charset/viewport + async so it never blocks the parser -->
+    <script src="https://js-de.sentry-cdn.com/47e63ac7e54639dd7801f7dd2de01759.min.js" crossorigin="anonymous" async></script>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="OneFood">
@@ -29,10 +30,14 @@
     <link rel="dns-prefetch" href="https://firebaseio.com">
     <link rel="dns-prefetch" href="https://firestore.googleapis.com">
     <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+    <link rel="dns-prefetch" href="https://securetoken.googleapis.com">
+    <link rel="dns-prefetch" href="https://fcmregistrations.googleapis.com">
+    <link rel="dns-prefetch" href="https://js-de.sentry-cdn.com">
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://firebaseio.com" crossorigin>
     <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://securetoken.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://world.openfoodfacts.org">
     <link rel="canonical" href="https://1food.fr/">
     <meta name="google-site-verification" content="9JsMSwlddzUz8mGffeWkkV1epL3RpXHXStPk8TZ01Lg" />
