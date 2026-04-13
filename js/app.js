@@ -82,7 +82,7 @@ const App = {
 
     pages: {
         dashboard: { title: 'OneFood', render: () => DashboardPage.render(), nav: true },
-        diary: { title: 'Journal', render: (p) => DiaryPage.render(p), nav: true },
+        diary: { title: 'Journal', render: (p) => DiaryPage.render(p), nav: true, cleanup: () => DiaryPage.cleanup && DiaryPage.cleanup() },
         search: { title: 'Rechercher', render: (p) => SearchPage.render(p), nav: false },
         camera: { title: 'Photo IA', render: () => CameraPage.render(), nav: false, cleanup: () => CameraPage.cleanup() },
         voice: { title: 'Saisie vocale', render: () => VoicePage.render(), nav: false },
@@ -167,6 +167,20 @@ const App = {
         window.addEventListener('popstate', (e) => {
             if (e.state && e.state.page) {
                 this._renderPage(e.state.page, e.state.params, false);
+            }
+        });
+
+        // Global keyboard handling: Escape closes modals and FAB menu
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Escape') return;
+            const modal = document.querySelector('.modal-overlay.show');
+            if (modal) {
+                if (typeof Modal !== 'undefined' && Modal.close) Modal.close();
+                return;
+            }
+            const fab = document.getElementById('fab-menu');
+            if (fab && fab.classList.contains('open')) {
+                this.closeFabMenu();
             }
         });
 
@@ -264,24 +278,38 @@ const App = {
 
     toggleFabMenu() {
         const menu = document.getElementById('fab-menu');
+        const btn = document.getElementById('fab-btn');
+        if (!menu) return;
+        const nowOpen = menu.classList.contains('hidden');
         menu.classList.toggle('hidden');
         menu.classList.toggle('open');
+        menu.setAttribute('aria-hidden', String(!nowOpen));
+        if (btn) btn.setAttribute('aria-expanded', String(nowOpen));
+        if (nowOpen) this.haptic('light');
     },
 
     closeFabMenu() {
         const menu = document.getElementById('fab-menu');
+        const btn = document.getElementById('fab-btn');
         if (menu) {
             menu.classList.add('hidden');
             menu.classList.remove('open');
+            menu.setAttribute('aria-hidden', 'true');
         }
+        if (btn) btn.setAttribute('aria-expanded', 'false');
     },
 
     showToast(message, duration = 2500) {
         const toast = document.getElementById('toast');
+        if (!toast) return;
         toast.textContent = message;
         toast.classList.remove('hidden');
+        // Force reflow so CSS transition plays even on back-to-back toasts
+        void toast.offsetWidth;
+        toast.classList.add('show');
         clearTimeout(this._toastTimeout);
         this._toastTimeout = setTimeout(() => {
+            toast.classList.remove('show');
             toast.classList.add('hidden');
         }, duration);
     },

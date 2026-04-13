@@ -7,17 +7,23 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="OneFood">
-    <meta name="theme-color" content="#E53935" media="(prefers-color-scheme: light)">
+    <meta name="application-name" content="OneFood">
+    <meta name="theme-color" content="#EF4444" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0a0a0f" media="(prefers-color-scheme: dark)">
     <meta name="color-scheme" content="light dark">
     <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-TileColor" content="#EF4444">
+    <meta name="msapplication-tap-highlight" content="no">
     <meta name="description" content="Suivi nutrition et musculation intelligent — Photo IA, vocal, 500+ aliments, avatar fitness">
 
     <!-- Preload critical resources -->
     <link rel="preload" href="css/style.css?v=74" as="style">
     <link rel="preload" href="css/fonts.css" as="style">
+    <link rel="preload" href="js/app.js?v=74" as="script">
     <link rel="dns-prefetch" href="https://www.gstatic.com">
+    <link rel="dns-prefetch" href="https://world.openfoodfacts.org">
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://world.openfoodfacts.org">
     <link rel="canonical" href="https://1food.fr/">
     <meta name="google-site-verification" content="9JsMSwlddzUz8mGffeWkkV1epL3RpXHXStPk8TZ01Lg" />
     <meta name="google-site-verification" content="BQJudT-tniipd_MKUR8wJ8iAHlutWyRaLluf1-wut5c" />
@@ -49,8 +55,11 @@
     <link rel="apple-touch-icon" sizes="192x192" href="assets/icons/icon-192.png">
 
     <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/icon-96.png">
     <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/icon-96.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
     <link rel="icon" type="image/svg+xml" href="assets/icons/icon-96.svg">
+    <link rel="mask-icon" href="assets/icons/icon-96.svg" color="#EF4444">
 
     <!-- iOS Splash screens (status bar padding) -->
     <style>
@@ -60,21 +69,27 @@
         /* Prevent double-tap zoom on interactive elements */
         button, a, [role="button"], .nav-btn, .fab-option, .card, input[type="button"], input[type="submit"] {
             touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
         /* Skip link (visible only on focus) */
         .skip-link {
-            position: absolute;
+            position: fixed;
             left: -9999px;
             top: 0;
-            background: #000;
+            background: #111;
             color: #fff;
-            padding: 10px 16px;
-            border-radius: 0 0 8px 0;
+            padding: 12px 20px;
+            border-radius: 0 0 10px 0;
             z-index: 10001;
             font-weight: 600;
+            font-size: 14px;
             text-decoration: none;
+            transition: left 0.2s ease;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.3);
         }
-        .skip-link:focus { left: 0; }
+        .skip-link:focus { left: 0; outline: 2px solid #EF4444; outline-offset: 2px; }
+        /* Prevent horizontal scroll on any mobile viewport */
+        html, body { overflow-x: hidden; max-width: 100vw; }
     </style>
 
     <!-- Force cache bust — fetches /version.json DIRECTLY from server bypassing SW -->
@@ -189,69 +204,69 @@
     </div>
 
     <div id="app">
-        <header id="app-header">
+        <header id="app-header" role="banner">
             <h1 id="page-title">OneFood</h1>
-            <button id="header-back" class="header-btn hidden" onclick="window.history.back()" aria-label="Retour à la page précédente">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <button id="header-back" class="header-btn hidden" onclick="window.history.back()" aria-label="Retour à la page précédente" type="button">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             </button>
         </header>
-        <main id="page-content" tabindex="-1"></main>
-        <div id="fab-menu" class="fab-menu hidden">
-            <div class="fab-overlay" onclick="App.closeFabMenu()"></div>
+        <main id="page-content" tabindex="-1" role="main"></main>
+        <div id="fab-menu" class="fab-menu hidden" role="dialog" aria-label="Menu d'ajout" aria-hidden="true">
+            <div class="fab-overlay" onclick="App.closeFabMenu()" aria-hidden="true"></div>
             <div class="fab-options" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:16px;max-width:320px;margin:0 auto">
-                <button class="fab-option" onclick="App.navigate('chat')">
-                    <span class="fab-icon">💬</span>
+                <button class="fab-option" onclick="App.navigate('chat')" type="button" aria-label="Ouvrir le chat IA">
+                    <span class="fab-icon" aria-hidden="true">💬</span>
                     <span>Chat IA</span>
                 </button>
-                <button class="fab-option" onclick="App.navigate('camera')">
-                    <span class="fab-icon">📷</span>
+                <button class="fab-option" onclick="App.navigate('camera')" type="button" aria-label="Ajouter par photo IA">
+                    <span class="fab-icon" aria-hidden="true">📷</span>
                     <span>Photo IA</span>
                 </button>
-                <button class="fab-option" onclick="App.navigate('search')">
-                    <span class="fab-icon">🔍</span>
+                <button class="fab-option" onclick="App.navigate('search')" type="button" aria-label="Rechercher un aliment">
+                    <span class="fab-icon" aria-hidden="true">🔍</span>
                     <span>Recherche</span>
                 </button>
-                <button class="fab-option" onclick="App.navigate('barcode')">
-                    <span class="fab-icon">📊</span>
+                <button class="fab-option" onclick="App.navigate('barcode')" type="button" aria-label="Scanner un code-barres">
+                    <span class="fab-icon" aria-hidden="true">📊</span>
                     <span>Code-barres</span>
                 </button>
-                <button class="fab-option" onclick="App.navigate('voice')">
-                    <span class="fab-icon">🎤</span>
+                <button class="fab-option" onclick="App.navigate('voice')" type="button" aria-label="Ajouter par commande vocale">
+                    <span class="fab-icon" aria-hidden="true">🎤</span>
                     <span>Vocal</span>
                 </button>
-                <button class="fab-option" onclick="SearchPage._manageRecipes();App.closeFabMenu()">
-                    <span class="fab-icon">📋</span>
+                <button class="fab-option" onclick="SearchPage._manageRecipes();App.closeFabMenu()" type="button" aria-label="Gérer mes recettes">
+                    <span class="fab-icon" aria-hidden="true">📋</span>
                     <span>Recettes</span>
                 </button>
             </div>
         </div>
         <nav id="bottom-nav" role="navigation" aria-label="Navigation principale">
-            <div class="nav-indicator" id="nav-indicator"></div>
-            <button class="nav-btn active" data-page="dashboard" aria-label="Accueil">
+            <div class="nav-indicator" id="nav-indicator" aria-hidden="true"></div>
+            <button class="nav-btn active" data-page="dashboard" aria-label="Accueil" aria-current="page" type="button">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
                 <span>Accueil</span>
             </button>
-            <button class="nav-btn" data-page="diary" aria-label="Journal alimentaire">
+            <button class="nav-btn" data-page="diary" aria-label="Journal alimentaire" type="button">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
                 <span>Journal</span>
             </button>
-            <button class="nav-btn fab-trigger" id="fab-btn" onclick="App.toggleFabMenu()" aria-label="Ajouter un aliment">
-                <div class="fab-circle">
+            <button class="nav-btn fab-trigger" id="fab-btn" onclick="App.toggleFabMenu()" aria-label="Ajouter un aliment" aria-expanded="false" aria-controls="fab-menu" type="button">
+                <div class="fab-circle" aria-hidden="true">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="white" aria-hidden="true"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
                 </div>
             </button>
-            <button class="nav-btn" data-page="avatar" aria-label="Créature">
+            <button class="nav-btn" data-page="avatar" aria-label="Créature" type="button">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
                 <span>Créature</span>
             </button>
-            <button class="nav-btn" data-page="profile" aria-label="Profil">
+            <button class="nav-btn" data-page="profile" aria-label="Profil" type="button">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                 <span>Profil</span>
             </button>
         </nav>
     </div>
 
-    <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+    <div id="toast" class="toast hidden" role="status" aria-live="polite" aria-atomic="true"></div>
 
     <script defer src="js/db.js?v=74"></script>
     <script defer src="js/storage.js?v=74"></script>

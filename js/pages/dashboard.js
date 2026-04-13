@@ -568,7 +568,23 @@ const DashboardPage = {
     _shiftDate(delta) {
         const d = new Date(App.getSelectedDate());
         d.setDate(d.getDate() + delta);
-        App.setSelectedDate(App._localDateKey(d));
+        // Subtle cross-fade transition while we swap the day
+        const content = document.getElementById('page-content');
+        if (content) {
+            content.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+            content.style.opacity = '0.35';
+            content.style.transform = `translateX(${delta > 0 ? '-8px' : '8px'})`;
+            setTimeout(() => {
+                App.setSelectedDate(App._localDateKey(d));
+                requestAnimationFrame(() => {
+                    content.style.opacity = '';
+                    content.style.transform = '';
+                });
+            }, 90);
+        } else {
+            App.setSelectedDate(App._localDateKey(d));
+        }
+        App.haptic('light');
     },
 
     _openDatePicker() {

@@ -124,21 +124,68 @@ const Modal = {
         const existing = document.querySelector('.modal-overlay');
         if (existing) existing.remove();
 
+        // Remember focus for restoration on close
+        this._lastFocusedElement = document.activeElement;
+
         const overlay = document.createElement('div');
         overlay.className = 'modal-overlay';
         overlay.setAttribute('role', 'dialog');
         overlay.setAttribute('aria-modal', 'true');
         overlay.innerHTML = `
-            <div class="modal-content">
-                <div class="modal-handle"></div>
+            <div class="modal-content" tabindex="-1">
+                <div class="modal-handle" aria-hidden="true"></div>
+                <button type="button" class="sr-only modal-close-sr" onclick="Modal.close()">Fermer</button>
                 ${content}
             </div>
         `;
+
+        // Lock body scroll while modal is open
+        this._prevBodyOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
 
         document.body.appendChild(overlay);
 
         // Animate in
         requestAnimationFrame(() => overlay.classList.add('show'));
+
+        // Focus trap — trap Tab key inside modal
+        const modalContentEl = overlay.querySelector('.modal-content');
+        const getFocusable = () => Array.from(
+            modalContentEl.querySelectorAll('a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), [tabindex]:not([tabindex="-1"])')
+        ).filter(el => el.offsetParent !== null);
+
+        const onKeydown = (e) => {
+            if (e.key === 'Tab') {
+                const focusables = getFocusable();
+                if (focusables.length === 0) {
+                    e.preventDefault();
+                    modalContentEl.focus();
+                    return;
+                }
+                const first = focusables[0];
+                const last = focusables[focusables.length - 1];
+                if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
+        };
+        overlay.addEventListener('keydown', onKeydown);
+        overlay._keydownHandler = onKeydown;
+
+        // Auto-focus first focusable after animation
+        setTimeout(() => {
+            const focusables = getFocusable();
+            const primaryBtn = modalContentEl.querySelector('.btn-primary');
+            const firstInput = modalContentEl.querySelector('input:not([type="hidden"]), select, textarea');
+            const target = firstInput || primaryBtn || focusables[0] || modalContentEl;
+            if (target && typeof target.focus === 'function') {
+                try { target.focus({ preventScroll: true }); } catch { target.focus(); }
+            }
+        }, 350);
 
         // Force-restart SVG animations (WebKit/iOS bug: animations don't start in innerHTML-injected SVGs)
         requestAnimationFrame(() => {
@@ -226,9 +273,21 @@ const Modal = {
         if (overlay) {
             // Clean up document-level listeners to prevent memory leak
             if (overlay._swipeCleanup) overlay._swipeCleanup();
+            if (overlay._keydownHandler) overlay.removeEventListener('keydown', overlay._keydownHandler);
             overlay.classList.remove('show');
             setTimeout(() => overlay.remove(), 300);
         }
+        // Restore body scroll
+        document.body.style.overflow = this._prevBodyOverflow || '';
+        this._prevBodyOverflow = '';
+        // Restore focus to element that opened the modal (a11y)
+        const toRestore = this._lastFocusedElement;
+        if (toRestore && typeof toRestore.focus === 'function') {
+            setTimeout(() => {
+                try { toRestore.focus({ preventScroll: true }); } catch { toRestore.focus(); }
+            }, 50);
+        }
+        this._lastFocusedElement = null;
     },
 
     // === WHEEL PICKER HELPER ===

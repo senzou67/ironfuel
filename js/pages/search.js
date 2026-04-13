@@ -3,10 +3,39 @@ const SearchPage = {
     currentCategory: 'all',
     _onlineTimeout: null,
     _onlineResults: [],
+    _searchDebounce: null,
+    _lastQuery: '',
 
     _escapeHtml(str) {
         if (!str) return '';
         return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    },
+
+    // Debounced local search wrapper — keeps input fast-feeling while avoiding jank
+    onSearchDebounced(query) {
+        clearTimeout(this._searchDebounce);
+        // Show/hide clear button immediately for snappy feedback
+        const clearBtn = document.getElementById('search-clear');
+        if (clearBtn) clearBtn.style.display = query && query.length > 0 ? 'block' : 'none';
+        // Short debounce for instant feel, cancels fast typing
+        this._searchDebounce = setTimeout(() => this.onSearch(query), 120);
+    },
+
+    // Handle keyboard shortcuts: Escape clears, Enter submits first result
+    onSearchKeydown(e) {
+        if (e.key === 'Escape') {
+            const input = e.target;
+            if (input.value) {
+                e.preventDefault();
+                this.clearSearch();
+            }
+            return;
+        }
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const first = document.querySelector('.search-results .search-result-item');
+            if (first) first.click();
+        }
     },
 
     render(params = {}) {
@@ -37,12 +66,21 @@ const SearchPage = {
         content.innerHTML = `
             <div class="search-container fade-in">
                 ${recipeBanner}
-                <div class="search-bar">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <div class="search-bar" id="search-bar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
                     </svg>
-                    <input type="text" id="search-input" placeholder="Rechercher un aliment..." oninput="SearchPage.onSearch(this.value)" autofocus>
-                    <button class="search-clear-btn" id="search-clear" onclick="SearchPage.clearSearch()">&times;</button>
+                    <input type="search" id="search-input" placeholder="Rechercher un aliment..."
+                        oninput="SearchPage.onSearchDebounced(this.value)"
+                        onkeydown="SearchPage.onSearchKeydown(event)"
+                        aria-label="Rechercher un aliment"
+                        autocomplete="off"
+                        autocorrect="off"
+                        autocapitalize="off"
+                        spellcheck="false"
+                        enterkeyhint="search"
+                        inputmode="search">
+                    <button class="search-clear-btn" id="search-clear" onclick="SearchPage.clearSearch()" aria-label="Effacer la recherche" type="button">&times;</button>
                 </div>
 
                 <div class="category-chips-wrapper">
@@ -114,6 +152,19 @@ const SearchPage = {
                 </div>
             </div>
         `;
+
+        // Autofocus input (delayed so modal transitions don't steal focus)
+        // Skip autofocus on small mobile to avoid keyboard jumping into view unexpectedly
+        // when the user navigated via a quick-action button.
+        requestAnimationFrame(() => {
+            const input = document.getElementById('search-input');
+            if (!input) return;
+            // Only auto-focus on desktop / tablets — mobile behavior is to tap
+            const isTouch = window.matchMedia('(pointer: coarse)').matches;
+            if (!isTouch) {
+                try { input.focus({ preventScroll: true }); } catch { input.focus(); }
+            }
+        });
     },
 
     clearSearch() {
@@ -244,9 +295,19 @@ const SearchPage = {
     },
 
     async searchOnline(query) {
-        if (!navigator.onLine) return;
+        if (!navigator.onLine) {
+            const el = document.getElementById('online-results');
+            if (el) el.innerHTML = `
+                <div style="margin-top:12px;text-align:center;padding:10px 12px;color:var(--text-secondary);font-size:12px;background:var(--surface-alt);border-radius:10px">
+                    📡 Hors ligne — recherche en ligne indisponible
+                </div>`;
+            return;
+        }
         const onlineEl = document.getElementById('online-results');
         if (!onlineEl) return;
+
+        const searchBar = document.getElementById('search-bar');
+        if (searchBar) searchBar.classList.add('loading');
 
         onlineEl.innerHTML = `
             <div style="margin-top:16px">
@@ -262,6 +323,7 @@ const SearchPage = {
             const results = await OpenFoodFactsService.searchProducts(query);
             this._onlineResults = results;
 
+            if (searchBar) searchBar.classList.remove('loading');
             if (!document.getElementById('online-results')) return;
 
             if (results.length === 0) {
@@ -276,8 +338,12 @@ const SearchPage = {
                 </div>
             `;
         } catch {
+            if (searchBar) searchBar.classList.remove('loading');
             const el = document.getElementById('online-results');
-            if (el) el.innerHTML = '';
+            if (el) el.innerHTML = `
+                <div style="margin-top:12px;text-align:center;padding:10px 12px;color:var(--text-secondary);font-size:12px">
+                    Erreur de recherche en ligne — réessaie plus tard
+                </div>`;
         }
     },
 
@@ -331,8 +397,8 @@ const SearchPage = {
         const customPhoto = isCustom && food.photo ? food.photo : null;
         const cachedImg = customPhoto || ((typeof FoodImageService !== 'undefined') ? FoodImageService.getCachedImage(food.name) : null);
         const thumbContent = cachedImg
-            ? `<img src="${cachedImg}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:8px" onerror="this.parentElement.innerHTML='<span>${catIcon}</span>';this.parentElement.style.background='${catColor}20';this.parentElement.style.border='1.5px solid ${catColor}40'">`
-            : `<span>${catIcon}</span>`;
+            ? `<img src="${cachedImg}" alt="" loading="lazy" decoding="async" class="lazy-img loaded" style="width:100%;height:100%;object-fit:cover;border-radius:8px" onerror="this.parentElement.innerHTML='<span>${catIcon}</span>';this.parentElement.style.background='${catColor}20';this.parentElement.style.border='1.5px solid ${catColor}40'">`
+            : `<span aria-hidden="true">${catIcon}</span>`;
         const thumbStyle = cachedImg
             ? 'background:none;border:none;overflow:hidden'
             : `background:${catColor}20;border:1.5px solid ${catColor}40`;
@@ -365,7 +431,7 @@ const SearchPage = {
         return `
             <div class="search-result-item online-item" onclick="SearchPage.selectOnlineFood(${index})">
                 <div class="result-info" style="display:flex;align-items:center;gap:8px">
-                    ${safeImage ? `<img src="${safeImage}" alt="" style="width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0">` : ''}
+                    ${safeImage ? `<img src="${safeImage}" alt="" loading="lazy" decoding="async" style="width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0">` : ''}
                     <div>
                         <div class="result-name">${safeName}</div>
                         <div class="result-detail">
