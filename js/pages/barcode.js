@@ -83,10 +83,26 @@ const BarcodePage = {
         }
     },
 
+    _loadHtml5QrcodeLib() {
+        if (typeof Html5Qrcode !== 'undefined') return Promise.resolve();
+        if (this._html5QrLoading) return this._html5QrLoading;
+        this._html5QrLoading = new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = 'lib/html5-qrcode.min.js?v=74';
+            s.async = true;
+            s.onload = () => resolve();
+            s.onerror = () => reject(new Error('Failed to load html5-qrcode'));
+            document.head.appendChild(s);
+        });
+        return this._html5QrLoading;
+    },
+
     async _startHtml5Scanning() {
         try {
             const readerEl = document.getElementById('barcode-reader');
-            if (!readerEl || typeof Html5Qrcode === 'undefined') {
+            if (!readerEl) return;
+            try { await this._loadHtml5QrcodeLib(); } catch (e) {}
+            if (typeof Html5Qrcode === 'undefined') {
                 const status = document.getElementById('barcode-status');
                 if (status) status.textContent = 'Scanner non disponible. Saisissez le code manuellement.';
                 return;

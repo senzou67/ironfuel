@@ -1,22 +1,26 @@
 import admin from 'firebase-admin';
 import { initFirebase, getDb, jsonResponse, errorResponse } from './_shared.js';
 
-const ADMIN_HASH = '302333801873a46149bed26a09a7ff46689e089067520fe3fd9b7199e5a6e158';
-
-async function checkAuth(request) {
+// Auth uses ADMIN_API_KEY env variable (set in Cloudflare Worker Secrets)
+// To login on admin.html, enter the exact value of ADMIN_API_KEY
+async function checkAuth(request, env) {
     const auth = request.headers.get('X-Admin-Key') || '';
-    const data = new TextEncoder().encode(auth);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    return hex === ADMIN_HASH;
+    const expected = env.ADMIN_API_KEY || '';
+    if (!expected || !auth) return false;
+    if (auth.length !== expected.length) return false;
+    // Constant-time comparison
+    let diff = 0;
+    for (let i = 0; i < auth.length; i++) {
+        diff |= auth.charCodeAt(i) ^ expected.charCodeAt(i);
+    }
+    return diff === 0;
 }
 
 export async function onRequest(context) {
     const { env, request } = context;
     initFirebase(env);
 
-    if (!await checkAuth(request)) return errorResponse('Unauthorized', 401);
+    if (!await checkAuth(request, env)) return errorResponse('Unauthorized', 401);
 
     const db = getDb(env);
     if (!db) return errorResponse('Firebase not configured');

@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <script src="https://js-de.sentry-cdn.com/47e63ac7e54639dd7801f7dd2de01759.min.js" crossorigin="anonymous"></script>
+    <script src="https://js-de.sentry-cdn.com/47e63ac7e54639dd7801f7dd2de01759.min.js" crossorigin="anonymous" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -20,9 +20,19 @@
     <link rel="preload" href="css/style.css?v=74" as="style">
     <link rel="preload" href="css/fonts.css" as="style">
     <link rel="preload" href="js/app.js?v=74" as="script">
+    <link rel="preload" href="js/db.js?v=74" as="script">
+    <link rel="preload" href="assets/fonts/inter-500.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="assets/fonts/inter-600.woff2" as="font" type="font/woff2" crossorigin>
+    <!-- DNS prefetch + preconnect for critical origins -->
     <link rel="dns-prefetch" href="https://www.gstatic.com">
     <link rel="dns-prefetch" href="https://world.openfoodfacts.org">
+    <link rel="dns-prefetch" href="https://firebaseio.com">
+    <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+    <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://firebaseio.com" crossorigin>
+    <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://world.openfoodfacts.org">
     <link rel="canonical" href="https://1food.fr/">
     <meta name="google-site-verification" content="9JsMSwlddzUz8mGffeWkkV1epL3RpXHXStPk8TZ01Lg" />
@@ -185,13 +195,14 @@
 
     <link rel="stylesheet" href="css/fonts.css">
     <link rel="stylesheet" href="css/style.css?v=74">
+    <!-- Chart.js is only needed on dashboard/history/weight — defer keeps order & non-blocking -->
     <script src="lib/chart.min.js" defer></script>
-    <script src="lib/html5-qrcode.min.js" defer></script>
-    <!-- Firebase Auth + Firestore + Messaging -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <!-- html5-qrcode is only needed on barcode page — loaded on-demand by barcode.js -->
+    <!-- Firebase Auth + Messaging (defer — non-blocking, executes before app.js which also defers) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" defer></script>
     <!-- Firestore SDK removed — SyncService uses REST API directly -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js" defer></script>
 </head>
 <body>
     <!-- Skip to main content (accessibility) -->
@@ -287,24 +298,50 @@
     <script defer src="js/components/mealcard.js?v=74"></script>
     <script defer src="js/components/fooditem.js?v=74"></script>
     <script defer src="js/components/avatar.js?v=74"></script>
+    <!-- CRITICAL page scripts (needed for first paint / initial navigation) -->
     <script defer src="js/pages/dashboard.js?v=74"></script>
     <script defer src="js/pages/diary.js?v=74"></script>
     <script defer src="js/pages/search.js?v=74"></script>
-    <script defer src="js/pages/camera.js?v=74"></script>
-    <script defer src="js/pages/voice.js?v=74"></script>
-    <script defer src="js/pages/chat.js?v=74"></script>
-    <script defer src="js/pages/barcode.js?v=74"></script>
     <script defer src="js/pages/history.js?v=74"></script>
     <script defer src="js/pages/profile.js?v=74"></script>
     <script defer src="js/pages/settings.js?v=74"></script>
-    <script defer src="js/pages/customfood.js?v=74"></script>
-    <script defer src="js/pages/gym.js?v=74"></script>
-    <script defer src="js/pages/supplements.js?v=74"></script>
-    <script defer src="js/pages/weight.js?v=74"></script>
-    <script defer src="js/pages/shop.js?v=74"></script>
-    <script defer src="js/pages/avatar.js?v=74"></script>
-    <script defer src="js/pages/mealplanner.js?v=74"></script>
     <script defer src="js/app.js?v=74"></script>
+    <!-- NON-CRITICAL page scripts — injected after window load to reduce main-thread blocking.
+         These globals (GymPage, SupplementsPage, etc.) are only read when the user
+         navigates to those pages, which requires at least one user interaction after load. -->
+    <script>
+        (function(){
+            var lazyPages = [
+                'js/pages/camera.js?v=74',
+                'js/pages/voice.js?v=74',
+                'js/pages/chat.js?v=74',
+                'js/pages/barcode.js?v=74',
+                'js/pages/customfood.js?v=74',
+                'js/pages/gym.js?v=74',
+                'js/pages/supplements.js?v=74',
+                'js/pages/weight.js?v=74',
+                'js/pages/shop.js?v=74',
+                'js/pages/avatar.js?v=74',
+                'js/pages/mealplanner.js?v=74'
+            ];
+            function inject() {
+                lazyPages.forEach(function(src){
+                    var s = document.createElement('script');
+                    s.src = src;
+                    s.defer = true;
+                    document.head.appendChild(s);
+                });
+            }
+            if (document.readyState === 'complete') {
+                // 'requestIdleCallback' is ideal, fallback to setTimeout
+                (window.requestIdleCallback || function(cb){ setTimeout(cb, 200); })(inject);
+            } else {
+                window.addEventListener('load', function(){
+                    (window.requestIdleCallback || function(cb){ setTimeout(cb, 200); })(inject);
+                });
+            }
+        })();
+    </script>
 
     <!-- SW registration handled in <head> cache-bust script -->
 </body>
