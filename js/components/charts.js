@@ -115,25 +115,35 @@ const Charts = {
         });
     },
 
-    createMacroChart(canvasId, protein, carbs, fat) {
+    createMacroChart(canvasId, protein, carbs, fat, fiber) {
         this.destroy(canvasId);
         const canvas = document.getElementById(canvasId);
         if (!canvas) return;
 
-        const total = protein + carbs + fat;
+        const total = protein + carbs + fat + (fiber || 0);
         if (total === 0) return;
 
         const proteinColor = this._cssVar('--protein-color') || '#3B82F6';
         const carbsColor = this._cssVar('--carbs-color') || '#F59E0B';
         const fatColor = this._cssVar('--fat-color') || '#EF4444';
+        const fiberColor = this._cssVar('--fiber-color') || '#22C55E';
+
+        const labels = ['Protéines', 'Glucides', 'Lipides'];
+        const data = [protein, carbs, fat];
+        const colors = [proteinColor, carbsColor, fatColor];
+        if (fiber && fiber > 0) {
+            labels.push('Fibres');
+            data.push(fiber);
+            colors.push(fiberColor);
+        }
 
         this.instances[canvasId] = new Chart(canvas, {
             type: 'doughnut',
             data: {
-                labels: ['Protéines', 'Glucides', 'Lipides'],
+                labels,
                 datasets: [{
-                    data: [protein, carbs, fat],
-                    backgroundColor: [proteinColor, carbsColor, fatColor],
+                    data,
+                    backgroundColor: colors,
                     borderWidth: 0
                 }]
             },

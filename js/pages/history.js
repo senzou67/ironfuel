@@ -20,6 +20,9 @@ const HistoryPage = {
         const avgFat = daysWithData.length > 0
             ? Math.round(daysWithData.reduce((s, d) => s + d.fat, 0) / daysWithData.length)
             : 0;
+        const avgFiber = daysWithData.length > 0
+            ? Math.round(daysWithData.reduce((s, d) => s + (d.fiber || 0), 0) / daysWithData.length)
+            : 0;
 
         const content = document.getElementById('page-content');
         content.innerHTML = `
@@ -98,7 +101,7 @@ const HistoryPage = {
 
         // Render charts
         Charts.createCalorieHistory('history-cal-chart', data, goals.calories);
-        Charts.createMacroChart('history-macro-chart', avgProt, avgCarbs, avgFat);
+        Charts.createMacroChart('history-macro-chart', avgProt, avgCarbs, avgFat, avgFiber);
         if (weightLog.length > 0) {
             Charts.createWeightChart('history-weight-chart', weightLog.slice(-this.period));
         }

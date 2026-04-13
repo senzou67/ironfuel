@@ -309,6 +309,10 @@ const ProfilePage = {
                     <input type="number" class="form-input" id="g-fat" value="${goals.fat}"
                         oninput="ProfilePage.onMacroChange()">
                 </div>
+                <div class="form-group">
+                    <label class="form-label">Fibres (g) <span class="macro-pct-badge" style="background:var(--fiber-color);color:white">recommandé</span></label>
+                    <input type="number" class="form-input" id="g-fiber" value="${goals.fiber || 25}" min="10" max="100">
+                </div>
             </div>
 
             <div id="macro-total-bar" style="margin-bottom:16px">
@@ -461,6 +465,7 @@ const ProfilePage = {
             protein: parseInt(document.getElementById('g-prot').value) || 150,
             carbs: parseInt(document.getElementById('g-carbs').value) || 250,
             fat: parseInt(document.getElementById('g-fat').value) || 65,
+            fiber: parseInt(document.getElementById('g-fiber').value) || 25,
             water: parseInt(document.getElementById('g-water').value) || 8,
             custom: true
         };
