@@ -332,9 +332,9 @@ const AuthService = {
                 <div class="login-card">
                     ${inAppBanner}
                     <div class="login-logo">
-                        <svg width="64" height="64" viewBox="0 0 100 100">
-                            <rect x="5" y="5" width="90" height="90" rx="20" fill="#E53935"/>
-                            <text x="50" y="62" text-anchor="middle" fill="white" font-size="42" font-weight="900">1</text>
+                        <svg width="64" height="64" viewBox="0 0 100 100" aria-hidden="true">
+                            <rect width="100" height="100" rx="22" fill="#EF4444"/>
+                            <text x="50" y="72" text-anchor="middle" fill="#fff" font-family="system-ui,-apple-system,Inter,Arial,sans-serif" font-size="62" font-weight="900">1</text>
                         </svg>
                     </div>
                     <h1 class="login-title">OneFood</h1>

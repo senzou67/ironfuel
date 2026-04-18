@@ -1,89 +1,64 @@
+// Regenerate PNG icons from the new flat-red SVG design.
+// Usage: npm i sharp --no-save && node generate-png-icons.js
 const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
 
 const iconsDir = path.join(__dirname, 'assets', 'icons');
-const svgPath = path.join(iconsDir, 'icon-512.svg');
+const BRAND_COLOR = '#EF4444';
 
-// SVG has emoji 🔥 which sharp can't render — create a clean SVG with just text
-const cleanSVG = (size) => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#C62828"/>
-      <stop offset="100%" stop-color="#B71C1C"/>
-    </linearGradient>
-  </defs>
-  <rect width="512" height="512" rx="113" fill="url(#bg)"/>
-  <text x="256" y="310" font-family="Arial,Helvetica,sans-serif" font-size="200" font-weight="bold" fill="white" text-anchor="middle">IF</text>
-  <text x="256" y="180" font-family="Arial,Helvetica,sans-serif" font-size="70" fill="#FFC107" text-anchor="middle" font-weight="bold">*</text>
+function cleanSVG(size, rounded = true) {
+    const cx = size / 2;
+    const r = rounded ? Math.round(size * 0.22) : 0;
+    const fontSize = Math.round(size * (rounded ? 0.62 : 0.54));
+    const baseline = Math.round(cx + fontSize * 0.34);
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+  <rect width="${size}" height="${size}" ${r ? `rx="${r}"` : ''} fill="${BRAND_COLOR}"/>
+  <text x="${cx}" y="${baseline}" font-family="Arial,Helvetica,sans-serif" font-size="${fontSize}" font-weight="900" fill="#fff" text-anchor="middle">1</text>
 </svg>`;
+}
 
-// Maskable icon needs safe zone (inner 80% circle)
-const maskableSVG = (size) => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#C62828"/>
-      <stop offset="100%" stop-color="#B71C1C"/>
-    </linearGradient>
-  </defs>
-  <rect width="512" height="512" fill="url(#bg)"/>
-  <text x="256" y="310" font-family="Arial,Helvetica,sans-serif" font-size="180" font-weight="bold" fill="white" text-anchor="middle">IF</text>
-</svg>`;
-
-// OG image (1200x630)
+// Open Graph 1200×630 — flat red, centered "OneFood" wordmark
 const ogSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#C62828"/>
-      <stop offset="100%" stop-color="#B71C1C"/>
-    </linearGradient>
-  </defs>
-  <rect width="1200" height="630" fill="url(#bg)"/>
-  <rect x="60" y="60" width="1080" height="510" rx="40" fill="rgba(255,255,255,0.1)"/>
-  <text x="600" y="280" font-family="Arial,Helvetica,sans-serif" font-size="160" font-weight="bold" fill="white" text-anchor="middle">OneFood</text>
-  <text x="600" y="380" font-family="Arial,Helvetica,sans-serif" font-size="42" fill="rgba(255,255,255,0.85)" text-anchor="middle">Suivi Nutrition &amp; Musculation Intelligent</text>
-  <text x="600" y="450" font-family="Arial,Helvetica,sans-serif" font-size="30" fill="#FFC107" text-anchor="middle">Photo IA  |  500+ aliments  |  Gamification</text>
+  <rect width="1200" height="630" fill="${BRAND_COLOR}"/>
+  <text x="600" y="340" font-family="Arial,Helvetica,sans-serif" font-size="170" font-weight="900" fill="#fff" text-anchor="middle">OneFood</text>
+  <text x="600" y="420" font-family="Arial,Helvetica,sans-serif" font-size="36" fill="rgba(255,255,255,0.85)" text-anchor="middle">Suivi Nutrition &amp; Musculation Intelligent</text>
 </svg>`;
 
 async function generate() {
     const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
-
     for (const size of sizes) {
-        const svg = Buffer.from(cleanSVG(size));
-        await sharp(svg)
+        await sharp(Buffer.from(cleanSVG(size, true)))
             .resize(size, size)
             .png()
             .toFile(path.join(iconsDir, `icon-${size}.png`));
         console.log(`Generated icon-${size}.png`);
     }
 
-    // Maskable icons (192 + 512)
+    // Maskable (no rounded corners, OS will apply shape mask)
     for (const size of [192, 512]) {
-        const svg = Buffer.from(maskableSVG(size));
-        await sharp(svg)
+        await sharp(Buffer.from(cleanSVG(size, false)))
             .resize(size, size)
             .png()
             .toFile(path.join(iconsDir, `icon-${size}-maskable.png`));
         console.log(`Generated icon-${size}-maskable.png`);
     }
 
-    // Apple touch icon (180x180)
-    const appleSvg = Buffer.from(cleanSVG(180));
-    await sharp(appleSvg)
+    // Apple touch icon (180)
+    await sharp(Buffer.from(cleanSVG(180, true)))
         .resize(180, 180)
         .png()
         .toFile(path.join(iconsDir, 'apple-touch-icon.png'));
     console.log('Generated apple-touch-icon.png');
 
-    // OG image (1200x630)
-    const ogBuffer = Buffer.from(ogSVG);
-    await sharp(ogBuffer)
+    // OG image (1200×630)
+    await sharp(Buffer.from(ogSVG))
         .resize(1200, 630)
         .png()
         .toFile(path.join(__dirname, 'assets', 'og-image.png'));
     console.log('Generated og-image.png');
 
-    console.log('\nDone! All PNG icons generated.');
+    console.log('\nDone! Flat red PNG icons regenerated.');
 }
 
 generate().catch(err => {

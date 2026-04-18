@@ -7,7 +7,7 @@
     "scope": "/",
     "display": "standalone",
     "background_color": "#ffffff",
-    "theme_color": "#E53935",
+    "theme_color": "#EF4444",
     "orientation": "portrait-primary",
     "lang": "fr-FR",
     "categories": ["health", "fitness", "food", "lifestyle"],

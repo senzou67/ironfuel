@@ -18,9 +18,9 @@
     <meta name="description" content="Suivi nutrition et musculation intelligent — Photo IA, vocal, 500+ aliments, avatar fitness">
 
     <!-- Preload critical resources -->
-    <link rel="preload" href="css/style.css?v=79" as="style">
-    <link rel="preload" href="js/app.js?v=79" as="script">
-    <link rel="preload" href="js/db.js?v=79" as="script">
+    <link rel="preload" href="css/style.css?v=80" as="style">
+    <link rel="preload" href="js/app.js?v=80" as="script">
+    <link rel="preload" href="js/db.js?v=80" as="script">
     <link rel="preload" href="assets/fonts/inter-500.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="assets/fonts/inter-600.woff2" as="font" type="font/woff2" crossorigin>
     <!-- Inline @font-face (replaces css/fonts.css) to save one render-blocking request -->
@@ -117,7 +117,7 @@
     <!-- Force cache bust — fetches /version.json DIRECTLY from server bypassing SW -->
     <script>
         (function(){
-            var LOCAL_V = 120; // Must match version.json
+            var LOCAL_V = 121; // Must match version.json
             var lsWorks = true;
             try {
                 localStorage.setItem('_test', '1');
@@ -205,7 +205,7 @@
         }
     </script>
 
-    <link rel="stylesheet" href="css/style.css?v=79">
+    <link rel="stylesheet" href="css/style.css?v=80">
     <!-- Chart.js is only needed on dashboard/history/weight — defer keeps order & non-blocking.
          Served from local /lib so it benefits from the service worker cache and avoids a CDN RTT. -->
     <script src="lib/chart.min.js" defer></script>
@@ -291,33 +291,33 @@
 
     <div id="toast" class="toast hidden" role="status" aria-live="polite" aria-atomic="true"></div>
 
-    <script defer src="js/db.js?v=79"></script>
-    <script defer src="js/storage.js?v=79"></script>
-    <script defer src="js/services/nutrition.js?v=79"></script>
-    <script defer src="js/services/vision.js?v=79"></script>
-    <script defer src="js/services/speech.js?v=79"></script>
-    <script defer src="js/services/openfoodfacts.js?v=79"></script>
-    <script defer src="js/services/foodimages.js?v=79"></script>
-    <script defer src="js/services/analytics.js?v=79"></script>
-    <script defer src="js/services/auth.js?v=79"></script>
-    <script defer src="js/services/trial.js?v=79"></script>
-    <script defer src="js/services/sync.js?v=79"></script>
-    <script defer src="js/services/notifications.js?v=79"></script>
-    <script defer src="js/services/micronutrients.js?v=79"></script>
-    <script defer src="js/components/navbar.js?v=79"></script>
-    <script defer src="js/components/modal.js?v=79"></script>
-    <script defer src="js/components/charts.js?v=79"></script>
-    <script defer src="js/components/mealcard.js?v=79"></script>
-    <script defer src="js/components/fooditem.js?v=79"></script>
-    <script defer src="js/components/avatar.js?v=79"></script>
+    <script defer src="js/db.js?v=80"></script>
+    <script defer src="js/storage.js?v=80"></script>
+    <script defer src="js/services/nutrition.js?v=80"></script>
+    <script defer src="js/services/vision.js?v=80"></script>
+    <script defer src="js/services/speech.js?v=80"></script>
+    <script defer src="js/services/openfoodfacts.js?v=80"></script>
+    <script defer src="js/services/foodimages.js?v=80"></script>
+    <script defer src="js/services/analytics.js?v=80"></script>
+    <script defer src="js/services/auth.js?v=80"></script>
+    <script defer src="js/services/trial.js?v=80"></script>
+    <script defer src="js/services/sync.js?v=80"></script>
+    <script defer src="js/services/notifications.js?v=80"></script>
+    <script defer src="js/services/micronutrients.js?v=80"></script>
+    <script defer src="js/components/navbar.js?v=80"></script>
+    <script defer src="js/components/modal.js?v=80"></script>
+    <script defer src="js/components/charts.js?v=80"></script>
+    <script defer src="js/components/mealcard.js?v=80"></script>
+    <script defer src="js/components/fooditem.js?v=80"></script>
+    <script defer src="js/components/avatar.js?v=80"></script>
     <!-- CRITICAL page scripts (needed for first paint / initial navigation) -->
-    <script defer src="js/pages/dashboard.js?v=79"></script>
-    <script defer src="js/pages/diary.js?v=79"></script>
-    <script defer src="js/pages/search.js?v=79"></script>
-    <script defer src="js/pages/history.js?v=79"></script>
-    <script defer src="js/pages/profile.js?v=79"></script>
-    <script defer src="js/pages/settings.js?v=79"></script>
-    <script defer src="js/app.js?v=79"></script>
+    <script defer src="js/pages/dashboard.js?v=80"></script>
+    <script defer src="js/pages/diary.js?v=80"></script>
+    <script defer src="js/pages/search.js?v=80"></script>
+    <script defer src="js/pages/history.js?v=80"></script>
+    <script defer src="js/pages/profile.js?v=80"></script>
+    <script defer src="js/pages/settings.js?v=80"></script>
+    <script defer src="js/app.js?v=80"></script>
     <!-- NON-CRITICAL page scripts — injected after window load to reduce main-thread blocking.
          These globals (GymPage, SupplementsPage, etc.) are only read when the user
          navigates to those pages, which requires at least one user interaction after load. -->
@@ -327,17 +327,17 @@
             // to keep TBT/FCP/LCP low. All consumers defensively feature-detect
             // these globals before use, so ordering after initial paint is safe.
             var lazyScripts = [
-                'js/pages/camera.js?v=79',
-                'js/pages/voice.js?v=79',
-                'js/pages/chat.js?v=79',
-                'js/pages/barcode.js?v=79',
-                'js/pages/customfood.js?v=79',
-                'js/pages/gym.js?v=79',
-                'js/pages/supplements.js?v=79',
-                'js/pages/weight.js?v=79',
-                'js/pages/shop.js?v=79',
-                'js/pages/avatar.js?v=79',
-                'js/pages/mealplanner.js?v=79',
+                'js/pages/camera.js?v=80',
+                'js/pages/voice.js?v=80',
+                'js/pages/chat.js?v=80',
+                'js/pages/barcode.js?v=80',
+                'js/pages/customfood.js?v=80',
+                'js/pages/gym.js?v=80',
+                'js/pages/supplements.js?v=80',
+                'js/pages/weight.js?v=80',
+                'js/pages/shop.js?v=80',
+                'js/pages/avatar.js?v=80',
+                'js/pages/mealplanner.js?v=80',
                 // Firebase Messaging (push notifications) — only needed once user enables push.
                 // Not required for initial paint; NotificationService.init() feature-detects.
                 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js'
