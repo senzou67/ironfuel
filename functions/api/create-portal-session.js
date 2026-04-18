@@ -27,6 +27,7 @@ export async function onRequestPost(context) {
 
         return jsonResponse({ url: session.url });
     } catch (err) {
-        return errorResponse('Failed to create portal session');
+        console.error('[create-portal-session] Stripe error:', err?.type, err?.message);
+        return errorResponse('Portail indisponible. Contacte contact@1food.fr.', 500);
     }
 }

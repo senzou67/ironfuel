@@ -41,14 +41,24 @@ Reponds UNIQUEMENT avec un JSON valide, sans texte avant ou apres, au format:
   ]
 }
 
-Regles:
-- Si l'utilisateur mentionne une quantite (ex: "200g de poulet"), utilise cette quantite.
-- Si aucune quantite n'est mentionnee, utilise une portion standard typique (ex: 1 oeuf = 60g, 1 pomme = 180g, 1 assiette de pates = 250g cuites, 1 tranche de pain = 30g).
+Regles (sois PRECIS, ne surestime JAMAIS les portions) :
+- Si l'utilisateur mentionne une quantite (ex: "200g de poulet", "2 oeufs"), utilise exactement cette quantite.
+- Sinon, utilise ces portions standard REALISTES (partie comestible uniquement, sans coquille ni os) :
+  * 1 oeuf (dur, poche, mollet, au plat) = 50g (JAMAIS plus de 55g)
+  * 1 tranche de pain = 30g | 1/4 baguette = 65g | 1 croissant = 60g
+  * 1 filet de poulet = 130g | 1 cuisse = 180g | 1 steak = 120g | 1 pavé de saumon = 130g
+  * 1 portion de pates/riz cuits = 200g | 1 bol de cereales = 40g (a sec)
+  * 1 pomme = 180g | 1 banane = 120g | 1 orange = 180g | 1 avocat = 150g
+  * 1 tranche de jambon = 30g | 1 tranche de fromage = 30g | 1 yaourt = 125g
+  * 1 verre de lait = 200g | 1 cafe/the = 0g (negligeable) | 1 verre de jus = 200g
+  * 1 portion de salade = 80g | 1 tomate = 120g | 1 carotte = 80g
 - Separe chaque aliment distinct (ex: "poulet et riz" = 2 aliments).
-- name_en doit etre le nom generique de l'aliment en anglais (ex: "grilled chicken breast", "white rice", "banana").`;
+- En cas de doute, PRIVILEGIE une estimation BASSE plutot que haute.
+- name_en doit etre le nom generique en anglais (ex: "hard boiled egg", "grilled chicken breast", "white rice", "banana").`;
 
         const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'];
         let result = null;
+        let lastError = null;
 
         for (const model of models) {
             try {
@@ -65,11 +75,20 @@ Regles:
                 );
                 const rawText = await response.text();
                 let data;
-                try { data = JSON.parse(rawText); } catch { continue; }
-                if (!response.ok) continue;
+                try { data = JSON.parse(rawText); } catch { lastError = `Réponse invalide (${model})`; continue; }
+                if (!response.ok) {
+                    const errMsg = data.error?.message || '';
+                    if (/no longer available|not found|not supported|deprecated|PERMISSION_DENIED/i.test(errMsg)) {
+                        console.error('[analyze-text] Model unavailable:', model, '—', errMsg);
+                        lastError = 'Modèle IA temporairement indisponible. Réessaie.';
+                    } else {
+                        lastError = errMsg || `Erreur Gemini (${model}): ${response.status}`;
+                    }
+                    continue;
+                }
 
                 const candidate = data.candidates?.[0];
-                if (!candidate || candidate.finishReason === 'SAFETY') continue;
+                if (!candidate || candidate.finishReason === 'SAFETY') { lastError = 'La description a été filtrée. Reformule.'; continue; }
 
                 const raw = candidate.content?.parts?.[0]?.text?.trim();
                 if (raw) {
@@ -89,7 +108,7 @@ Regles:
             } catch {}
         }
 
-        if (!result) return errorResponse('Pas de réponse de Gemini.');
+        if (!result) return errorResponse(lastError || 'Pas de réponse de Gemini.');
 
         let enriched;
         try {

@@ -39,13 +39,23 @@ Reponds UNIQUEMENT avec un JSON valide, sans texte avant ou apres, au format:
   ]
 }
 
-Regles:
-- Estime le poids de maniere realiste en te basant sur la taille apparente des portions.
-- Si tu vois une assiette, estime par rapport a la taille standard d'une assiette (26cm).
-- name_en doit etre le nom generique de l'aliment en anglais (ex: "grilled chicken breast", "white rice", "banana").`;
+Regles importantes pour l'estimation du poids (sois PRECIS, ne surestime JAMAIS) :
+- Si tu vois une assiette, compare a la taille standard (26cm de diametre).
+- Portions de reference REALISTES pour des aliments seuls (partie comestible, sans coquille ni os) :
+  * 1 oeuf (dur/poche/mollet) = 50g (jamais plus de 55g)
+  * 1 tranche de pain = 30g | 1/4 baguette = 65g
+  * 1 filet de poulet cuit = 130g | 1 cuisse de poulet = 180g
+  * 1 pavé de saumon = 130g | 1 steak haché = 100-150g
+  * 1 portion de pates/riz cuits = 180-250g | 1 bol de cereales = 40g de sec
+  * 1 pomme moyenne = 180g | 1 banane moyenne = 120g | 1 avocat = 150g
+  * 1 tranche de jambon = 30g | 1 tranche de fromage = 30g
+  * 1 yaourt = 125g | 1 verre de lait = 200g
+  * 1 portion de salade = 50-100g | 1 tomate moyenne = 120g
+- En cas de doute, PRIVILEGIE une estimation BASSE plutot que haute.
+- Les valeurs caloriques et macros DOIVENT etre calculees en fonction de la partie comestible uniquement.
+- name_en doit etre le nom generique de l'aliment en anglais (ex: "hard boiled egg", "grilled chicken breast", "white rice", "banana").`;
 
-        // Stable models only — gemini-2.0-flash and gemini-2.0-flash-lite are restricted
-        // for new API keys. gemini-2.5-flash is the most reliable choice.
+        // Latest stable Gemini models. Older gemini-2.0-* are deprecated for new API keys.
         const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'];
         let text = null;
         let lastError = null;
@@ -68,7 +78,14 @@ Regles:
                 let data;
                 try { data = JSON.parse(rawText); } catch { lastError = `Réponse invalide de Gemini (${model})`; console.error('[analyze] Invalid JSON from', model, rawText.substring(0, 200)); continue; }
                 if (!response.ok) {
-                    lastError = data.error?.message || `Erreur Gemini (${model}): ${response.status}`;
+                    const errMsg = data.error?.message || '';
+                    // Model deprecated / restricted for this API key — try next model silently
+                    if (/no longer available|not found|not supported|deprecated|PERMISSION_DENIED/i.test(errMsg)) {
+                        console.error('[analyze] Model unavailable:', model, '—', errMsg);
+                        lastError = 'Modèle IA temporairement indisponible. Réessaie.';
+                        continue;
+                    }
+                    lastError = errMsg || `Erreur Gemini (${model}): ${response.status}`;
                     console.error('[analyze] Model failed:', model, 'status:', response.status, 'error:', lastError);
                     continue;
                 }
