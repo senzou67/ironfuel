@@ -27,8 +27,8 @@ const Modal = {
         'steak': [{label:'Petit',g:100},{label:'Moyen',g:150},{label:'Grand',g:200}],
         'saumon': [{label:'1 pavé',g:130},{label:'Grand pavé',g:180}],
         'thon': [{label:'1 boîte',g:80},{label:'1 pavé',g:150}],
-        'oeuf': [{label:'1 oeuf',g:60},{label:'2 oeufs',g:120},{label:'3 oeufs',g:180}],
-        'oeufs': [{label:'1',g:60},{label:'2',g:120},{label:'3',g:180}],
+        'oeuf': [{label:'1 oeuf',g:50},{label:'2 oeufs',g:100},{label:'3 oeufs',g:150}],
+        'oeufs': [{label:'1',g:50},{label:'2',g:100},{label:'3',g:150}],
         'jambon': [{label:'1 tranche',g:30},{label:'2 tranches',g:60}],
         'whey': [{label:'1 scoop',g:30},{label:'2 scoops',g:60}],
         // Produits laitiers

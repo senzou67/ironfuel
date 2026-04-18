@@ -163,14 +163,8 @@ const PayPalService = {
             },
 
             onApprove: async (data) => {
-                // Unlock premium
-                const trialData = TrialService._getData();
-                trialData.paid = true;
-                trialData.paidDate = new Date().toISOString();
-                trialData.paymentId = data.subscriptionID;
-                trialData.plan = 'monthly';
-                trialData.provider = 'paypal';
-                TrialService._setData(trialData);
+                // Unlock premium via the full 4-layer persistence (localStorage, cookie, IDB, Firestore)
+                TrialService.markPaid(data.subscriptionID, 'monthly');
 
                 Modal.close();
                 App.showToast('Abonnement PayPal activé ! 🎉');

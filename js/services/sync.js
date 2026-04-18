@@ -125,7 +125,15 @@ const SyncService = {
             this._log('Gathered ' + Object.keys(dataFields).length + ' keys');
 
             // Gather meal logs + gym logs + supplement logs
-            const logDates = JSON.parse(localStorage.getItem('nutritrack_log_dates') || '[]');
+            let logDates = [];
+            try {
+                logDates = JSON.parse(localStorage.getItem('nutritrack_log_dates') || '[]');
+                if (!Array.isArray(logDates)) logDates = [];
+            } catch {
+                // Corrupted index — reset to empty and let subsequent writes rebuild it
+                localStorage.setItem('nutritrack_log_dates', '[]');
+                logDates = [];
+            }
             const logs = {};
             for (const date of logDates) {
                 const logVal = localStorage.getItem('nutritrack_log_' + date);
