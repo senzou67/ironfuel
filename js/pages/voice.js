@@ -358,7 +358,7 @@ const VoicePage = {
                         <div class="result-info">
                             <div class="result-name">${food.name}</div>
                             <div class="result-detail">
-                                P:${food.n[1]}g · G:${food.n[2]}g · L:${food.n[3]}g /100g
+                                P:${food.n[1]}g · G:${food.n[2]}g · L:${food.n[3]}g · Fib:${food.n[4] || 0}g /100g
                             </div>
                         </div>
                         <span class="result-cal">${food.n[0]} kcal</span>

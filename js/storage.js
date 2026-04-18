@@ -154,8 +154,8 @@ const Storage = {
         if (food.protein < 0 || food.carbs < 0 || food.fat < 0) return false;
         const macroTotal = ((food.protein || 0) + (food.carbs || 0) + (food.fat || 0));
         if (macroTotal <= 0) return false;
-        // Reject if macros don't roughly match calories (±50%)
-        const macroCal = (food.protein || 0) * 4 + (food.carbs || 0) * 4 + (food.fat || 0) * 9;
+        // Reject if macros don't roughly match calories (±50%). Include fiber at 2 kcal/g.
+        const macroCal = (food.protein || 0) * 4 + (food.carbs || 0) * 4 + (food.fat || 0) * 9 + (food.fiber || 0) * 2;
         if (macroCal > 0 && Math.abs(macroCal - food.calories) / food.calories > 0.5) return false;
         return true;
     },

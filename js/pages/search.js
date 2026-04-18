@@ -521,7 +521,7 @@ const SearchPage = {
                     <div class="search-result-item" onclick="SearchPage._addCommunityFood(${i})" style="cursor:pointer">
                         <div class="result-info">
                             <div class="result-name">🌐 ${_esc(f.name)}</div>
-                            <div class="result-detail">${f.calories} kcal · P:${f.protein}g · G:${f.carbs}g · L:${f.fat}g${f.votes > 1 ? ' · 👍 ' + f.votes : ''}</div>
+                            <div class="result-detail">${f.calories} kcal · P:${f.protein}g · G:${f.carbs}g · L:${f.fat}g · Fib:${f.fiber || 0}g${f.votes > 1 ? ' · 👍 ' + f.votes : ''}</div>
                         </div>
                         <span class="result-calories">${f.calories}</span>
                     </div>

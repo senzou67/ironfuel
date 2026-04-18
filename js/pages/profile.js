@@ -16,8 +16,8 @@ const ProfilePage = {
         const streak = Storage.getStreak();
         const totalDays = Storage.getLogDates().length;
 
-        // Calculate current macro percentages
-        const totalMacroCal = (goals.protein * 4) + (goals.carbs * 4) + (goals.fat * 9);
+        // Calculate current macro percentages (fiber counted at 2 kcal/g)
+        const totalMacroCal = (goals.protein * 4) + (goals.carbs * 4) + (goals.fat * 9) + ((goals.fiber || 0) * 2);
         const pctProt = totalMacroCal > 0 ? Math.round((goals.protein * 4) / totalMacroCal * 100) : 30;
         const pctCarbs = totalMacroCal > 0 ? Math.round((goals.carbs * 4) / totalMacroCal * 100) : 40;
         const pctFat = totalMacroCal > 0 ? Math.round((goals.fat * 9) / totalMacroCal * 100) : 30;
@@ -254,8 +254,8 @@ const ProfilePage = {
         const profile = Storage.getProfile();
         const auto = NutritionService.calculateDailyNeeds(profile);
 
-        // Calculate current percentages
-        const totalMacroCal = (goals.protein * 4) + (goals.carbs * 4) + (goals.fat * 9);
+        // Calculate current percentages (fiber counted at 2 kcal/g)
+        const totalMacroCal = (goals.protein * 4) + (goals.carbs * 4) + (goals.fat * 9) + ((goals.fiber || 0) * 2);
         const pctProt = totalMacroCal > 0 ? Math.round((goals.protein * 4) / totalMacroCal * 100) : 30;
         const pctCarbs = totalMacroCal > 0 ? Math.round((goals.carbs * 4) / totalMacroCal * 100) : 40;
         const pctFat = totalMacroCal > 0 ? Math.round((goals.fat * 9) / totalMacroCal * 100) : 30;

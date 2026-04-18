@@ -57,11 +57,12 @@ const NutritionService = {
             carbs = Math.round((calories - protein * 4 - fat * 9) / 4);
         }
 
-        // Sécurité: recalculer les calories à partir des macros réels
-        calories = Math.round(protein * 4 + carbs * 4 + fat * 9);
-
         // Fibre: 14g/1000 kcal (Institute of Medicine)
         const fiber = Math.round(calories * 14 / 1000);
+
+        // Sécurité: recalculer les calories à partir des macros réels
+        // Fibre comptée à 2 kcal/g (fermentation colique partielle).
+        calories = Math.round(protein * 4 + carbs * 4 + fat * 9 + fiber * 2);
 
         return { calories, protein, carbs, fat, fiber, tdee, bmr: Math.round(bmr) };
     },
