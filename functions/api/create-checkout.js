@@ -1,16 +1,30 @@
 import Stripe from 'stripe';
 import { jsonResponse, errorResponse } from './_shared.js';
 
+function _mapStripeError(err) {
+    const msg = (err && err.message) || '';
+    if (err && err.type === 'StripeAuthenticationError') return 'Paiement indisponible — contacte contact@1food.fr';
+    if (/price|STRIPE_PRICE/i.test(msg)) return 'Configuration de prix invalide. Contacte le support.';
+    if (/email/i.test(msg)) return 'Adresse e-mail invalide.';
+    if (/currency/i.test(msg)) return 'Devise non supportée.';
+    if (/amount/i.test(msg)) return 'Montant invalide.';
+    return 'Paiement indisponible — réessaie dans quelques instants.';
+}
+
 export async function onRequestPost(context) {
     const { env, request } = context;
     const STRIPE_KEY = env.STRIPE_SECRET_KEY;
-    if (!STRIPE_KEY) return errorResponse('Stripe not configured');
+    if (!STRIPE_KEY) return errorResponse('Paiement non configuré. Contacte le support.', 503);
 
     const stripe = new Stripe(STRIPE_KEY);
     const siteUrl = env.URL || 'https://1food.fr';
 
+    let body;
+    try { body = await request.json(); }
+    catch { return errorResponse('Requête invalide.', 400); }
+    const { userId, email, skipTrial, plan, mode, amount, message } = body || {};
+
     try {
-        const { userId, email, skipTrial, plan, mode, amount, message } = await request.json();
 
         // === DONATION ===
         if (mode === 'donation') {
@@ -73,6 +87,7 @@ export async function onRequestPost(context) {
         const session = await stripe.checkout.sessions.create(sessionParams);
         return jsonResponse({ url: session.url, sessionId: session.id });
     } catch (err) {
-        return errorResponse('Checkout creation failed');
+        console.error('[create-checkout] Stripe error:', err?.type, err?.message, err?.raw?.message, { plan, mode, hasEmail: !!email });
+        return errorResponse(_mapStripeError(err), 500);
     }
 }

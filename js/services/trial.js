@@ -583,14 +583,16 @@ const TrialService = {
                 })
             });
 
-            const data = await res.json();
-            if (data.url) {
+            let data = {};
+            try { data = await res.json(); } catch {}
+            if (res.ok && data.url) {
                 window.location.href = data.url;
-            } else {
-                throw new Error(data.error || 'Erreur');
+                return;
             }
+            throw new Error(data.error || `Erreur ${res.status}`);
         } catch (err) {
-            App.showToast('Erreur de paiement. Réessaie.');
+            console.error('[startPayment]', err);
+            App.showToast(err.message && err.message !== 'Failed to fetch' ? err.message : 'Erreur réseau. Vérifie ta connexion.');
             if (btn) {
                 btn.disabled = false;
                 btn.textContent = 'Réessayer';

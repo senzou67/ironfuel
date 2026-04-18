@@ -96,8 +96,38 @@ async function searchOFF(query) {
     }
 }
 
+// Realistic maximum weight (g) for items the AI commonly overestimates.
+// Used as a safety clamp: if the AI returns an unreasonable weight, cap it.
+// Key is a lowercase substring to match against the food name.
+const MAX_SINGLE_UNIT_WEIGHT = {
+    'oeuf dur': 55, 'oeuf poche': 55, 'oeuf mollet': 55,
+    'oeuf au plat': 60, 'oeuf brouille': 60, 'oeuf coque': 55,
+    'hard boiled egg': 55, 'poached egg': 55, 'soft boiled egg': 55,
+    'tranche de pain': 35, 'slice of bread': 35,
+    'tranche de jambon': 35, 'tranche de fromage': 35,
+    'yaourt': 180, 'yogurt': 180,
+    'carre de chocolat': 10, 'square of chocolate': 10
+};
+
+function _clampWeight(name, weight) {
+    if (!weight || !name) return weight;
+    const low = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    // Detect explicit multi-count (e.g. "2 oeufs"). If count is given, allow count*max.
+    const countMatch = low.match(/(\d+)\s+/);
+    const count = countMatch ? Math.min(parseInt(countMatch[1]) || 1, 12) : 1;
+    for (const key of Object.keys(MAX_SINGLE_UNIT_WEIGHT)) {
+        if (low.includes(key)) {
+            const cap = MAX_SINGLE_UNIT_WEIGHT[key] * count;
+            if (weight > cap) return cap;
+            return weight;
+        }
+    }
+    return weight;
+}
+
 export async function enrichFood(food, apiKey) {
-    const weight = food.weight_g || 100;
+    const originalWeight = food.weight_g || 100;
+    const weight = _clampWeight(food.name || food.name_en || '', originalWeight);
     const factor = weight / 100;
 
     if (food.name_en) {
