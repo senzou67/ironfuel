@@ -88,6 +88,18 @@ const App = {
         else if (this.currentPage === 'diary') DiaryPage.render();
     },
 
+    _applyTheme() {
+        const theme = (typeof Storage !== 'undefined' && Storage.getTheme) ? Storage.getTheme() : 'auto';
+        if (theme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        } else if (theme === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+        } else {
+            // 'auto': remove attribute, let CSS @media handle it
+            document.documentElement.removeAttribute('data-theme');
+        }
+    },
+
     getDateLabel() {
         const d = this.getSelectedDate();
         const today = new Date();

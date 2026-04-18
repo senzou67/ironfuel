@@ -89,7 +89,7 @@ const MealPlannerPage = {
                                     <div style="display:flex;align-items:center;gap:8px">
                                         <span style="font-weight:700;font-size:14px;${isToday ? 'color:var(--primary)' : ''}">${day.name}</span>
                                         <span style="font-size:12px;color:var(--text-secondary)">${day.dayNum}</span>
-                                        ${isToday ? '<span style="font-size:10px;padding:2px 6px;background:var(--primary);color:white;border-radius:6px;font-weight:700">AUJOURD\\'HUI</span>' : ''}
+                                        ${isToday ? '<span style="font-size:10px;padding:2px 6px;background:var(--primary);color:white;border-radius:6px;font-weight:700">AUJOURD\'HUI</span>' : ''}
                                     </div>
                                     ${!isPast ? `<button onclick="MealPlannerPage.copyToDiary('${day.key}')" style="background:var(--primary-light);color:var(--primary);border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer">→ Journal</button>` : ''}
                                 </div>
