@@ -21,6 +21,7 @@ const ProfilePage = {
         const pctProt = totalMacroCal > 0 ? Math.round((goals.protein * 4) / totalMacroCal * 100) : 30;
         const pctCarbs = totalMacroCal > 0 ? Math.round((goals.carbs * 4) / totalMacroCal * 100) : 40;
         const pctFat = totalMacroCal > 0 ? Math.round((goals.fat * 9) / totalMacroCal * 100) : 30;
+        const pctFiber = totalMacroCal > 0 ? Math.round(((goals.fiber || 0) * 2) / totalMacroCal * 100) : 0;
 
         const authUser = AuthService.getStoredUser();
         const isLoggedIn = AuthService.isLoggedIn();
@@ -259,6 +260,7 @@ const ProfilePage = {
         const pctProt = totalMacroCal > 0 ? Math.round((goals.protein * 4) / totalMacroCal * 100) : 30;
         const pctCarbs = totalMacroCal > 0 ? Math.round((goals.carbs * 4) / totalMacroCal * 100) : 40;
         const pctFat = totalMacroCal > 0 ? Math.round((goals.fat * 9) / totalMacroCal * 100) : 30;
+        const pctFiber = totalMacroCal > 0 ? Math.round(((goals.fiber || 0) * 2) / totalMacroCal * 100) : 0;
 
         Modal.show(`
             <div class="modal-title">Objectifs nutritionnels</div>
@@ -314,13 +316,14 @@ const ProfilePage = {
                         oninput="ProfilePage.onMacroChange()">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Fibres (g) <span class="macro-pct-badge" style="background:var(--fiber-color);color:white">recommandé</span></label>
-                    <input type="number" class="form-input" id="g-fiber" value="${goals.fiber || 25}" min="10" max="100">
+                    <label class="form-label">Fibres (g) <span class="macro-pct-badge fiber" id="pct-fiber">${pctFiber}%</span></label>
+                    <input type="number" class="form-input" id="g-fiber" value="${goals.fiber || 25}" min="10" max="100"
+                        oninput="ProfilePage.onMacroChange()">
                 </div>
             </div>
 
             <div id="macro-total-bar" style="margin-bottom:16px">
-                ${this._renderMacroBar(pctProt, pctCarbs, pctFat)}
+                ${this._renderMacroBar(pctProt, pctCarbs, pctFat, pctFiber)}
             </div>
 
             <div class="form-group">
@@ -339,14 +342,15 @@ const ProfilePage = {
         this._currentRatios = { prot: pctProt, carbs: pctCarbs, fat: pctFat };
     },
 
-    _renderMacroBar(pctProt, pctCarbs, pctFat) {
-        const total = pctProt + pctCarbs + pctFat;
+    _renderMacroBar(pctProt, pctCarbs, pctFat, pctFiber = 0) {
+        const total = pctProt + pctCarbs + pctFat + pctFiber;
         const isValid = total >= 95 && total <= 105;
         return `
             <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;margin-bottom:4px">
                 <div style="width:${pctProt}%;background:var(--protein-color);transition:width 0.3s"></div>
                 <div style="width:${pctCarbs}%;background:var(--carbs-color);transition:width 0.3s"></div>
                 <div style="width:${pctFat}%;background:var(--fat-color);transition:width 0.3s"></div>
+                <div style="width:${pctFiber}%;background:var(--fiber-color);transition:width 0.3s"></div>
             </div>
             <div style="font-size:11px;color:${isValid ? 'var(--text-secondary)' : 'var(--danger)'}">
                 Total : ${total}% ${isValid ? '✓' : '(devrait être ~100%)'}
@@ -377,7 +381,8 @@ const ProfilePage = {
         const prot = parseInt(document.getElementById('g-prot').value) || 0;
         const carbs = parseInt(document.getElementById('g-carbs').value) || 0;
         const fat = parseInt(document.getElementById('g-fat').value) || 0;
-        const totalCal = (prot * 4) + (carbs * 4) + (fat * 9);
+        const fiber = parseInt(document.getElementById('g-fiber').value) || 0;
+        const totalCal = (prot * 4) + (carbs * 4) + (fat * 9) + (fiber * 2);
         if (totalCal > 0) {
             this._currentRatios = {
                 prot: Math.round((prot * 4) / totalCal * 100),
@@ -385,7 +390,7 @@ const ProfilePage = {
                 fat: Math.round((fat * 9) / totalCal * 100)
             };
         }
-        // Also update calories to match macro total
+        // Also update calories to match macro total (includes fiber × 2)
         const cal = document.getElementById('g-cal');
         if (cal) cal.value = Math.round(totalCal);
     },
@@ -394,21 +399,25 @@ const ProfilePage = {
         const prot = parseInt(document.getElementById('g-prot').value) || 0;
         const carbs = parseInt(document.getElementById('g-carbs').value) || 0;
         const fat = parseInt(document.getElementById('g-fat').value) || 0;
-        const total = (prot * 4) + (carbs * 4) + (fat * 9);
+        const fiber = parseInt(document.getElementById('g-fiber').value) || 0;
+        const total = (prot * 4) + (carbs * 4) + (fat * 9) + (fiber * 2);
 
         const pp = total > 0 ? Math.round((prot * 4) / total * 100) : 0;
         const pc = total > 0 ? Math.round((carbs * 4) / total * 100) : 0;
         const pf = total > 0 ? Math.round((fat * 9) / total * 100) : 0;
+        const pfib = total > 0 ? Math.round((fiber * 2) / total * 100) : 0;
 
         const ppEl = document.getElementById('pct-prot');
         const pcEl = document.getElementById('pct-carbs');
         const pfEl = document.getElementById('pct-fat');
+        const pfibEl = document.getElementById('pct-fiber');
         if (ppEl) ppEl.textContent = pp + '%';
         if (pcEl) pcEl.textContent = pc + '%';
         if (pfEl) pfEl.textContent = pf + '%';
+        if (pfibEl) pfibEl.textContent = pfib + '%';
 
         const bar = document.getElementById('macro-total-bar');
-        if (bar) bar.innerHTML = this._renderMacroBar(pp, pc, pf);
+        if (bar) bar.innerHTML = this._renderMacroBar(pp, pc, pf, pfib);
     },
 
     applyRatio(key) {

@@ -218,7 +218,9 @@ body::before {
 /* Main content */
 #page-content {
     padding-top: calc(var(--header-height) + env(safe-area-inset-top, 0px));
-    padding-bottom: calc(var(--nav-height) + 20px);
+    /* Include safe-area-inset-bottom so the last content isn't hidden behind
+       the Android/iOS gesture bar + fixed bottom nav on mobile PWAs. */
+    padding-bottom: calc(var(--nav-height) + 20px + env(safe-area-inset-bottom, 0px));
     min-height: 100vh;
     overflow-x: hidden;
     max-width: 100%;
@@ -2115,12 +2117,14 @@ body::before {
 .macro-pct-row {
     display: flex;
     gap: 8px;
-    align-items: center;
+    flex-wrap: wrap;
+    align-items: flex-start;
     margin-bottom: 12px;
 }
 
 .macro-pct-row .form-group {
-    flex: 1;
+    flex: 1 1 60px;
+    min-width: 60px;
     margin: 0;
 }
 
@@ -2138,6 +2142,7 @@ body::before {
 .macro-pct-badge.prot { background: var(--protein-color); }
 .macro-pct-badge.carb { background: var(--carbs-color); }
 .macro-pct-badge.fat { background: var(--fat-color); }
+.macro-pct-badge.fiber { background: var(--fiber-color); }
 
 .macro-sync-info {
     font-size: 12px;
@@ -4393,7 +4398,7 @@ input:focus, select:focus, textarea:focus {
 /* Ensure main content has extra padding-bottom on small screens so FAB doesn't overlap */
 @media (max-width: 480px) {
     #page-content {
-        padding-bottom: calc(var(--nav-height) + 28px);
+        padding-bottom: calc(var(--nav-height) + 28px + env(safe-area-inset-bottom, 0px));
     }
 }
 
