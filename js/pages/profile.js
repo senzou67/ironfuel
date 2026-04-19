@@ -78,6 +78,7 @@ const ProfilePage = {
                             <div style="font-size:11px;color:var(--text-secondary)">Lipides</div>
                         </div>
                         <div style="text-align:center;flex:1;padding:8px;background:var(--bg);border-radius:8px">
+                            <span class="macro-pct-badge fiber">${pctFiber}%</span>
                             <div style="font-size:16px;font-weight:600;color:var(--fiber-color);margin-top:4px">${goals.fiber || 25}g</div>
                             <div style="font-size:11px;color:var(--text-secondary)">Fibres</div>
                         </div>
