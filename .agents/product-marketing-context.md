@@ -37,7 +37,7 @@
 **Direct:** MyFitnessPal (leader mondial), Yazio (France/DE), Fitatu — *manquent de Photo IA française, UX datée, Premium cher (MFP ≈ 95 €/an).*
 **Secondary:** Cronometer (scientifique pur) — *trop complexe, pas gamifié, pas orienté muscu.*
 **Indirect:** Apple Health / Google Fit + carnet papier — *pas de base alimentaire, pas d'analyse.*
-**AI-native concurrents émergents :** `[À CONFIRMER]` — Cal AI, Macrofactor, Bitewise — à auditer.
+**AI-native concurrents (confirmés comme menace)** : **Cal AI**, **Macrofactor**, **Bitewise** — positionnement similaire (IA pour logger), prix variable, UX plus polie. OneFood se différencie par : prix plus bas, focus muscu fr, gamification avatar, intégration séances salle.
 
 ## Differentiation
 **Key differentiators:**
@@ -55,7 +55,7 @@
 |---|---|
 | « L'IA va se tromper sur les quantités » | Tu peux ajuster le poids en 1 clic, et on a un clamp anti-surestimation (œuf max 55g etc.). |
 | « Encore 14,99 €/an en plus… » | Moins cher qu'un café Starbucks par mois, avec 14 jours d'essai sans engagement. |
-| « J'ai déjà tout mon historique dans MyFitnessPal » | `[À CONFIRMER]` — import MFP prévu / disponible ? |
+| « J'ai déjà tout mon historique dans MyFitnessPal » | **Feature import MFP à prévoir sur la roadmap** — aujourd'hui pas supportée, à développer (CSV export MFP → import OneFood). |
 | « C'est pas en anglais / pour la muscu pro » | Spécifiquement pensé pour les muscu francophones : protéines en avant, séances intégrées, termes fr. |
 
 **Anti-persona :** cycliste endurance pur cherchant des glucides complexes précis, diététicien pro voulant des micronutriments exhaustifs (→ Cronometer).

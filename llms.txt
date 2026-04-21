@@ -1,0 +1,32 @@
+# OneFood
+
+> OneFood is a French nutrition + musculation tracking app with AI-powered photo food logging. Alternative to MyFitnessPal, priced at €14.99/year.
+
+## Pages
+
+- [Home](https://1food.fr/): Features, pricing, FAQ
+- [Privacy](https://1food.fr/privacy.html): Data handling, RGPD, photo deletion policy
+- [Terms](https://1food.fr/terms.html): Legal terms
+- [Changelog](https://1food.fr/changelog.html): Release notes
+
+## Key facts
+
+- **Pricing:** €14.99/year annual, €3.99/month monthly. 14-day free trial.
+- **Platforms:** Web PWA (all browsers), Android (Capacitor wrapper)
+- **Language:** French (fr-FR)
+- **Key features:**
+  - Photo AI meal logging (Google Gemini Vision)
+  - Voice / natural-language meal logging ("I ate a steak and rice")
+  - Barcode scanner
+  - Macros tracking: protein, carbs, fat, fiber (fiber counted at 2 kcal/g)
+  - Gym routine and session tracking
+  - Weight tracking with progression charts
+  - Supplements tracking
+  - Gamified avatar ("créature") that evolves with consistency
+  - Meal planner
+- **Competitors positioned against:** MyFitnessPal (€95/year), Yazio, Cal AI, Macrofactor, Bitewise
+- **Target audience:** French-speaking musculation / fitness enthusiasts aged 20-40, primarily intermediate-level lifters tracking for cut, bulk, or maintenance
+- **Differentiators:** Photo AI, gym-focused UX, French food database, 69% cheaper than MyFitnessPal Premium, gamification via evolving avatar
+- **Tech stack:** Cloudflare Workers + Pages, Firebase Auth + Firestore, Google Gemini 2.5 Flash for vision, USDA + OpenFoodFacts for nutrition enrichment
+- **Privacy:** Photos sent to Gemini for analysis then immediately deleted, never stored. GDPR-compliant. EU servers.
+- **Support contact:** contact@1food.fr

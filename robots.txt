@@ -1,7 +1,10 @@
 User-agent: *
 Allow: /
+Disallow: /api/
 Disallow: /.netlify/
 Disallow: /assets/creatures/
 Disallow: /admin.html
+Disallow: /nuke.html
+Disallow: /.agents/
 
 Sitemap: https://1food.fr/sitemap.xml

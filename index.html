@@ -15,12 +15,12 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-TileColor" content="#EF4444">
     <meta name="msapplication-tap-highlight" content="no">
-    <meta name="description" content="Suivi nutrition et musculation intelligent — Photo IA, vocal, 500+ aliments, avatar fitness">
+    <meta name="description" content="Logge tes repas en photo grâce à l'IA. Suivi macros, séances salle, créature évolutive. Alternative française à MyFitnessPal — 14,99 €/an (vs 95 €). Essai gratuit 14 jours.">
 
     <!-- Preload critical resources -->
-    <link rel="preload" href="css/style.css?v=84" as="style">
-    <link rel="preload" href="js/app.js?v=84" as="script">
-    <link rel="preload" href="js/db.js?v=84" as="script">
+    <link rel="preload" href="css/style.css?v=85" as="style">
+    <link rel="preload" href="js/app.js?v=85" as="script">
+    <link rel="preload" href="js/db.js?v=85" as="script">
     <link rel="preload" href="assets/fonts/inter-500.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="assets/fonts/inter-600.woff2" as="font" type="font/woff2" crossorigin>
     <!-- Inline @font-face (replaces css/fonts.css) to save one render-blocking request -->
@@ -66,7 +66,59 @@
     <meta name="twitter:description" content="Photo IA, vocal, 500+ aliments, créature fitness. Ton coach nutrition intelligent.">
     <meta name="twitter:image" content="https://1food.fr/assets/og-image.png">
 
-    <title>OneFood</title>
+    <title>OneFood — Suivi nutrition & musculation IA | 14,99 €/an</title>
+
+    <!-- SEO / AI-SEO — Structured data for Google rich results + LLM citation -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "OneFood",
+      "url": "https://1food.fr",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Android, iOS, Web",
+      "description": "Tracker nutrition & musculation avec IA : photo, voix, code-barres. Macros muscu, séances salle, créature évolutive.",
+      "offers": [
+        { "@type": "Offer", "name": "Premium Annuel", "price": "14.99", "priceCurrency": "EUR", "category": "subscription" },
+        { "@type": "Offer", "name": "Premium Mensuel", "price": "3.99", "priceCurrency": "EUR", "category": "subscription" }
+      ],
+      "inLanguage": "fr-FR",
+      "author": { "@type": "Organization", "name": "OneFood", "url": "https://1food.fr" }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Comment OneFood log-t-il les repas en photo ?",
+          "acceptedAnswer": { "@type": "Answer", "text": "OneFood utilise l'IA Gemini de Google pour reconnaître les aliments sur une photo, estimer les quantités et calculer les macros (protéines, glucides, lipides, fibres) en 3 secondes." }
+        },
+        {
+          "@type": "Question",
+          "name": "Quel est le prix de OneFood ?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Premium annuel : 14,99 €/an (soit 1,25 €/mois). Premium mensuel : 3,99 €/mois. Essai gratuit 14 jours. Plan gratuit à vie pour le journal alimentaire et la recherche." }
+        },
+        {
+          "@type": "Question",
+          "name": "OneFood est-elle une alternative à MyFitnessPal ?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Oui. OneFood offre des fonctions comparables (tracking macros, base de 500+ aliments) mais ajoute la Photo IA, la voix, une créature gamifiée et le suivi musculation, pour 14,99 €/an au lieu de 95 €/an." }
+        },
+        {
+          "@type": "Question",
+          "name": "OneFood fonctionne-t-elle hors ligne ?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Oui pour la saisie manuelle et le journal : Service Worker + IndexedDB. La Photo IA et le Chat IA nécessitent une connexion pour appeler l'API Gemini." }
+        },
+        {
+          "@type": "Question",
+          "name": "Mes photos sont-elles stockées ?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Non. Les photos sont envoyées à Gemini pour analyse puis immédiatement supprimées. Aucune photo n'est stockée côté OneFood ni côté Google au-delà du traitement." }
+        }
+      ]
+    }
+    </script>
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="assets/manifest.json">
@@ -117,7 +169,7 @@
     <!-- Force cache bust — fetches /version.json DIRECTLY from server bypassing SW -->
     <script>
         (function(){
-            var LOCAL_V = 125; // Must match version.json
+            var LOCAL_V = 126; // Must match version.json
             var lsWorks = true;
             try {
                 localStorage.setItem('_test', '1');
@@ -205,7 +257,7 @@
         }
     </script>
 
-    <link rel="stylesheet" href="css/style.css?v=84">
+    <link rel="stylesheet" href="css/style.css?v=85">
     <!-- Chart.js is only needed on dashboard/history/weight — defer keeps order & non-blocking.
          Served from local /lib so it benefits from the service worker cache and avoids a CDN RTT. -->
     <script src="lib/chart.min.js" defer></script>
@@ -291,33 +343,33 @@
 
     <div id="toast" class="toast hidden" role="status" aria-live="polite" aria-atomic="true"></div>
 
-    <script defer src="js/db.js?v=84"></script>
-    <script defer src="js/storage.js?v=84"></script>
-    <script defer src="js/services/nutrition.js?v=84"></script>
-    <script defer src="js/services/vision.js?v=84"></script>
-    <script defer src="js/services/speech.js?v=84"></script>
-    <script defer src="js/services/openfoodfacts.js?v=84"></script>
-    <script defer src="js/services/foodimages.js?v=84"></script>
-    <script defer src="js/services/analytics.js?v=84"></script>
-    <script defer src="js/services/auth.js?v=84"></script>
-    <script defer src="js/services/trial.js?v=84"></script>
-    <script defer src="js/services/sync.js?v=84"></script>
-    <script defer src="js/services/notifications.js?v=84"></script>
-    <script defer src="js/services/micronutrients.js?v=84"></script>
-    <script defer src="js/components/navbar.js?v=84"></script>
-    <script defer src="js/components/modal.js?v=84"></script>
-    <script defer src="js/components/charts.js?v=84"></script>
-    <script defer src="js/components/mealcard.js?v=84"></script>
-    <script defer src="js/components/fooditem.js?v=84"></script>
-    <script defer src="js/components/avatar.js?v=84"></script>
+    <script defer src="js/db.js?v=85"></script>
+    <script defer src="js/storage.js?v=85"></script>
+    <script defer src="js/services/nutrition.js?v=85"></script>
+    <script defer src="js/services/vision.js?v=85"></script>
+    <script defer src="js/services/speech.js?v=85"></script>
+    <script defer src="js/services/openfoodfacts.js?v=85"></script>
+    <script defer src="js/services/foodimages.js?v=85"></script>
+    <script defer src="js/services/analytics.js?v=85"></script>
+    <script defer src="js/services/auth.js?v=85"></script>
+    <script defer src="js/services/trial.js?v=85"></script>
+    <script defer src="js/services/sync.js?v=85"></script>
+    <script defer src="js/services/notifications.js?v=85"></script>
+    <script defer src="js/services/micronutrients.js?v=85"></script>
+    <script defer src="js/components/navbar.js?v=85"></script>
+    <script defer src="js/components/modal.js?v=85"></script>
+    <script defer src="js/components/charts.js?v=85"></script>
+    <script defer src="js/components/mealcard.js?v=85"></script>
+    <script defer src="js/components/fooditem.js?v=85"></script>
+    <script defer src="js/components/avatar.js?v=85"></script>
     <!-- CRITICAL page scripts (needed for first paint / initial navigation) -->
-    <script defer src="js/pages/dashboard.js?v=84"></script>
-    <script defer src="js/pages/diary.js?v=84"></script>
-    <script defer src="js/pages/search.js?v=84"></script>
-    <script defer src="js/pages/history.js?v=84"></script>
-    <script defer src="js/pages/profile.js?v=84"></script>
-    <script defer src="js/pages/settings.js?v=84"></script>
-    <script defer src="js/app.js?v=84"></script>
+    <script defer src="js/pages/dashboard.js?v=85"></script>
+    <script defer src="js/pages/diary.js?v=85"></script>
+    <script defer src="js/pages/search.js?v=85"></script>
+    <script defer src="js/pages/history.js?v=85"></script>
+    <script defer src="js/pages/profile.js?v=85"></script>
+    <script defer src="js/pages/settings.js?v=85"></script>
+    <script defer src="js/app.js?v=85"></script>
     <!-- NON-CRITICAL page scripts — injected after window load to reduce main-thread blocking.
          These globals (GymPage, SupplementsPage, etc.) are only read when the user
          navigates to those pages, which requires at least one user interaction after load. -->
@@ -327,17 +379,17 @@
             // to keep TBT/FCP/LCP low. All consumers defensively feature-detect
             // these globals before use, so ordering after initial paint is safe.
             var lazyScripts = [
-                'js/pages/camera.js?v=84',
-                'js/pages/voice.js?v=84',
-                'js/pages/chat.js?v=84',
-                'js/pages/barcode.js?v=84',
-                'js/pages/customfood.js?v=84',
-                'js/pages/gym.js?v=84',
-                'js/pages/supplements.js?v=84',
-                'js/pages/weight.js?v=84',
-                'js/pages/shop.js?v=84',
-                'js/pages/avatar.js?v=84',
-                'js/pages/mealplanner.js?v=84',
+                'js/pages/camera.js?v=85',
+                'js/pages/voice.js?v=85',
+                'js/pages/chat.js?v=85',
+                'js/pages/barcode.js?v=85',
+                'js/pages/customfood.js?v=85',
+                'js/pages/gym.js?v=85',
+                'js/pages/supplements.js?v=85',
+                'js/pages/weight.js?v=85',
+                'js/pages/shop.js?v=85',
+                'js/pages/avatar.js?v=85',
+                'js/pages/mealplanner.js?v=85',
                 // Firebase Messaging (push notifications) — only needed once user enables push.
                 // Not required for initial paint; NotificationService.init() feature-detects.
                 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js'

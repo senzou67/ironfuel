@@ -12,7 +12,9 @@ const EXCLUDE = new Set([
     'wrangler.toml', 'wrangler.jsonc', '.gitignore', '.assetsignore',
     '.github', 'netlify.toml', 'RECAP-IRONFUEL.md', 'bump.sh',
     'generate-icons.js', 'generate-png-icons.js', 'desktop',
-    'functions', 'worker.js'
+    'functions', 'worker.js',
+    // Marketing strategy docs — tracked in git but not public
+    '.agents'
 ]);
 
 function copyDir(src, dest) {
