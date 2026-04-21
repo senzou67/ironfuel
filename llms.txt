@@ -5,6 +5,7 @@
 ## Pages
 
 - [Home](https://1food.fr/): Features, pricing, FAQ
+- [OneFood vs MyFitnessPal](https://1food.fr/onefood-vs-myfitnesspal.html): Detailed comparison, pricing, features
 - [Privacy](https://1food.fr/privacy.html): Data handling, RGPD, photo deletion policy
 - [Terms](https://1food.fr/terms.html): Legal terms
 - [Changelog](https://1food.fr/changelog.html): Release notes

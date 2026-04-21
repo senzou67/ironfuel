@@ -493,38 +493,37 @@ const TrialService = {
         content.innerHTML = `
             <div class="paywall-overlay fade-in">
                 <div class="paywall-card">
-                    <div class="paywall-icon">🚀</div>
-                    <h2>Passe à OneFood Premium</h2>
-                    <p>Débloque toutes les fonctionnalités pour atteindre tes objectifs.</p>
+                    <div class="paywall-icon">📸</div>
+                    <h2>Ton plat maison en 1 photo.</h2>
+                    <p>Plus besoin de rentrer 12 ingrédients dans MyFitnessPal. OneFood log tout en 2 secondes.</p>
 
                     <div class="paywall-features">
-                        <div class="paywall-feature">✅ Créature & personnalisation avatar</div>
-                        <div class="paywall-feature">✅ Objectifs calories & macros personnalisés</div>
-                        <div class="paywall-feature">✅ Photo IA & reconnaissance vocale</div>
-                        <div class="paywall-feature">✅ Scan code-barres</div>
-                        <div class="paywall-feature">✅ Boutique & cosmétiques</div>
-                        <div class="paywall-feature">✅ Suivi salle de sport</div>
+                        <div class="paywall-feature">✅ Photo IA — prends ton assiette en photo, c'est tout</div>
+                        <div class="paywall-feature">✅ Chat IA — « j'ai mangé un steak et du riz » → détection auto</div>
+                        <div class="paywall-feature">✅ Scan code-barres illimité (payant chez MFP)</div>
+                        <div class="paywall-feature">✅ Objectifs macros muscu perso (prot / glucides / lipides / fibres)</div>
+                        <div class="paywall-feature">✅ Suivi salle de sport & compléments</div>
                         <div class="paywall-feature">✅ Suivi du poids & graphiques</div>
-                        <div class="paywall-feature">✅ Compléments alimentaires</div>
+                        <div class="paywall-feature">✅ Créature qui évolue avec ta régularité 🐉</div>
                     </div>
 
                     <div class="paywall-free-features">
-                        <div class="paywall-free-title">Inclus gratuitement :</div>
+                        <div class="paywall-free-title">Gratuit à vie, sans engagement :</div>
                         <div class="paywall-feature" style="opacity:0.7">📋 Journal alimentaire illimité</div>
-                        <div class="paywall-feature" style="opacity:0.7">🔍 Recherche d'aliments</div>
+                        <div class="paywall-feature" style="opacity:0.7">🔍 Recherche dans 500+ aliments</div>
                         <div class="paywall-feature" style="opacity:0.7">📊 Historique & statistiques</div>
                     </div>
 
                     <!-- Plan selection -->
                     <div class="paywall-plans">
                         <div class="paywall-plan selected" id="plan-annual" onclick="TrialService._selectPlan('annual')">
-                            <div class="paywall-plan-badge">MEILLEURE OFFRE</div>
+                            <div class="paywall-plan-badge">-69% · MEILLEURE OFFRE</div>
                             <div class="paywall-plan-name">Annuel</div>
                             <div class="paywall-plan-price">
                                 <span class="paywall-amount">14,99€</span>
                                 <span class="paywall-period">/an</span>
                             </div>
-                            <div class="paywall-plan-detail">Soit 3,99€/mois</div>
+                            <div class="paywall-plan-detail">Soit 1,25€/mois · tu économises 32,89€</div>
                         </div>
                         <div class="paywall-plan" id="plan-monthly" onclick="TrialService._selectPlan('monthly')">
                             <div class="paywall-plan-name">Mensuel</div>
@@ -532,16 +531,16 @@ const TrialService = {
                                 <span class="paywall-amount">3,99€</span>
                                 <span class="paywall-period">/mois</span>
                             </div>
-                            <div class="paywall-plan-detail">15€/an</div>
+                            <div class="paywall-plan-detail">47,88€/an au total</div>
                         </div>
                     </div>
 
                     <button class="btn btn-primary paywall-btn" onclick="TrialService.startPayment(true)">
-                        S'abonner — 14,99€/an
+                        Commencer Premium — 1,25€/mois
                     </button>
 
-                    <p class="paywall-no-commitment">🚫 Sans engagement — Résiliable à tout moment</p>
-                    <p class="paywall-secure">🔒 Paiement sécurisé par Stripe</p>
+                    <p class="paywall-no-commitment">🔒 Stripe · 🚫 Résiliable en 2 clics · 💰 14 j satisfait ou remboursé</p>
+                    <p class="paywall-secure" style="font-size:12px;opacity:0.7">14,99€/an vs 95€/an chez MyFitnessPal Premium.</p>
                 </div>
             </div>
         `;
@@ -558,8 +557,8 @@ const TrialService = {
         const btn = document.querySelector('.paywall-btn');
         if (btn) {
             btn.textContent = plan === 'annual'
-                ? 'S\'abonner — 14,99€/an'
-                : 'S\'abonner — 3,99€/mois';
+                ? 'Commencer Premium — 1,25€/mois'
+                : 'Commencer Premium — 3,99€/mois';
         }
     },
 

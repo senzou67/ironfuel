@@ -89,38 +89,41 @@ const SettingsPage = {
                         ${TrialService.isTrialActive() ? '🎉 Essai gratuit — ' + TrialService.daysLeft() + 'j restants' : '⭐ Passe à Premium'}
                     </div>
                     <div class="settings-item" style="flex-direction:column;align-items:stretch;gap:10px">
+                        <div style="font-size:14px;color:var(--text);line-height:1.5;margin-bottom:4px;font-weight:600">
+                            Ton plat maison en 1 photo.
+                        </div>
+                        <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:4px">
+                            Plus besoin de rentrer 12 ingrédients dans MyFitnessPal. OneFood log tout en 2 secondes.
+                        </div>
                         <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:4px">
-                            <div style="font-weight:700;color:var(--text);margin-bottom:6px">Fonctionnalités Premium :</div>
                             <div style="display:flex;flex-direction:column;gap:4px">
-                                <span>💊 Suivi des compléments alimentaires</span>
-                                <span>🏋️ Enregistrement et suivi des séances de salle</span>
-                                <span>⚖️ Suivi du poids avec graphiques</span>
-                                <span>📊 Modification des objectifs caloriques et macros</span>
-                                <span>🍽️ Personnalisation des repas (ajout, suppression)</span>
-                                <span>🐾 Évolution finale de l'avatar</span>
-                                <span>📸 Détection d'aliments par photo IA</span>
-                                <span>🎙️ Ajout vocal d'aliments</span>
+                                <span>📸 Photo IA — prends ton assiette en photo, c'est tout</span>
+                                <span>🎙️ Chat IA — « j'ai mangé un steak et du riz » → détection auto</span>
+                                <span>📊 Scan code-barres illimité (payant chez MFP)</span>
+                                <span>💪 Objectifs macros muscu perso</span>
+                                <span>🏋️ Suivi salle + compléments + poids</span>
+                                <span>🐉 Créature qui évolue avec ta régularité</span>
                             </div>
                         </div>
 
                         <div style="display:flex;gap:8px">
                             <div class="settings-plan-card selected" id="settings-plan-annual" onclick="SettingsPage._selectPlan('annual')" style="flex:1;padding:12px;border:2px solid var(--primary);border-radius:10px;text-align:center;cursor:pointer;background:var(--primary-light)">
-                                <div style="font-size:10px;font-weight:700;color:var(--primary);margin-bottom:4px">MEILLEURE OFFRE</div>
+                                <div style="font-size:10px;font-weight:700;color:var(--primary);margin-bottom:4px">-69% · MEILLEURE OFFRE</div>
                                 <div style="font-weight:800;font-size:18px;color:var(--primary)">14,99€</div>
-                                <div style="font-size:11px;color:var(--text-secondary)">/an (1,25€/mois)</div>
+                                <div style="font-size:11px;color:var(--text-secondary)">/an · 1,25€/mois</div>
                             </div>
                             <div class="settings-plan-card" id="settings-plan-monthly" onclick="SettingsPage._selectPlan('monthly')" style="flex:1;padding:12px;border:2px solid var(--border);border-radius:10px;text-align:center;cursor:pointer">
                                 <div style="font-size:10px;font-weight:700;color:transparent;margin-bottom:4px">.</div>
                                 <div style="font-weight:800;font-size:18px">3,99€</div>
-                                <div style="font-size:11px;color:var(--text-secondary)">/mois</div>
+                                <div style="font-size:11px;color:var(--text-secondary)">/mois · 47,88€/an</div>
                             </div>
                         </div>
 
                         <button class="btn btn-primary" id="settings-sub-btn" onclick="SettingsPage._subscribe()" style="width:100%;font-weight:700;font-size:16px;padding:14px">
-                            S'abonner — 14,99€/an
+                            Commencer Premium — 1,25€/mois
                         </button>
-                        <p style="font-size:11px;color:var(--text-secondary);text-align:center">🔒 Paiement sécurisé via Stripe</p>
-                        <p style="font-size:11px;color:var(--primary);text-align:center;font-weight:600">🚫 Sans engagement — Résiliable à tout moment</p>
+                        <p style="font-size:11px;color:var(--text-secondary);text-align:center">🔒 Stripe · 🚫 Résiliable en 2 clics · 💰 14 j satisfait ou remboursé</p>
+                        <p style="font-size:11px;color:var(--text-secondary);text-align:center;opacity:0.7">14,99€/an vs 95€/an chez MyFitnessPal Premium.</p>
                     </div>
                 </div>
                 ` : (() => {
@@ -441,7 +444,7 @@ const SettingsPage = {
         }
         const btn = document.getElementById('settings-sub-btn');
         if (btn) {
-            btn.textContent = plan === 'annual' ? 'S\'abonner — 14,99€/an' : 'S\'abonner — 3,99€/mois';
+            btn.textContent = plan === 'annual' ? 'Commencer Premium — 1,25€/mois' : 'Commencer Premium — 3,99€/mois';
         }
         TrialService._selectedPlan = plan;
     },
