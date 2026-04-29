@@ -96,9 +96,11 @@ async function searchOFF(query) {
     }
 }
 
-// Realistic maximum weight (g) for items the AI commonly overestimates.
-// Used as a safety clamp: if the AI returns an unreasonable weight, cap it.
-// Key is a lowercase substring to match against the food name.
+// Realistic maximum weight (g) PER UNIT for items the AI commonly overestimates.
+// Defensive clamp: if the AI returns a wildly unreasonable weight, cap it.
+// Strategy: only clamp if the weight is more than ALLOWED_MULTIPLE \u00d7 per_unit_max
+// when no count is detected in the name \u2014 this avoids under-counting multi-portion
+// photos (e.g. "Oeuf dur" with weight 150g = 3 eggs, should NOT be clamped to 55g).
 const MAX_SINGLE_UNIT_WEIGHT = {
     'oeuf dur': 55, 'oeuf poche': 55, 'oeuf mollet': 55,
     'oeuf au plat': 60, 'oeuf brouille': 60, 'oeuf coque': 55,
@@ -109,15 +111,26 @@ const MAX_SINGLE_UNIT_WEIGHT = {
     'carre de chocolat': 10, 'square of chocolate': 10
 };
 
+// When no count is specified in the name, assume up to this many units could be
+// in one food item before we consider it "obviously overestimated".
+const ALLOWED_MULTIPLE_NO_COUNT = 4;
+
 function _clampWeight(name, weight) {
     if (!weight || !name) return weight;
     const low = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    // Detect explicit multi-count (e.g. "2 oeufs"). If count is given, allow count*max.
+    // Detect explicit count (e.g. "2 oeufs", "3 tranches"). If found, cap = count \u00d7 max.
     const countMatch = low.match(/(\d+)\s+/);
-    const count = countMatch ? Math.min(parseInt(countMatch[1]) || 1, 12) : 1;
+    let cap;
     for (const key of Object.keys(MAX_SINGLE_UNIT_WEIGHT)) {
         if (low.includes(key)) {
-            const cap = MAX_SINGLE_UNIT_WEIGHT[key] * count;
+            const perUnit = MAX_SINGLE_UNIT_WEIGHT[key];
+            if (countMatch) {
+                const count = Math.min(parseInt(countMatch[1]) || 1, 12);
+                cap = perUnit * count;
+            } else {
+                // No count \u2192 allow up to 4 units; only clamp obvious overestimates
+                cap = perUnit * ALLOWED_MULTIPLE_NO_COUNT;
+            }
             if (weight > cap) return cap;
             return weight;
         }

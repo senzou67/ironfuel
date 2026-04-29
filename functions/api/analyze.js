@@ -8,10 +8,11 @@ export async function onRequestPost(context) {
         return errorResponse('Authentification requise.', 401);
     }
 
-    // Rate limit: 20 analyses/hour per IP
+    // Rate limit: 40 analyses/hour per IP — covers typical day of meal logging
+    // (4 meals × ~3 photo retries on average) with comfort margin.
     const ip = request.headers.get('cf-connecting-ip') || 'unknown';
-    if (!await checkRateLimit(env, `analyze:${ip}`, 20)) {
-        return errorResponse('Trop de requêtes. Réessaie dans quelques minutes.', 429);
+    if (!await checkRateLimit(env, `analyze:${ip}`, 40)) {
+        return errorResponse('Trop d\'analyses — limite horaire atteinte. Réessaie dans une heure.', 429);
     }
 
     const GEMINI_KEY = env.GEMINI_API_KEY;
@@ -57,10 +58,14 @@ Regles importantes pour l'estimation du poids (sois PRECIS, ne surestime JAMAIS)
 
         // Latest stable Gemini models. Older gemini-2.0-* are deprecated for new API keys.
         const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'];
+        // Per-model timeout: 22s (leaves room for fallback within Cloudflare's 30s CPU limit).
+        const PER_MODEL_TIMEOUT_MS = 22000;
         let text = null;
         let lastError = null;
 
         for (const model of models) {
+            const ac = new AbortController();
+            const timer = setTimeout(() => ac.abort(), PER_MODEL_TIMEOUT_MS);
             try {
                 const response = await fetch(
                     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_KEY}`,
@@ -70,7 +75,8 @@ Regles importantes pour l'estimation du poids (sois PRECIS, ne surestime JAMAIS)
                         body: JSON.stringify({
                             contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: 'image/jpeg', data: image } }] }],
                             generationConfig: { temperature: 0.3, maxOutputTokens: 2048, responseMimeType: 'application/json' }
-                        })
+                        }),
+                        signal: ac.signal
                     }
                 );
 
@@ -91,13 +97,22 @@ Regles importantes pour l'estimation du poids (sois PRECIS, ne surestime JAMAIS)
                 }
 
                 const candidate = data.candidates?.[0];
-                if (!candidate || candidate.finishReason === 'SAFETY') { lastError = 'Gemini a refusé l\'image (filtre de sécurité)'; continue; }
+                if (!candidate) { lastError = `Pas de candidat (${model})`; continue; }
+                if (candidate.finishReason === 'SAFETY') { lastError = 'Photo refusée par le filtre de sécurité Google. Reprends une autre photo.'; continue; }
+                if (candidate.finishReason === 'RECITATION') { lastError = `Réponse incomplète (${model})`; continue; }
 
                 text = candidate.content?.parts?.[0]?.text?.trim();
                 if (text) break;
                 lastError = `Réponse vide de Gemini (${model})`;
             } catch (e) {
-                lastError = e.message;
+                if (e.name === 'AbortError') {
+                    lastError = `Timeout sur ${model} (${PER_MODEL_TIMEOUT_MS/1000}s)`;
+                    console.error('[analyze]', lastError);
+                } else {
+                    lastError = e.message;
+                }
+            } finally {
+                clearTimeout(timer);
             }
         }
 

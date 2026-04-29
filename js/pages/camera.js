@@ -162,25 +162,43 @@ const CameraPage = {
         document.getElementById('camera-loading').style.display = 'block';
 
         try {
-            const canvas = document.createElement('canvas');
-            const img = new Image();
-            await new Promise((resolve, reject) => {
-                img.onload = resolve;
-                img.onerror = reject;
-                img.src = photo.src;
-            });
-            // Resize to max 1280px to reduce Gemini API load and latency
+            // Robust image loading: works for JPEG / PNG / WebP / HEIC (iOS) when
+            // the browser supports it. createImageBitmap is faster + more
+            // tolerant than <img> and properly decodes EXIF rotation.
+            let bitmap;
+            try {
+                const blob = await (await fetch(photo.src)).blob();
+                if (typeof createImageBitmap !== 'undefined') {
+                    bitmap = await createImageBitmap(blob);
+                } else {
+                    const img = new Image();
+                    await new Promise((resolve, reject) => {
+                        img.onload = resolve;
+                        img.onerror = reject;
+                        img.src = photo.src;
+                    });
+                    bitmap = img;
+                }
+            } catch (e) {
+                throw new Error('Format d\'image non supporté. Essaie une photo JPEG/PNG.');
+            }
+
+            // Resize to max 1280px and compress aggressively to limit upload size
+            // (Gemini doesn't need pixel-perfect images for food recognition)
             const MAX_SIZE = 1280;
-            let w = img.width, h = img.height;
+            let w = bitmap.width, h = bitmap.height;
+            if (!w || !h) throw new Error('Image vide ou corrompue.');
             if (w > MAX_SIZE || h > MAX_SIZE) {
                 const ratio = Math.min(MAX_SIZE / w, MAX_SIZE / h);
                 w = Math.round(w * ratio);
                 h = Math.round(h * ratio);
             }
+            const canvas = document.createElement('canvas');
             canvas.width = w;
             canvas.height = h;
-            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-            const base64 = canvas.toDataURL('image/jpeg', 0.82).split(',')[1];
+            canvas.getContext('2d').drawImage(bitmap, 0, 0, w, h);
+            // Quality 0.78 keeps 1280×960 JPEG under ~250KB → fast upload
+            const base64 = canvas.toDataURL('image/jpeg', 0.78).split(',')[1];
 
             let foods = null;
             let lastError = null;
@@ -191,6 +209,8 @@ const CameraPage = {
                     lastError = new Error('Aucun aliment détecté');
                 } catch (e) {
                     lastError = e;
+                    // 429 / auth errors won't get better with retry — bail out
+                    if (/limite|expirée|429|401/i.test(e.message)) break;
                 }
                 if (attempt < 2 && (!foods || foods.length === 0)) {
                     App.showToast(`Nouvel essai... (${attempt + 2}/3)`);
@@ -207,7 +227,7 @@ const CameraPage = {
                 this.showResults(foods);
             } else {
                 document.getElementById('camera-actions').style.display = 'block';
-                App.showToast('Aucun aliment détecté. Réessaie avec une photo plus claire.');
+                App.showToast('Aucun aliment détecté. Cadre l\'assiette de plus près avec un bon éclairage.');
             }
         } catch (err) {
             document.getElementById('camera-loading').style.display = 'none';

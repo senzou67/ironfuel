@@ -33,11 +33,27 @@ Estime le poids de manière réaliste en te basant sur la taille apparente des p
             }
         } catch(e) {}
 
-        const response = await fetch('/api/analyze', {
-            method: 'POST',
-            headers: reqHeaders,
-            body: JSON.stringify({ image: base64Image })
-        });
+        // Client-side timeout: server tries up to 3 models × 22s = 66s worst case.
+        // Cap at 75s so the user gets a clear message instead of a hung spinner.
+        const ac = new AbortController();
+        const timer = setTimeout(() => ac.abort(), 75000);
+
+        let response;
+        try {
+            response = await fetch('/api/analyze', {
+                method: 'POST',
+                headers: reqHeaders,
+                body: JSON.stringify({ image: base64Image }),
+                signal: ac.signal
+            });
+        } catch (e) {
+            clearTimeout(timer);
+            if (e.name === 'AbortError') {
+                throw new Error('Délai dépassé. Réseau lent ? Réessaie.');
+            }
+            throw new Error('Connexion impossible. Vérifie ton réseau et réessaie.');
+        }
+        clearTimeout(timer);
 
         const rawText = await response.text();
         let data;
@@ -45,6 +61,13 @@ Estime le poids de manière réaliste en te basant sur la taille apparente des p
             throw new Error('Erreur serveur — réessaie dans quelques secondes.');
         }
         if (!response.ok) {
+            // Specific error mapping for clearer user feedback
+            if (response.status === 429) {
+                throw new Error(data.error || 'Trop d\'analyses — réessaie dans une heure.');
+            }
+            if (response.status === 401) {
+                throw new Error('Session expirée. Recharge la page et reconnecte-toi.');
+            }
             throw new Error(data.error || `Erreur serveur: ${response.status}`);
         }
         return data.foods || [];
