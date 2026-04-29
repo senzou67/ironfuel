@@ -60,9 +60,12 @@ Regles importantes pour l'estimation du poids (sois PRECIS, ne surestime JAMAIS)
         const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'];
         // Per-model timeout: 22s (leaves room for fallback within Cloudflare's 30s CPU limit).
         const PER_MODEL_TIMEOUT_MS = 22000;
-        let text = null;
+        let result = null;
         let lastError = null;
 
+        // Try each model. Parse INSIDE the loop so a model that returns
+        // unparseable text (plain prose, truncated JSON, etc.) falls back
+        // to the next model instead of failing the whole request.
         for (const model of models) {
             const ac = new AbortController();
             const timer = setTimeout(() => ac.abort(), PER_MODEL_TIMEOUT_MS);
@@ -101,9 +104,32 @@ Regles importantes pour l'estimation du poids (sois PRECIS, ne surestime JAMAIS)
                 if (candidate.finishReason === 'SAFETY') { lastError = 'Photo refusée par le filtre de sécurité Google. Reprends une autre photo.'; continue; }
                 if (candidate.finishReason === 'RECITATION') { lastError = `Réponse incomplète (${model})`; continue; }
 
-                text = candidate.content?.parts?.[0]?.text?.trim();
-                if (text) break;
-                lastError = `Réponse vide de Gemini (${model})`;
+                const text = candidate.content?.parts?.[0]?.text?.trim();
+                if (!text) { lastError = `Réponse vide de Gemini (${model})`; continue; }
+
+                // Try to parse the response. If unparseable, try the NEXT model.
+                let parsed = null;
+                try { parsed = JSON.parse(text); } catch {}
+                if (!parsed) {
+                    const m = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+                    if (m) { try { parsed = JSON.parse(m[1].trim()); } catch {} }
+                }
+                if (!parsed) {
+                    const s = text.indexOf('{'), e = text.lastIndexOf('}');
+                    if (s !== -1 && e > s) { try { parsed = JSON.parse(text.substring(s, e + 1)); } catch {} }
+                }
+                if (!parsed) {
+                    const s = text.indexOf('['), e = text.lastIndexOf(']');
+                    if (s !== -1 && e > s) { try { const arr = JSON.parse(text.substring(s, e + 1)); parsed = { foods: arr }; } catch {} }
+                }
+
+                if (parsed && (Array.isArray(parsed) || Array.isArray(parsed.foods))) {
+                    result = Array.isArray(parsed) ? { foods: parsed } : parsed;
+                    break;
+                }
+                // Parse failed — log preview and try next model
+                lastError = `Réponse IA mal formée (${model})`;
+                console.error('[analyze] Unparseable response from', model, '—', text.substring(0, 200));
             } catch (e) {
                 if (e.name === 'AbortError') {
                     lastError = `Timeout sur ${model} (${PER_MODEL_TIMEOUT_MS/1000}s)`;
@@ -116,27 +142,7 @@ Regles importantes pour l'estimation du poids (sois PRECIS, ne surestime JAMAIS)
             }
         }
 
-        if (!text) return errorResponse(lastError || 'Pas de réponse de Gemini.');
-
-        let result = null;
-        // Try parsing as-is first (responseMimeType: application/json)
-        try { result = JSON.parse(text); } catch {}
-        // Try extracting from markdown code block
-        if (!result) {
-            const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-            if (jsonMatch) { try { result = JSON.parse(jsonMatch[1].trim()); } catch {} }
-        }
-        // Try extracting first { ... } block
-        if (!result) {
-            const s = text.indexOf('{'), e = text.lastIndexOf('}');
-            if (s !== -1 && e > s) { try { result = JSON.parse(text.substring(s, e + 1)); } catch {} }
-        }
-        // Try extracting first [ ... ] block (array of foods directly)
-        if (!result) {
-            const s = text.indexOf('['), e = text.lastIndexOf(']');
-            if (s !== -1 && e > s) { try { const arr = JSON.parse(text.substring(s, e + 1)); result = { foods: arr }; } catch {} }
-        }
-        if (!result) return errorResponse('Réponse IA mal formée. Réessaie.');
+        if (!result) return errorResponse(lastError || 'Pas de réponse de Gemini.');
 
         let enriched;
         try {
