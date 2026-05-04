@@ -22,8 +22,8 @@ if (FCM_CONFIG.messagingSenderId && FCM_CONFIG.appId) {
     console.log('[SW] FCM not configured — set messagingSenderId & appId in sw.js');
 }
 
-const CACHE_NAME = 'onefood-v130';
-const SW_VERSION = 130;
+const CACHE_NAME = 'onefood-v131';
+const SW_VERSION = 131;
 const ASSETS = [
     '/',
     '/index.html',
@@ -139,6 +139,18 @@ self.addEventListener('fetch', (e) => {
     // NEVER cache version.json or nuke.html — always go to network
     if (url.pathname === '/version.json' || url.pathname === '/nuke.html') {
         e.respondWith(fetch(e.request));
+        return;
+    }
+
+    // NEVER cache our own /api/* endpoints — these are dynamic data calls.
+    // Without this, GET endpoints (search-online, etc.) get served from a
+    // stale-while-revalidate cache, which means the first request after a
+    // deploy can serve a cached 404 from before the endpoint existed.
+    if (url.hostname === location.hostname && url.pathname.startsWith('/api/')) {
+        e.respondWith(fetch(e.request).catch(() => new Response(
+            JSON.stringify({ error: 'Hors ligne — réessaie quand le réseau est revenu.' }),
+            { status: 503, headers: { 'Content-Type': 'application/json' } }
+        )));
         return;
     }
 
