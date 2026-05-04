@@ -18,6 +18,7 @@ import * as saveEmail from './functions/api/save-email.js';
 import * as trialCheck from './functions/api/trial-check.js';
 import * as adminApi from './functions/api/admin-api.js';
 import * as errorLog from './functions/api/error-log.js';
+import * as searchOnline from './functions/api/search-online.js';
 
 const ROUTES = {
     '/api/analyze': analyze,
@@ -36,6 +37,7 @@ const ROUTES = {
     '/api/trial-check': trialCheck,
     '/api/admin-api': adminApi,
     '/api/error-log': errorLog,
+    '/api/search-online': searchOnline,
 };
 
 export default {

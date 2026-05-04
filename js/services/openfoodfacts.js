@@ -49,10 +49,13 @@ const OpenFoodFactsService = {
             return cached.data;
         }
 
-        const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&json=1&page_size=15&page=${page}&lc=fr&fields=product_name_fr,product_name,brands,image_front_small_url,nutriments,nutriscore_grade,code`;
+        // Proxied through our Worker — bypasses browser CORS issues with the
+        // OFF /cgi/search.pl endpoint (some responses miss
+        // Access-Control-Allow-Origin and are blocked by the browser).
+        const url = `/api/search-online?q=${encodeURIComponent(query)}&page=${page}`;
 
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 8000);
+        const timeout = setTimeout(() => controller.abort(), 10000);
         let response;
         try {
             response = await fetch(url, { signal: controller.signal });
@@ -61,27 +64,7 @@ const OpenFoodFactsService = {
         }
         if (!response.ok) throw new Error('Erreur de recherche');
         const data = await response.json();
-
-        const results = (data.products || [])
-            .filter(p => (p.product_name_fr || p.product_name) && p.nutriments)
-            .map(p => {
-                const n = p.nutriments || {};
-                return {
-                    name: p.product_name_fr || p.product_name || 'Inconnu',
-                    brand: p.brands || '',
-                    image: p.image_front_small_url || '',
-                    barcode: p.code,
-                    nutriscore: p.nutriscore_grade,
-                    n: [
-                        Math.round(n['energy-kcal_100g'] || 0),
-                        Math.round((n.proteins_100g || 0) * 10) / 10,
-                        Math.round((n.carbohydrates_100g || 0) * 10) / 10,
-                        Math.round((n.fat_100g || 0) * 10) / 10,
-                        Math.round((n.fiber_100g || 0) * 10) / 10
-                    ],
-                    isOnline: true
-                };
-            });
+        const results = data.products || [];
 
         // Cache results
         this._searchCache[cacheKey] = { data: results, time: Date.now() };
