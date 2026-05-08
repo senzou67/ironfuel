@@ -137,7 +137,8 @@ const ProfilePage = {
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
                 <div class="form-group">
                     <label class="form-label">Âge</label>
-                    <input type="number" class="form-input" id="p-age" value="${profile.age}" min="10" max="120">
+                    <input type="number" class="form-input" id="p-age" value="${profile.age}" min="13" max="120">
+                    <div style="font-size:10px;color:var(--text-secondary);margin-top:4px">Tu dois avoir au moins 13 ans pour utiliser OneFood (RGPD).</div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Sexe</label>
@@ -178,9 +179,15 @@ const ProfilePage = {
     },
 
     saveProfile() {
+        const ageRaw = parseInt(document.getElementById('p-age').value);
+        // Hard floor at 13 — store policies + GDPR. Default 30 if blank.
+        if (ageRaw && ageRaw < 13) {
+            App.showToast('OneFood est réservé aux 13 ans et plus.');
+            return;
+        }
         const profile = {
             name: document.getElementById('p-name').value,
-            age: parseInt(document.getElementById('p-age').value) || 30,
+            age: ageRaw || 30,
             sex: document.getElementById('p-sex').value,
             height: parseInt(document.getElementById('p-height').value) || 175,
             weight: parseFloat(document.getElementById('p-weight').value) || 70,

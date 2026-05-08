@@ -564,6 +564,13 @@ const TrialService = {
 
     // Start subscription — routes to Stripe (web) / RevenueCat (native) via PaymentService.
     async startPayment(skipTrial = false) {
+        // Age gate — required by App Store / Play Store + GDPR for digital services.
+        const profile = (typeof Storage !== 'undefined') ? Storage.getProfile() : {};
+        if (profile && profile.age && profile.age < 13) {
+            App.showToast('Tu dois avoir au moins 13 ans pour souscrire.');
+            return;
+        }
+
         const btn = document.querySelector('.paywall-btn');
         if (btn) {
             btn.disabled = true;
