@@ -562,7 +562,7 @@ const TrialService = {
         }
     },
 
-    // Start Stripe Checkout (subscription mode)
+    // Start subscription — routes to Stripe (web) / RevenueCat (native) via PaymentService.
     async startPayment(skipTrial = false) {
         const btn = document.querySelector('.paywall-btn');
         if (btn) {
@@ -571,24 +571,12 @@ const TrialService = {
         }
 
         try {
-            const res = await fetch('/api/create-checkout', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    userId: AuthService.isLoggedIn() ? AuthService.getCurrentUser().uid : Storage._get('device_id', this._generateDeviceId()),
-                    email: AuthService.isLoggedIn() ? AuthService.getCurrentUser().email : null,
-                    skipTrial: skipTrial,
-                    plan: this._selectedPlan || 'annual'
-                })
+            await PaymentService.subscribe({
+                plan: this._selectedPlan || 'annual',
+                userId: AuthService.isLoggedIn() ? AuthService.getCurrentUser().uid : Storage._get('device_id', this._generateDeviceId()),
+                email: AuthService.isLoggedIn() ? AuthService.getCurrentUser().email : null,
+                skipTrial: skipTrial
             });
-
-            let data = {};
-            try { data = await res.json(); } catch {}
-            if (res.ok && data.url) {
-                window.location.href = data.url;
-                return;
-            }
-            throw new Error(data.error || `Erreur ${res.status}`);
         } catch (err) {
             console.error('[startPayment]', err);
             App.showToast(err.message && err.message !== 'Failed to fetch' ? err.message : 'Erreur réseau. Vérifie ta connexion.');

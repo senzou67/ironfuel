@@ -574,24 +574,12 @@ const SettingsPage = {
         Modal.close();
 
         try {
-            const res = await fetch('/api/create-checkout', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    userId: AuthService.isLoggedIn() ? AuthService.getCurrentUser().uid : Storage._get('device_id', ''),
-                    email: AuthService.isLoggedIn() ? AuthService.getCurrentUser().email : null,
-                    mode: 'donation',
-                    amount: amount
-                })
+            await PaymentService.donate({
+                userId: AuthService.isLoggedIn() ? AuthService.getCurrentUser().uid : Storage._get('device_id', ''),
+                email: AuthService.isLoggedIn() ? AuthService.getCurrentUser().email : null,
+                amount,
+                message: ''
             });
-
-            let data = {};
-            try { data = await res.json(); } catch {}
-            if (res.ok && data.url) {
-                window.location.href = data.url;
-                return;
-            }
-            throw new Error(data.error || `Erreur ${res.status}`);
         } catch (err) {
             console.error('[donate]', err);
             App.showToast(err.message && err.message !== 'Failed to fetch' ? err.message : 'Erreur réseau. Vérifie ta connexion.');
