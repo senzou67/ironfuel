@@ -5,7 +5,7 @@
   "scripts": {
     "build": "node build.js",
     "deploy": "wrangler deploy",
-    "android:install": "npm i -D @capacitor/core@^6.0.0 @capacitor/android@^6.0.0 @capacitor/camera@^6.0.0 @capacitor/push-notifications@^6.0.0 @capacitor/share@^6.0.0 @capacitor/haptics@^6.0.0 @capacitor/app@^6.0.0 @capacitor/status-bar@^6.0.0",
+    "android:install": "npm i -D @capacitor/core@^6.0.0 @capacitor/android@^6.0.0 @capacitor/camera@^6.0.0 @capacitor/push-notifications@^6.0.0 @capacitor/share@^6.0.0 @capacitor/haptics@^6.0.0 @capacitor/app@^6.0.0 @capacitor/status-bar@^6.0.0 @revenuecat/purchases-capacitor@^9.0.0",
     "cap:sync": "npx cap sync android",
     "cap:open": "npx cap open android",
     "android:build": "npm run build && npx cap sync android && npx cap open android"

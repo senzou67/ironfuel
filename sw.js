@@ -49,6 +49,7 @@ const ASSETS = [
     '/js/services/trial.js',
     '/js/services/payment.js',
     '/js/services/payment-stripe.js',
+    '/js/services/payment-revenuecat.js',
     '/js/services/sync.js',
     '/js/services/notifications.js',
     '/js/services/paypal.js',
