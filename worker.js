@@ -19,6 +19,7 @@ import * as trialCheck from './functions/api/trial-check.js';
 import * as adminApi from './functions/api/admin-api.js';
 import * as errorLog from './functions/api/error-log.js';
 import * as searchOnline from './functions/api/search-online.js';
+import * as revenuecatWebhook from './functions/api/revenuecat-webhook.js';
 
 const ROUTES = {
     '/api/analyze': analyze,
@@ -38,6 +39,7 @@ const ROUTES = {
     '/api/admin-api': adminApi,
     '/api/error-log': errorLog,
     '/api/search-online': searchOnline,
+    '/api/revenuecat-webhook': revenuecatWebhook,
 };
 
 export default {
