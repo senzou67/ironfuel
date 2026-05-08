@@ -9,9 +9,12 @@
 ### 1. Pas de projet natif Android/iOS généré
 **État** : `capacitor.config.json` ✅ présent (`appId: fr.onefood.app`, splash, push). Mais aucun dossier `android/` ni `ios/` dans le repo → **Capacitor n'a jamais été syncé**.
 
+**Sous-blocker associé** : `webDir: "public"` est déclaré mais `/public` n'existe pas → `cap sync` va échouer en silence. Il faut **run `npm run build` d'abord** pour générer le dossier (build.js sait faire, juste jamais exécuté).
+
 **Action** :
 ```bash
 npm run android:install     # installe Capacitor (script ajouté)
+npm run build               # génère /public via build.js
 npx cap add android
 npm run cap:sync            # construit android/
 # Pour iOS (Mac requis) :
@@ -73,6 +76,25 @@ Les deux stores demandent maintenant un formulaire détaillé sur les données c
 ### 8. Targets SDK Android à jour (Play Store policy)
 
 Depuis août 2024, Play Store exige `targetSdkVersion >= 34` (Android 14). À vérifier dans `android/app/build.gradle` après sync. Le template Capacitor 6.x est déjà à 34, donc ✅ probable.
+
+### 8b. Signing config / keystore Android
+
+Une fois `android/` généré, configurer le release signing **proprement** :
+```bash
+keytool -genkey -v -keystore onefood-release.keystore \
+  -alias onefood -keyalg RSA -keysize 2048 -validity 10000
+```
+- Mettre les credentials dans `android/keystore.properties` (jamais hardcoder)
+- Ajouter au `.gitignore` : `*.keystore`, `keystore.properties`, `android/.cxx/`, `android/build/`
+- Stocker la keystore en sécurité (perdue = impossible de mettre à jour l'app sur Play Store, jamais)
+- Activer Play App Signing dans la Console pour redondance
+
+### 8c. Adaptive icons (Play Store API 26+)
+
+Capacitor génère un launcher icon par défaut MAIS pas d'adaptive icon (foreground/background séparés requis depuis Android 8.0). Après `cap add android` :
+- Android Studio → Image Asset Studio → générer foreground (logo "1" blanc) + background (aplat `#EF4444`)
+- OU utiliser `npx @capacitor/assets generate` avec source `assets/icons/icon-512.png` (déjà à jour)
+- Vérifier que `android/app/src/main/res/mipmap-*/ic_launcher_foreground.xml` et `ic_launcher_background.xml` matchent la marque
 
 ### 9. Splash screen + adaptive icons natifs
 
@@ -138,8 +160,8 @@ Trouvée comme objection #1 dans le research client (`.agents/customer-research.
 
 ## ✅ Ce qui est déjà OK (bon balayage)
 
-- **Account deletion** complète (`settings.js:457` + Firestore docs + auth account, conforme Apple/Play 2024)
-- **Health disclaimer** présent (`terms.html:102`, `mentions-legales.html:68`, `dashboard.js:274`)
+- **Account deletion** complète (`settings.js:457` + Firestore docs + auth account, conforme Apple/Play 2024) — **mais à compléter** : ajouter SLA explicite "Compte effacé sous 30 jours" dans `privacy.html` (Apple le vérifie textuellement), idéalement endpoint `/api/delete-account` qui marque pour purge en 24-48h (filet de sécurité contre annulations chargeback)
+- **Health disclaimer** présent (`terms.html:102`, `mentions-legales.html:68`, `dashboard.js:274`) — **à promote** : la mention dashboard est en `font-size:10px` opacity 0.6 → trop discrète pour un app store reviewer santé. Ajouter un modal first-run "⚠️ OneFood est informatif, pas un avis médical" dismissible 90j
 - **GDPR consent** explicite avant traitement (`app.js:196-461`)
 - **Privacy Policy + Terms** en français hébergés (`privacy.html`, `terms.html`)
 - **Photo deletion policy** explicite (Gemini supprime après analyse — point fort à défendre)
