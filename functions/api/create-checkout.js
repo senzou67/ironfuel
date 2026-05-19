@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { jsonResponse, errorResponse } from './_shared.js';
+import { jsonResponse, errorResponse, getVerifiedUid } from './_shared.js';
 
 function _mapStripeError(err) {
     const msg = (err && err.message) || '';
@@ -22,7 +22,15 @@ export async function onRequestPost(context) {
     let body;
     try { body = await request.json(); }
     catch { return errorResponse('Requête invalide.', 400); }
-    const { userId, email, skipTrial, plan, mode, amount, message } = body || {};
+    const { userId: bodyUserId, email, skipTrial, plan, mode, amount, message } = body || {};
+
+    // If the caller presents a valid Firebase ID token, ALWAYS use the
+    // verified UID and ignore body.userId. This blocks userId spoofing
+    // attacks (logged-in user A passing userId=B to grant Premium to B).
+    // If no token is present, fall back to body.userId — the legitimate
+    // anonymous device_id flow (cf. trial.js:585).
+    const verifiedUid = await getVerifiedUid(request, env);
+    const userId = verifiedUid || bodyUserId;
 
     try {
 

@@ -41,6 +41,22 @@ export async function verifyAuth(request, env) {
     }
 }
 
+// Returns the verified Firebase UID, or null if no/invalid token.
+// Use when the endpoint needs the *identity* (not just "is authenticated").
+export async function getVerifiedUid(request, env) {
+    const a = initFirebase(env);
+    if (!a) return null;
+    const authHeader = request.headers.get('Authorization') || '';
+    const token = authHeader.replace('Bearer ', '');
+    if (!token) return null;
+    try {
+        const decoded = await a.auth().verifyIdToken(token);
+        return decoded.uid || null;
+    } catch {
+        return null;
+    }
+}
+
 // Lightweight auth check: just verify a token is present (no Firebase verification)
 // Use this for endpoints where Firebase Admin may not work in Workers env
 export function hasAuthToken(request) {

@@ -7,9 +7,14 @@
 // constraint by switching to the mobile provider on Capacitor native.
 const StripePaymentService = {
     async subscribe({ plan, userId, email, skipTrial }) {
+        const headers = { 'Content-Type': 'application/json' };
+        try {
+            const user = (typeof AuthService !== 'undefined') ? AuthService.getCurrentUser() : null;
+            if (user) headers['Authorization'] = 'Bearer ' + await user.getIdToken();
+        } catch {}
         const res = await fetch('/api/create-checkout', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify({
                 userId,
                 email,
@@ -27,9 +32,14 @@ const StripePaymentService = {
     },
 
     async donate({ userId, email, amount, message }) {
+        const headers = { 'Content-Type': 'application/json' };
+        try {
+            const user = (typeof AuthService !== 'undefined') ? AuthService.getCurrentUser() : null;
+            if (user) headers['Authorization'] = 'Bearer ' + await user.getIdToken();
+        } catch {}
         const res = await fetch('/api/create-checkout', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify({
                 userId,
                 email,
