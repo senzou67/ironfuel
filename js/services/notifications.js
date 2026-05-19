@@ -41,7 +41,9 @@ const NotificationService = {
         }
     },
 
-    // Request permission and get FCM token
+    // Request permission and get FCM token.
+    // Shows a custom pre-prompt explanation before the OS prompt
+    // (required by Apple guideline 5.1.1 + improves grant rate everywhere).
     async requestPermission() {
         if (!('Notification' in window)) {
             App.showToast('Notifications non supportées sur ce navigateur');
@@ -51,6 +53,37 @@ const NotificationService = {
         if (Notification.permission === 'denied') {
             App.showToast('Notifications bloquées — active-les dans les paramètres du navigateur');
             return null;
+        }
+
+        // Pre-prompt: only show when permission is still 'default' (never asked).
+        // If user already granted, skip straight to token retrieval.
+        if (Notification.permission === 'default' && typeof Modal !== 'undefined') {
+            const accepted = await new Promise((resolve) => {
+                Modal.show(`
+                    <div style="text-align:center">
+                        <div style="font-size:48px;margin-bottom:12px">🔔</div>
+                        <div class="modal-title">Reste régulier avec un rappel</div>
+                        <p style="color:var(--text-secondary);font-size:14px;line-height:1.5;margin-bottom:16px">
+                            OneFood peut t'envoyer un rappel quotidien pour ne pas casser ton streak et te tenir au courant de tes objectifs.
+                        </p>
+                        <p style="color:var(--text-secondary);font-size:12px;line-height:1.4;margin-bottom:16px">
+                            Tu pourras désactiver à tout moment dans Paramètres → Notifications.
+                        </p>
+                        <div style="display:flex;gap:8px">
+                            <button class="btn btn-secondary" id="notif-prompt-deny" style="flex:1">Plus tard</button>
+                            <button class="btn btn-primary" id="notif-prompt-accept" style="flex:1">Activer</button>
+                        </div>
+                    </div>
+                `);
+                const finish = (ok) => { try { Modal.close(); } catch {} resolve(ok); };
+                setTimeout(() => {
+                    const a = document.getElementById('notif-prompt-accept');
+                    const d = document.getElementById('notif-prompt-deny');
+                    if (a) a.onclick = () => finish(true);
+                    if (d) d.onclick = () => finish(false);
+                }, 0);
+            });
+            if (!accepted) return null;
         }
 
         try {

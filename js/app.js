@@ -394,6 +394,41 @@ const App = {
         catch(e) { return true; } // If localStorage broken, don't block
     },
 
+    // Health/medical disclaimer modal — required by App Store / Play Store
+    // for apps in the Health & Fitness category. Shown once after consent,
+    // re-shown after 90 days dismissal as a reminder.
+    _showHealthDisclaimerIfNeeded() {
+        try {
+            const dismissedAt = parseInt(localStorage.getItem('health_disclaimer_dismissed') || '0');
+            const NINETY_DAYS = 90 * 86400000;
+            if (dismissedAt && (Date.now() - dismissedAt) < NINETY_DAYS) return;
+        } catch {}
+        if (typeof Modal === 'undefined') return;
+        Modal.show(`
+            <div style="text-align:center">
+                <div style="font-size:48px;margin-bottom:8px">⚕️</div>
+                <div class="modal-title">Avis important</div>
+                <p style="color:var(--text-secondary);font-size:14px;line-height:1.5;margin-bottom:12px;text-align:left">
+                    OneFood est un <strong>outil d'information</strong> conçu pour t'aider à suivre ton alimentation et tes objectifs sportifs. Il ne remplace en aucun cas l'avis d'un médecin, d'un diététicien ou d'un coach professionnel.
+                </p>
+                <p style="color:var(--text-secondary);font-size:13px;line-height:1.5;margin-bottom:16px;text-align:left">
+                    Si tu as une condition médicale (diabète, grossesse, allaitement, trouble du comportement alimentaire, allergies, traitement en cours), <strong>consulte un professionnel de santé</strong> avant de modifier ton alimentation ou ton activité physique.
+                </p>
+                <p style="color:var(--text-secondary);font-size:12px;line-height:1.4;margin-bottom:16px;text-align:left;opacity:0.8">
+                    Les calculs caloriques et macros sont des estimations basées sur des formules standards (BMR/TDEE) et peuvent ne pas refléter ton métabolisme réel.
+                </p>
+                <button class="btn btn-primary" id="health-disclaimer-ok" style="width:100%">J'ai compris</button>
+            </div>
+        `);
+        setTimeout(() => {
+            const btn = document.getElementById('health-disclaimer-ok');
+            if (btn) btn.onclick = () => {
+                try { localStorage.setItem('health_disclaimer_dismissed', String(Date.now())); } catch {}
+                try { Modal.close(); } catch {}
+            };
+        }, 0);
+    },
+
     async _postConsentInit() {
         // Init cloud sync + restore data if needed
         SyncService.init();
@@ -420,6 +455,8 @@ const App = {
             this.navigate('dashboard');
             this._dismissSplash();
             this._showTutorialIfNeeded();
+            // Health disclaimer after 1.2s — non-blocking, runs once / re-runs after 90d
+            setTimeout(() => this._showHealthDisclaimerIfNeeded(), 1200);
         }
     },
 

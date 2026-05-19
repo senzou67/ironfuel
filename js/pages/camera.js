@@ -53,6 +53,7 @@ const CameraPage = {
     async startCamera() {
         try {
             // Check permission status first (avoid repeated prompts)
+            let needsPrePrompt = false;
             if (navigator.permissions) {
                 try {
                     const perm = await navigator.permissions.query({ name: 'camera' });
@@ -60,8 +61,48 @@ const CameraPage = {
                         App.showToast('Autorise la caméra dans les paramètres de ton navigateur');
                         return;
                     }
+                    // 'prompt' = never asked → show our explanation first (Apple guideline 5.1.1)
+                    needsPrePrompt = (perm.state === 'prompt');
                 } catch {}
+            } else {
+                // Permissions API not supported (Safari < 16) — show pre-prompt once
+                needsPrePrompt = !sessionStorage.getItem('camera_explained');
             }
+
+            if (needsPrePrompt && typeof Modal !== 'undefined') {
+                const accepted = await new Promise((resolve) => {
+                    Modal.show(`
+                        <div style="text-align:center">
+                            <div style="font-size:48px;margin-bottom:12px">📸</div>
+                            <div class="modal-title">Photo IA</div>
+                            <p style="color:var(--text-secondary);font-size:14px;line-height:1.5;margin-bottom:12px">
+                                Pour analyser tes repas en photo, OneFood a besoin d'accéder à ton appareil photo.
+                            </p>
+                            <p style="color:var(--text-secondary);font-size:12px;line-height:1.4;margin-bottom:16px">
+                                Les photos sont envoyées à Google Gemini pour analyse puis <strong>immédiatement supprimées</strong>.
+                                Aucune image n'est stockée par OneFood.
+                            </p>
+                            <div style="display:flex;gap:8px">
+                                <button class="btn btn-secondary" id="cam-prompt-deny" style="flex:1">Refuser</button>
+                                <button class="btn btn-primary" id="cam-prompt-accept" style="flex:1">Autoriser</button>
+                            </div>
+                        </div>
+                    `);
+                    const finish = (ok) => { try { Modal.close(); } catch {} resolve(ok); };
+                    setTimeout(() => {
+                        const a = document.getElementById('cam-prompt-accept');
+                        const d = document.getElementById('cam-prompt-deny');
+                        if (a) a.onclick = () => finish(true);
+                        if (d) d.onclick = () => finish(false);
+                    }, 0);
+                });
+                if (!accepted) {
+                    App.showToast('Photo IA désactivée — autorise la caméra plus tard si tu changes d\'avis.');
+                    return;
+                }
+                try { sessionStorage.setItem('camera_explained', '1'); } catch {}
+            }
+
             this.stream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 960 } }
             });
