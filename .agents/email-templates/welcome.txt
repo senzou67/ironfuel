@@ -1,0 +1,38 @@
+Bienvenue chez OneFood, {{name}} !
+
+Content de te voir débarquer chez OneFood. Ton suivi nutrition et muscu
+commence maintenant.
+
+3 trucs à faire pour bien démarrer :
+
+1. LOGGE TON PREMIER REPAS
+   Photo IA, vocal, code-barres ou recherche — toutes les méthodes sont
+   gratuites.
+
+2. CHOISIS TA CRÉATURE
+   Feu, Plante ou Eau — elle évolue avec ta régularité.
+
+3. ACTIVE LES RAPPELS
+   Repas, eau, salle — Paramètres > Notifications.
+
+Ouvrir OneFood : {{appUrl}}
+
+LE TRUC QUI CHANGE TOUT : PHOTO IA
+Pose ton assiette, prends une photo. L'IA détecte les aliments et
+calcule les macros en 5 secondes. Fini la pesée fastidieuse.
+
+Tu as 14 jours d'essai gratuit Premium — toutes les fonctionnalités
+débloquées. Pas besoin de carte bancaire pour démarrer.
+
+Une question ? Réponds à cet email, je lis tout.
+— David, créateur de OneFood
+
+---
+OneFood · Suivi nutrition & muscu IA
+{{appUrl}} · {{supportEmail}}
+
+Tu reçois cet email parce que tu as créé un compte OneFood.
+Se désinscrire : {{unsubscribeUrl}}
+Confidentialité : {{appUrl}}/privacy.html
+
+© {{currentYear}} OneFood. Tous droits réservés.

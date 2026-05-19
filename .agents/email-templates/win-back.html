@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>On t'a manqué ?</title>
+    <style>
+        body { margin: 0; padding: 0; background: #f4f4f7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1a1a1a; }
+        a { color: #EF4444; text-decoration: none; }
+        .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
+        .hero { background: #fef2f2; padding: 32px 24px; text-align: center; }
+        .hero-icon { font-size: 56px; line-height: 1; }
+        .hero-title { color: #1a1a1a; font-size: 26px; font-weight: 800; margin: 14px 0 6px; }
+        .hero-sub { color: #4a4a4a; font-size: 15px; margin: 0; }
+        .body { padding: 30px 28px; line-height: 1.6; font-size: 15px; color: #2a2a2a; }
+        .body p { margin: 0 0 16px; }
+        .news { background: #fafafa; border-radius: 12px; padding: 20px 22px; margin: 22px 0; }
+        .news-title { font-weight: 700; font-size: 15px; color: #1a1a1a; margin: 0 0 12px; }
+        .news-item { padding: 8px 0; border-bottom: 1px solid #eaeaea; font-size: 14px; color: #4a4a4a; }
+        .news-item:last-child { border-bottom: none; }
+        .news-item strong { color: #EF4444; }
+        .cta { display: inline-block; background: #EF4444; color: #ffffff !important; text-decoration: none; font-weight: 700; padding: 14px 32px; border-radius: 10px; font-size: 16px; }
+        .cta-wrap { text-align: center; margin: 22px 0; }
+        .promo { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 20px 22px; margin: 22px 0; text-align: center; }
+        .promo-title { font-weight: 800; font-size: 18px; color: #78350f; margin: 0 0 6px; }
+        .promo-desc { color: #92400e; font-size: 14px; margin: 0; }
+        .footer { padding: 22px 28px; background: #f4f4f7; font-size: 12px; color: #6b6b80; text-align: center; line-height: 1.5; }
+        .footer a { color: #6b6b80; text-decoration: underline; }
+        @media (max-width: 600px) {
+            .body { padding: 22px 18px; }
+            .hero-title { font-size: 22px; }
+            .cta { display: block; }
+        }
+    </style>
+</head>
+<body>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
+        <tr>
+            <td align="center" style="padding: 20px 12px">
+                <table class="container" cellpadding="0" cellspacing="0" border="0" width="600" role="presentation" style="border-radius: 16px; overflow: hidden">
+                    <tr>
+                        <td class="hero">
+                            <div class="hero-icon" aria-hidden="true">🐣</div>
+                            <h1 class="hero-title">On t'a manqué, {{name}} ?</h1>
+                            <p class="hero-sub">Ça fait {{daysInactive}} jours qu'on s'est pas vus.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="body">
+                            <p>Salut {{name}},</p>
+
+                            <p>Je remarque que tu n'es pas revenu sur OneFood depuis un moment. Pas de pression — c'est juste pour te dire qu'on continue à améliorer l'app et que ta créature t'attend toujours.</p>
+
+                            <div class="news">
+                                <p class="news-title">📰 Quoi de neuf depuis ton départ</p>
+                                <div class="news-item"><strong>Photo IA plus rapide</strong> — analyse en 3 secondes au lieu de 5</div>
+                                <div class="news-item"><strong>FAQ in-app</strong> — réponses aux questions courantes</div>
+                                <div class="news-item"><strong>Données de santé conformes RGPD</strong> — full transparence sur ce qu'on collecte</div>
+                                <div class="news-item"><strong>Streak qui résiste</strong> — un jour raté ne casse plus tout</div>
+                            </div>
+
+                            <div class="promo">
+                                <p class="promo-title">🎁 1 mois Premium offert</p>
+                                <p class="promo-desc">Code <strong>RETOUR1MOIS</strong> à entrer au paiement. Valable 14 jours.</p>
+                            </div>
+
+                            <div class="cta-wrap">
+                                <a href="{{appUrl}}" class="cta">Reprendre OneFood</a>
+                            </div>
+
+                            <p>Si OneFood ne te convient plus, dis-le moi en réponse — je veux comprendre ce qu'on aurait pu faire mieux. Vraiment.</p>
+
+                            <p>— David, OneFood</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="footer">
+                            <p>OneFood · Suivi nutrition &amp; muscu IA<br>
+                            <a href="{{appUrl}}">1food.fr</a> · <a href="mailto:{{supportEmail}}">{{supportEmail}}</a></p>
+                            <p>Tu reçois cet email parce que tu as un compte OneFood et que tu n'es pas revenu depuis {{daysInactive}} jours.<br>
+                            <a href="{{unsubscribeUrl}}">Se désinscrire des emails de réactivation</a> · <a href="{{appUrl}}/privacy.html">Confidentialité</a></p>
+                            <p>© {{currentYear}} OneFood. Tous droits réservés.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

@@ -1,0 +1,40 @@
+Plus que {{daysLeft}} jours d'essai, {{name}}
+
+Ton essai gratuit Premium se termine bientôt.
+
+VOICI CE QUE TU AS ACCOMPLI PENDANT TON ESSAI :
+- {{mealsLogged}} repas loggés
+- {{streak}} jours de streak
+
+Pas mal du tout. Pour continuer à logger tes repas en photo, suivre ta
+créature et garder ton historique, passe en Premium.
+
+PREMIUM ANNUEL : 14,99 € PAR AN
+Soit 1,25 €/mois.
+
+Comparé à MyFitnessPal Premium (95 €/an), tu économises 80 €.
+
+Continuer en Premium : {{appUrl}}
+
+Tu peux aussi prendre le mensuel à 3,99 €/mois si tu préfères.
+
+PAS CONVAINCU ?
+Tu peux garder le plan gratuit (saisie manuelle, recherche, base 500+
+aliments). Mais tu perdras :
+- Photo IA illimitée (l'arme secrète)
+- Chat IA pour décortiquer un plat complexe
+- Synchronisation cloud multi-appareils
+- Pas de pub, pour toujours
+
+Une question avant de décider ? Réponds à cet email, je suis là.
+— David
+
+---
+OneFood · Suivi nutrition & muscu IA
+{{appUrl}} · {{supportEmail}}
+
+Tu reçois cet email car tu as un essai Premium en cours.
+Se désinscrire des emails marketing : {{unsubscribeUrl}}
+Confidentialité : {{appUrl}}/privacy.html
+
+© {{currentYear}} OneFood. Tous droits réservés.

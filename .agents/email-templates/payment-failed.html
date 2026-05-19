@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>OneFood — Paiement échoué</title>
+    <style>
+        body { margin: 0; padding: 0; background: #f4f4f7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1a1a1a; }
+        a { color: #EF4444; text-decoration: none; }
+        .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
+        .hero { background: #fef2f2; padding: 32px 24px; text-align: center; border-bottom: 4px solid #EF4444; }
+        .hero-icon { font-size: 44px; line-height: 1; }
+        .hero-title { color: #b91c1c; font-size: 24px; font-weight: 800; margin: 14px 0 6px; }
+        .hero-sub { color: #6b6b80; font-size: 15px; margin: 0; }
+        .body { padding: 30px 28px; line-height: 1.6; font-size: 15px; color: #2a2a2a; }
+        .body p { margin: 0 0 16px; }
+        .alert { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 16px 18px; margin: 22px 0; color: #78350f; font-size: 14px; }
+        .alert-title { font-weight: 700; margin: 0 0 6px; color: #92400e; }
+        .cta { display: inline-block; background: #EF4444; color: #ffffff !important; text-decoration: none; font-weight: 700; padding: 14px 32px; border-radius: 10px; font-size: 16px; }
+        .cta-wrap { text-align: center; margin: 22px 0; }
+        .checklist { background: #fafafa; border-radius: 10px; padding: 18px 20px; margin: 18px 0; }
+        .checklist li { margin-bottom: 8px; color: #4a4a4a; font-size: 14px; }
+        .footer { padding: 22px 28px; background: #f4f4f7; font-size: 12px; color: #6b6b80; text-align: center; line-height: 1.5; }
+        .footer a { color: #6b6b80; text-decoration: underline; }
+        @media (max-width: 600px) {
+            .body { padding: 22px 18px; }
+            .hero-title { font-size: 20px; }
+            .cta { display: block; }
+        }
+    </style>
+</head>
+<body>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
+        <tr>
+            <td align="center" style="padding: 20px 12px">
+                <table class="container" cellpadding="0" cellspacing="0" border="0" width="600" role="presentation" style="border-radius: 16px; overflow: hidden">
+                    <tr>
+                        <td class="hero">
+                            <div class="hero-icon" aria-hidden="true">🚨</div>
+                            <h1 class="hero-title">Paiement échoué</h1>
+                            <p class="hero-sub">Ton abonnement OneFood Premium est en attente.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="body">
+                            <p>Hey {{name}},</p>
+
+                            <p>Le prélèvement de ton abonnement OneFood Premium n'a pas pu aboutir. Pas de panique — c'est généralement une carte expirée, des fonds insuffisants ou un blocage temporaire de la banque.</p>
+
+                            <div class="cta-wrap">
+                                <a href="{{updatePaymentUrl}}" class="cta">Mettre à jour mon paiement</a>
+                            </div>
+
+                            <div class="alert">
+                                <p class="alert-title">⏳ Tu as 7 jours pour régulariser</p>
+                                <p style="margin: 0">Stripe va re-essayer automatiquement pendant 7 jours. Au-delà, ton abonnement sera annulé et tu repasseras sur le plan gratuit. Tes données restent en sécurité dans tous les cas.</p>
+                            </div>
+
+                            <p style="font-weight: 600; color: #1a1a1a">Vérifie ces points en priorité :</p>
+                            <ul class="checklist">
+                                <li>Ta carte est-elle expirée ?</li>
+                                <li>As-tu une nouvelle carte (changement de banque, fraude détectée, etc.) ?</li>
+                                <li>Ta banque a-t-elle bloqué le paiement comme suspicieux ? (un appel rapide à ton conseiller règle ça)</li>
+                                <li>Fonds suffisants sur le compte ?</li>
+                            </ul>
+
+                            <p>Si tu galères ou si tu as un doute, réponds à cet email et je t'aide directement.</p>
+
+                            <p>— David, OneFood</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="footer">
+                            <p>OneFood · Suivi nutrition &amp; muscu IA<br>
+                            <a href="{{appUrl}}">1food.fr</a> · <a href="mailto:{{supportEmail}}">{{supportEmail}}</a></p>
+                            <p>Cet email est transactionnel (gestion de ton abonnement). Tu le reçois car tu as un abonnement OneFood Premium actif.<br>
+                            <a href="{{appUrl}}/privacy.html">Confidentialité</a></p>
+                            <p>© {{currentYear}} OneFood. Tous droits réservés.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

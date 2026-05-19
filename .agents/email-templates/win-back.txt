@@ -1,0 +1,36 @@
+On t'a manqué, {{name}} ?
+
+Ça fait {{daysInactive}} jours qu'on s'est pas vus.
+
+Salut {{name}},
+
+Je remarque que tu n'es pas revenu sur OneFood depuis un moment. Pas de
+pression — c'est juste pour te dire qu'on continue à améliorer l'app et
+que ta créature t'attend toujours.
+
+QUOI DE NEUF DEPUIS TON DÉPART
+- Photo IA plus rapide — analyse en 3 secondes au lieu de 5
+- FAQ in-app — réponses aux questions courantes
+- Données de santé conformes RGPD — full transparence
+- Streak qui résiste — un jour raté ne casse plus tout
+
+🎁 1 MOIS PREMIUM OFFERT
+Code RETOUR1MOIS à entrer au paiement. Valable 14 jours.
+
+Reprendre OneFood : {{appUrl}}
+
+Si OneFood ne te convient plus, dis-le moi en réponse — je veux
+comprendre ce qu'on aurait pu faire mieux. Vraiment.
+
+— David, OneFood
+
+---
+OneFood · Suivi nutrition & muscu IA
+{{appUrl}} · {{supportEmail}}
+
+Tu reçois cet email parce que tu as un compte OneFood et que tu n'es
+pas revenu depuis {{daysInactive}} jours.
+Se désinscrire des emails de réactivation : {{unsubscribeUrl}}
+Confidentialité : {{appUrl}}/privacy.html
+
+© {{currentYear}} OneFood. Tous droits réservés.

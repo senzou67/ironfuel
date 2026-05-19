@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Bienvenue chez OneFood</title>
+    <style>
+        body { margin: 0; padding: 0; background: #f4f4f7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1a1a1a; }
+        a { color: #EF4444; text-decoration: none; }
+        .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
+        .hero { background: #EF4444; padding: 32px 24px; text-align: center; }
+        .hero-logo { display: inline-block; width: 64px; height: 64px; background: #ffffff; border-radius: 16px; line-height: 64px; font-size: 36px; font-weight: 800; color: #EF4444; }
+        .hero-title { color: #ffffff; font-size: 26px; font-weight: 800; margin: 18px 0 6px; }
+        .hero-sub { color: #ffe7e7; font-size: 15px; margin: 0; }
+        .body { padding: 30px 28px; line-height: 1.6; font-size: 15px; color: #2a2a2a; }
+        .body p { margin: 0 0 16px; }
+        .step { display: block; padding: 14px 16px; margin: 10px 0; background: #fafafa; border-left: 4px solid #EF4444; border-radius: 6px; }
+        .step-num { display: inline-block; width: 22px; height: 22px; background: #EF4444; color: #fff; border-radius: 50%; text-align: center; line-height: 22px; font-weight: 700; font-size: 13px; margin-right: 8px; vertical-align: middle; }
+        .step-text { font-weight: 600; color: #1a1a1a; }
+        .cta { display: inline-block; background: #EF4444; color: #ffffff !important; text-decoration: none; font-weight: 700; padding: 14px 28px; border-radius: 10px; font-size: 15px; }
+        .cta-wrap { text-align: center; margin: 22px 0; }
+        .feature { background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 16px 18px; margin: 22px 0; }
+        .feature-title { font-weight: 700; font-size: 15px; color: #b91c1c; margin: 0 0 6px; }
+        .footer { padding: 22px 28px; background: #f4f4f7; font-size: 12px; color: #6b6b80; text-align: center; line-height: 1.5; }
+        .footer a { color: #6b6b80; text-decoration: underline; }
+        @media (max-width: 600px) {
+            .body { padding: 22px 18px; }
+            .hero-title { font-size: 22px; }
+            .cta { display: block; }
+        }
+    </style>
+</head>
+<body>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
+        <tr>
+            <td align="center" style="padding: 20px 12px">
+                <table class="container" cellpadding="0" cellspacing="0" border="0" width="600" role="presentation" style="border-radius: 16px; overflow: hidden">
+                    <tr>
+                        <td class="hero">
+                            <div class="hero-logo" aria-hidden="true">1</div>
+                            <h1 class="hero-title">Bienvenue {{name}} 🔥</h1>
+                            <p class="hero-sub">Ton suivi nutrition et muscu commence maintenant.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="body">
+                            <p>Salut {{name}}, content de te voir débarquer chez OneFood !</p>
+                            <p>Voici les 3 trucs à faire pour bien démarrer :</p>
+
+                            <div class="step">
+                                <span class="step-num">1</span>
+                                <span class="step-text">Logge ton premier repas</span>
+                                <p style="margin: 6px 0 0; color: #555; font-size: 14px">Photo IA, vocal, code-barres ou recherche — toutes les méthodes sont gratuites.</p>
+                            </div>
+
+                            <div class="step">
+                                <span class="step-num">2</span>
+                                <span class="step-text">Choisis ta créature</span>
+                                <p style="margin: 6px 0 0; color: #555; font-size: 14px">Feu, Plante ou Eau — elle évolue avec ta régularité.</p>
+                            </div>
+
+                            <div class="step">
+                                <span class="step-num">3</span>
+                                <span class="step-text">Active les rappels</span>
+                                <p style="margin: 6px 0 0; color: #555; font-size: 14px">Repas, eau, salle — Paramètres → Notifications.</p>
+                            </div>
+
+                            <div class="cta-wrap">
+                                <a href="{{appUrl}}" class="cta">Ouvrir OneFood</a>
+                            </div>
+
+                            <div class="feature">
+                                <p class="feature-title">💡 Le truc qui change tout : Photo IA</p>
+                                <p style="margin: 0; font-size: 14px; color: #4a4a4a">Pose ton assiette, prends une photo. L'IA détecte les aliments et calcule les macros en 5 secondes. Fini la pesée fastidieuse.</p>
+                            </div>
+
+                            <p>Tu as 14 jours d'essai gratuit Premium — toutes les fonctionnalités débloquées. Pas besoin de carte bancaire pour démarrer.</p>
+
+                            <p>Une question ? Réponds à cet email, je lis tout.<br>
+                            — David, créateur de OneFood</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="footer">
+                            <p>OneFood · Suivi nutrition &amp; muscu IA<br>
+                            <a href="{{appUrl}}">1food.fr</a> · <a href="mailto:{{supportEmail}}">{{supportEmail}}</a></p>
+                            <p>Tu reçois cet email parce que tu as créé un compte OneFood.<br>
+                            <a href="{{unsubscribeUrl}}">Se désinscrire</a> · <a href="{{appUrl}}/privacy.html">Confidentialité</a></p>
+                            <p>© {{currentYear}} OneFood. Tous droits réservés.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

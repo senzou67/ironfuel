@@ -1,0 +1,39 @@
+OneFood — Paiement échoué
+
+Ton abonnement OneFood Premium est en attente.
+
+Hey {{name}},
+
+Le prélèvement de ton abonnement OneFood Premium n'a pas pu aboutir.
+Pas de panique — c'est généralement une carte expirée, des fonds
+insuffisants ou un blocage temporaire de la banque.
+
+>>> METTRE À JOUR MON PAIEMENT : {{updatePaymentUrl}}
+
+TU AS 7 JOURS POUR RÉGULARISER
+Stripe va re-essayer automatiquement pendant 7 jours. Au-delà, ton
+abonnement sera annulé et tu repasseras sur le plan gratuit. Tes
+données restent en sécurité dans tous les cas.
+
+VÉRIFIE CES POINTS EN PRIORITÉ :
+- Ta carte est-elle expirée ?
+- As-tu une nouvelle carte (changement de banque, fraude détectée, etc.) ?
+- Ta banque a-t-elle bloqué le paiement comme suspicieux ?
+  (un appel rapide à ton conseiller règle ça)
+- Fonds suffisants sur le compte ?
+
+Si tu galères ou si tu as un doute, réponds à cet email et je t'aide
+directement.
+
+— David, OneFood
+
+---
+OneFood · Suivi nutrition & muscu IA
+{{appUrl}} · {{supportEmail}}
+
+Cet email est transactionnel (gestion de ton abonnement). Tu le reçois
+car tu as un abonnement OneFood Premium actif.
+
+Confidentialité : {{appUrl}}/privacy.html
+
+© {{currentYear}} OneFood. Tous droits réservés.
