@@ -12,6 +12,7 @@ Tout est dans `assets/native-sources/` :
 | `icon-foreground.svg` | Adaptive icon — couche FOREGROUND (1024×1024, fond transparent) | "1" centré dans le 66% safe-zone |
 | `icon-background.svg` | Adaptive icon — couche BACKGROUND (solid `#EF4444`) | Aplat rouge OneFood |
 | `splash.svg` | Splash screen (2732×2732) | Fond rouge + logo + texte "OneFood" |
+| `PrivacyInfo.xcprivacy` | **Apple Privacy Manifest** (requis iOS depuis mai 2024) | Copier dans `ios/App/App/` après `cap add ios` puis l'ajouter au bundle dans Xcode. Cf. `.agents/privacy-labels-apple.md` §4. |
 
 Couleur unique : **`#EF4444`** (OneFood primary). Aucun dégradé, aucun contour blanc.
 
