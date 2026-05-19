@@ -558,14 +558,26 @@ const App = {
         } catch(e) { return; }
 
         const steps = [
-            { icon: '🍽️', title: 'Ajoute tes repas', desc: 'Appuie sur le + pour ajouter : Chat IA, Photo IA, Recherche, Code-barres ou Vocal.' },
-            { icon: '📋', title: 'Recettes favorites', desc: 'Crée tes recettes habituelles et ajoute-les en 1 clic depuis le bouton +.' },
-            { icon: '💧', title: 'Hydratation', desc: 'Clique sur le bouton eau pour ajouter 250ml. Un bonus t\'attend à l\'objectif !' },
-            { icon: '💊', title: 'Compléments', desc: 'Configure ton plan de suppléments et coche-les chaque jour.' },
-            { icon: '🏋️', title: 'Salle de sport', desc: 'Planifie ta routine hebdo et marque tes séances comme faites.' },
-            { icon: '⚖️', title: 'Suivi du poids', desc: 'Note ton poids régulièrement pour voir ta courbe de progression.' },
-            { icon: '🐣', title: 'Ta créature', desc: 'Plus tu es régulier, plus elle gagne d\'XP et évolue ! 3 types, 4 formes.' },
-            { icon: '🔔', title: 'Notifications', desc: 'Active les rappels dans Paramètres pour ne rien oublier : repas, eau, salle, compléments.' }
+            {
+                icon: '📸',
+                title: 'Photo IA — Ton secret',
+                desc: 'Pose ton assiette, prends une photo. L\'IA détecte les aliments et calcule calories + macros en 5 secondes. Fini la pesée fastidieuse.'
+            },
+            {
+                icon: '⚡',
+                title: '5 façons d\'ajouter',
+                desc: 'Photo IA, Chat IA, Vocal, Code-barres, Recherche — toutes gratuites. Pas de paywall sur la base, contrairement aux autres apps.'
+            },
+            {
+                icon: '🐣',
+                title: 'Ta créature évolue',
+                desc: 'Plus tu logges régulièrement, plus elle gagne d\'XP et évolue. 3 types (Feu, Plante, Eau), 4 formes. Une raison de revenir chaque jour.'
+            },
+            {
+                icon: '🔔',
+                title: 'Habitudes qui tiennent',
+                desc: 'Streak quotidienne + rappels intelligents (repas, hydratation, salle). Active les notifications dans Paramètres pour rester motivé.'
+            }
         ];
 
         let currentStep = 0;
@@ -641,7 +653,10 @@ const Onboarding = {
         const existing = document.querySelector('.onboarding-overlay');
         if (existing) existing.remove();
 
-        const steps = [this.stepWelcome, this.stepBody, this.stepGoal, this.stepStarter];
+        // CRO order: Welcome → Goal (commitment) → Body (data entry) → Starter.
+        // Asking for the goal BEFORE the 5-field body form measurably lifts
+        // completion in nutrition apps (cf. Noom / Cal AI patterns).
+        const steps = [this.stepWelcome, this.stepGoal, this.stepBody, this.stepStarter];
         if (this.step >= steps.length) {
             this.finish();
             return;
@@ -689,8 +704,8 @@ const Onboarding = {
     stepBody() {
         return `
             <div class="ob-icon">🔥</div>
-            <h2>Vos informations</h2>
-            <p>Pour calculer vos besoins caloriques quotidiens.</p>
+            <h2>Tes infos</h2>
+            <p>Pour calculer tes besoins caloriques quotidiens.</p>
             <div style="max-width:300px;margin:0 auto;text-align:left">
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
                     <div class="form-group">
@@ -734,9 +749,9 @@ const Onboarding = {
 
     stepGoal() {
         return `
-            <div class="ob-icon">🏋️</div>
-            <h2>Votre objectif</h2>
-            <p>Nous ajusterons vos calories en conséquence.</p>
+            <div class="ob-icon">🎯</div>
+            <h2>Ton objectif ?</h2>
+            <p>On ajuste tes calories selon ton intention.</p>
             <div style="max-width:300px;margin:0 auto;display:flex;flex-direction:column;gap:12px">
                 <button class="btn btn-outline ob-goal-btn" data-goal="lose" onclick="Onboarding.selectGoal('lose')" style="width:100%;justify-content:flex-start;gap:12px">
                     📉 Perdre du poids
@@ -807,7 +822,7 @@ const Onboarding = {
     },
 
     next() {
-        // Save current step data
+        // Save current step data. Step indices match the order in renderStep().
         if (this.step === 0) {
             const name = document.getElementById('ob-name')?.value?.trim();
             if (!name) {
@@ -815,7 +830,8 @@ const Onboarding = {
                 return;
             }
             this._name = name;
-        } else if (this.step === 1) {
+        } else if (this.step === 2) {
+            // Body step (now after Goal — see CRO comment in renderStep)
             this._sex = document.getElementById('ob-sex').value;
             this._age = parseInt(document.getElementById('ob-age').value) || 30;
             this._height = parseInt(document.getElementById('ob-height').value) || 175;
