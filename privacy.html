@@ -50,7 +50,9 @@
             <tr><td>Photos (caméra IA)</td><td>Reconnaissance d'aliments par IA</td><td>Consentement explicite</td></tr>
             <tr><td>Données de paiement (Stripe, PayPal, Apple In-App Purchase, Google Play Billing)</td><td>Gestion abonnement Premium et dons</td><td>Exécution du contrat</td></tr>
             <tr><td>Token FCM (notifications)</td><td>Envoi de notifications push</td><td>Consentement</td></tr>
-            <tr><td>Adresse IP (hashée)</td><td>Prévention de fraude (essai gratuit)</td><td>Intérêt légitime</td></tr>
+            <tr><td>Adresse IP (hashée SHA-256)</td><td>Prévention de fraude (essai gratuit)</td><td>Intérêt légitime</td></tr>
+            <tr><td>Logs d'erreurs techniques (stack trace, URL, userAgent, pays)</td><td>Stabilité de l'application et correction de bugs</td><td>Intérêt légitime</td></tr>
+            <tr><td>Événements d'usage (page vue, ajout aliment, etc.)</td><td>Mesure d'audience et amélioration produit</td><td>Intérêt légitime</td></tr>
         </table>
 
         <div class="highlight">
@@ -71,7 +73,7 @@
             <li><strong>RevenueCat, Inc.</strong> — Plateforme de gestion unifiée des abonnements in-app multi-plateformes (iOS/Android) — 153 Townsend Street, San Francisco, CA 94107, USA</li>
             <li><strong>Google Gemini AI</strong> (modèle Gemini Vision, Google LLC) — Analyse en temps réel des photos d'aliments pour la fonctionnalité Photo IA. Les images sont transmises à l'API Google uniquement pour la durée de l'analyse (quelques secondes), <strong>ne sont jamais stockées</strong> ni par OneFood ni par Google après traitement, et <strong>ne sont jamais utilisées pour entraîner des modèles d'IA</strong> (conformément aux conditions d'utilisation de l'API Gemini en mode payant)</li>
             <li><strong>OpenFoodFacts</strong> — Base de données alimentaire ouverte (aucune donnée personnelle transmise)</li>
-            <li><strong>Sentry</strong> (Functional Software, Inc.) — Monitoring des erreurs techniques (logs anonymisés, aucune donnée de santé transmise) — 132 Hawthorne Street, San Francisco, CA 94107, USA</li>
+            <li><strong>Firebase Analytics</strong> (Google LLC) — Mesure d'audience produit et événements d'usage de l'application (ouverture de l'app, pages vues, ajout d'aliments, scan code-barres, recherche, photo IA, affichage paywall, action abonnement, ajout d'eau, don, premier repas, changement d'avatar). Les événements sont associés à votre identifiant Firebase. Aucune donnée nutritionnelle détaillée (poids, quantités caloriques précises, objectifs santé) n'est transmise — uniquement le type d'événement et des métadonnées techniques.</li>
         </ul>
 
         <h2>5. Transferts hors Union Européenne</h2>
@@ -111,12 +113,13 @@
         <p>Vous pouvez également déposer une réclamation auprès de la CNIL : <a href="https://www.cnil.fr" target="_blank" rel="noopener">www.cnil.fr</a></p>
 
         <h2>9. Cookies et traceurs</h2>
-        <p>OneFood utilise uniquement des <strong>cookies fonctionnels</strong> :</p>
+        <p>OneFood utilise les cookies et stockages suivants :</p>
         <ul>
-            <li><strong>localStorage</strong> — Stockage des données utilisateur et préférences de l'application</li>
-            <li><strong>Firebase Auth</strong> — Gestion de la session d'authentification</li>
+            <li><strong>localStorage</strong> (cookies fonctionnels) — Stockage des données utilisateur et préférences de l'application (clés préfixées <code>nutritrack_*</code>)</li>
+            <li><strong>Firebase Auth</strong> (cookies fonctionnels) — Gestion de la session d'authentification</li>
+            <li><strong>Firebase Analytics</strong> (cookies de mesure d'audience) — Événements d'usage produit pour comprendre comment l'application est utilisée et l'améliorer. Cf. §4 pour la liste exhaustive des événements collectés.</li>
         </ul>
-        <p>Aucun cookie tiers, publicitaire ou de suivi n'est déposé. Aucun traceur analytique n'est utilisé.</p>
+        <p>Aucun cookie publicitaire ni tracker tiers (Google Analytics 4 web, Meta Pixel, etc.) n'est déposé.</p>
 
         <h2>10. Sécurité</h2>
         <ul>
