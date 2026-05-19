@@ -59,12 +59,16 @@
     <meta property="og:image" content="https://1food.fr/assets/og-image.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="OneFood — Suivi nutrition & musculation par IA">
+    <meta property="og:site_name" content="OneFood">
+    <meta property="og:locale" content="fr_FR">
 
     <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary">
+    <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="OneFood — Suivi Nutrition & Musculation">
     <meta name="twitter:description" content="Photo IA, vocal, 500+ aliments, créature fitness. Ton coach nutrition intelligent.">
     <meta name="twitter:image" content="https://1food.fr/assets/og-image.png">
+    <meta name="twitter:image:alt" content="OneFood — Suivi nutrition & musculation par IA">
 
     <title>OneFood — Suivi nutrition & musculation IA | 14,99 €/an</title>
 
@@ -169,7 +173,7 @@
     <!-- Force cache bust — fetches /version.json DIRECTLY from server bypassing SW -->
     <script>
         (function(){
-            var LOCAL_V = 138; // Must match version.json
+            var LOCAL_V = 139; // Must match version.json
             var lsWorks = true;
             try {
                 localStorage.setItem('_test', '1');
@@ -285,7 +289,34 @@
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             </button>
         </header>
-        <main id="page-content" tabindex="-1" role="main"></main>
+        <main id="page-content" tabindex="-1" role="main">
+            <noscript>
+                <div style="max-width:680px;margin:32px auto;padding:0 20px;color:#e0e0e0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;line-height:1.6">
+                    <h2 style="color:#EF4444;font-size:24px;margin-bottom:14px">OneFood — Suivi nutrition &amp; musculation par IA</h2>
+                    <p style="margin-bottom:14px">OneFood est une alternative française à MyFitnessPal qui simplifie le suivi de tes repas grâce à l'intelligence artificielle. Pose ton assiette, prends une photo, et l'IA Gemini reconnaît les aliments en quelques secondes — calories, protéines, glucides, lipides, fibres.</p>
+
+                    <h3 style="font-size:18px;margin:20px 0 10px">Fonctionnalités principales</h3>
+                    <ul style="padding-left:20px;margin-bottom:14px">
+                        <li><strong>Photo IA</strong> — Reconnaissance instantanée de tes plats par l'IA Gemini de Google</li>
+                        <li><strong>Chat IA, vocal, code-barres, recherche</strong> — 5 façons d'ajouter, toutes gratuites</li>
+                        <li><strong>Base de 500+ aliments</strong> curée pour le marché français + OpenFoodFacts</li>
+                        <li><strong>Suivi musculation</strong> — Planning hebdo, séances, compléments</li>
+                        <li><strong>Créature évolutive</strong> qui gagne de l'XP avec ta régularité (anti-abandon)</li>
+                        <li><strong>Streak quotidienne</strong> et rappels intelligents</li>
+                    </ul>
+
+                    <h3 style="font-size:18px;margin:20px 0 10px">Tarifs</h3>
+                    <p style="margin-bottom:8px">Plan gratuit à vie pour la saisie manuelle et la recherche.</p>
+                    <p style="margin-bottom:8px"><strong>Premium annuel : 14,99 €/an</strong> (1,25 €/mois) — contre 95 €/an pour MyFitnessPal Premium.</p>
+                    <p style="margin-bottom:14px">Premium mensuel : 3,99 €/mois. Essai gratuit 14 jours, sans carte bancaire.</p>
+
+                    <h3 style="font-size:18px;margin:20px 0 10px">Activer JavaScript pour utiliser OneFood</h3>
+                    <p style="margin-bottom:14px">OneFood est une application web progressive (PWA) qui nécessite JavaScript pour fonctionner. Active JavaScript dans ton navigateur puis recharge la page.</p>
+
+                    <p style="margin-bottom:14px"><a href="/faq.html" style="color:#EF4444">FAQ</a> · <a href="/onefood-vs-myfitnesspal.html" style="color:#EF4444">Comparatif vs MyFitnessPal</a> · <a href="/privacy.html" style="color:#EF4444">Confidentialité</a> · <a href="/terms.html" style="color:#EF4444">CGU</a></p>
+                </div>
+            </noscript>
+        </main>
         <div id="fab-menu" class="fab-menu hidden" role="dialog" aria-label="Menu d'ajout" aria-hidden="true">
             <div class="fab-overlay" onclick="App.closeFabMenu()" aria-hidden="true"></div>
             <div class="fab-options" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:16px;max-width:320px;margin:0 auto">
