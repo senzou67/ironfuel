@@ -171,6 +171,10 @@ const Modal = {
                     e.preventDefault();
                     first.focus();
                 }
+            } else if (e.key === 'Escape') {
+                // WCAG 2.1.2 — modal must be dismissible with keyboard.
+                e.preventDefault();
+                Modal.close();
             }
         };
         overlay.addEventListener('keydown', onKeydown);

@@ -643,7 +643,7 @@ const SettingsPage = {
                 <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1.5px solid var(--border);border-radius:12px;margin-bottom:6px;background:var(--surface)">
                     <span style="font-size:20px;cursor:pointer" onclick="SettingsPage._pickMealIcon(${i})" id="meal-icon-${i}">${m.icon}</span>
                     <input type="text" value="${m.name}" class="form-input meal-name-input" data-idx="${i}" style="flex:1;font-size:14px;font-weight:600;padding:8px 10px;border-radius:8px">
-                    ${current.length > 2 ? `<button onclick="SettingsPage._removeMeal(${i})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;padding:4px">✕</button>` : ''}
+                    ${current.length > 2 ? `<button onclick="SettingsPage._removeMeal(${i})" aria-label="Supprimer le repas ${m.name}" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;min-width:44px;min-height:44px;padding:10px;display:flex;align-items:center;justify-content:center">✕</button>` : ''}
                 </div>
             `).join('');
 

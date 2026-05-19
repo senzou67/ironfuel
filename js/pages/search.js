@@ -396,8 +396,9 @@ const SearchPage = {
         // Check for photo: custom food photo > curated/cached image > category icon
         const customPhoto = isCustom && food.photo ? food.photo : null;
         const cachedImg = customPhoto || ((typeof FoodImageService !== 'undefined') ? FoodImageService.getCachedImage(food.name) : null);
+        const safeFoodName = this._escapeHtml(food.name);
         const thumbContent = cachedImg
-            ? `<img src="${cachedImg}" alt="" loading="lazy" decoding="async" class="lazy-img loaded" style="width:100%;height:100%;object-fit:cover;border-radius:8px" onerror="this.parentElement.innerHTML='<span>${catIcon}</span>';this.parentElement.style.background='${catColor}20';this.parentElement.style.border='1.5px solid ${catColor}40'">`
+            ? `<img src="${cachedImg}" alt="${safeFoodName}" loading="lazy" decoding="async" class="lazy-img loaded" style="width:100%;height:100%;object-fit:cover;border-radius:8px" onerror="this.parentElement.innerHTML='<span>${catIcon}</span>';this.parentElement.style.background='${catColor}20';this.parentElement.style.border='1.5px solid ${catColor}40'">`
             : `<span aria-hidden="true">${catIcon}</span>`;
         const thumbStyle = cachedImg
             ? 'background:none;border:none;overflow:hidden'
@@ -431,7 +432,7 @@ const SearchPage = {
         return `
             <div class="search-result-item online-item" onclick="SearchPage.selectOnlineFood(${index})">
                 <div class="result-info" style="display:flex;align-items:center;gap:8px">
-                    ${safeImage ? `<img src="${safeImage}" alt="" loading="lazy" decoding="async" style="width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0">` : ''}
+                    ${safeImage ? `<img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async" style="width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0">` : ''}
                     <div>
                         <div class="result-name">${safeName}</div>
                         <div class="result-detail">
