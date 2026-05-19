@@ -75,6 +75,13 @@ const SettingsPage = {
 
                 <div class="settings-group">
                     <div class="settings-group-title">Données</div>
+                    <button class="settings-item" onclick="SettingsPage.mfpImport()">
+                        <span>📥 Importer depuis MyFitnessPal</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                        </svg>
+                    </button>
+                    <input type="file" id="mfp-csv-input" accept=".csv,text/csv" style="display:none" onchange="SettingsPage._mfpHandleFile(event)">
                     <button class="settings-item" onclick="SettingsPage.clearData()" style="color:var(--danger)">
                         <span>Réinitialiser toutes les données</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2">
@@ -346,6 +353,182 @@ const SettingsPage = {
             }
         };
         reader.readAsText(file);
+    },
+
+    // ===== MYFITNESSPAL CSV IMPORT =====
+    // 3-step flow : (1) explain + open file picker, (2) parse + preview, (3) confirm + import.
+    mfpImport() {
+        Modal.show(`
+            <div style="text-align:left">
+                <div style="text-align:center;font-size:42px;margin-bottom:10px" aria-hidden="true">📥</div>
+                <div class="modal-title" style="text-align:center;margin-bottom:8px">Importer depuis MyFitnessPal</div>
+                <p style="color:var(--text-secondary);font-size:14px;line-height:1.5;margin-bottom:14px">
+                    Récupère tout ton historique alimentaire en quelques secondes. Ton journal MFP fusionne avec OneFood, sans doublons.
+                </p>
+                <div style="background:var(--surface-alt);border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:13px;line-height:1.6;color:var(--text)">
+                    <strong>Comment exporter ton CSV depuis MyFitnessPal :</strong>
+                    <ol style="padding-left:20px;margin:8px 0 0">
+                        <li>Connecte-toi à <a href="https://www.myfitnesspal.com" target="_blank" rel="noopener" style="color:var(--primary)">myfitnesspal.com</a> (compte Premium requis pour l'export)</li>
+                        <li>Settings → Export Data → Food Log</li>
+                        <li>Choisis la période et télécharge le CSV</li>
+                        <li>Reviens ici et sélectionne le fichier</li>
+                    </ol>
+                </div>
+                <div style="display:flex;gap:10px">
+                    <button class="btn btn-secondary" onclick="Modal.close()" style="flex:1">Annuler</button>
+                    <button class="btn btn-primary" onclick="document.getElementById('mfp-csv-input').click();Modal.close()" style="flex:2">Choisir un fichier CSV</button>
+                </div>
+            </div>
+        `);
+    },
+
+    _mfpHandleFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        // Reset input so the same file can be re-selected if needed
+        event.target.value = '';
+
+        // Quick sanity check : MFP exports are rarely > 5 MB even for years of data
+        if (file.size > 10 * 1024 * 1024) {
+            App.showToast('Fichier trop volumineux (max 10 MB)');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                if (typeof MFPImportService === 'undefined') {
+                    App.showToast('Service d\'import non chargé, recharge la page');
+                    return;
+                }
+                const result = MFPImportService.parse(e.target.result);
+                this._mfpShowPreview(result);
+            } catch (err) {
+                App.showToast(err.message || 'Fichier CSV invalide');
+            }
+        };
+        reader.onerror = () => App.showToast('Impossible de lire le fichier');
+        reader.readAsText(file);
+    },
+
+    _mfpShowPreview(result) {
+        const { entries, summary, errors } = result;
+        if (entries.length === 0) {
+            Modal.show(`
+                <div style="text-align:center">
+                    <div style="font-size:42px;margin-bottom:10px" aria-hidden="true">⚠️</div>
+                    <div class="modal-title">Aucune entrée valide</div>
+                    <p style="color:var(--text-secondary);font-size:14px;margin:10px 0 16px">
+                        Le fichier ne contient pas de données exploitables. Vérifie qu'il s'agit bien d'un export MyFitnessPal "Food Log".
+                    </p>
+                    ${errors.length ? `<p style="font-size:12px;color:var(--danger);background:var(--surface-alt);padding:10px;border-radius:8px;text-align:left;max-height:120px;overflow:auto">${errors.slice(0, 5).map(e => SettingsPage._mfpEscape(e)).join('<br>')}${errors.length > 5 ? `<br>… +${errors.length - 5} autres` : ''}</p>` : ''}
+                    <button class="btn btn-primary" onclick="Modal.close()" style="margin-top:14px;width:100%">OK</button>
+                </div>
+            `);
+            return;
+        }
+
+        // Stash entries for the confirm step (avoid stringifying into the DOM)
+        this._mfpPendingEntries = entries;
+
+        const mealNames = { breakfast: 'Petit-déj', lunch: 'Déjeuner', dinner: 'Dîner', snack: 'Collation' };
+        const breakdownHtml = Object.entries(summary.mealBreakdown)
+            .map(([id, n]) => `<span style="display:inline-block;background:var(--surface-alt);padding:4px 10px;border-radius:12px;font-size:12px;margin-right:6px;margin-bottom:6px">${mealNames[id] || id} : ${n}</span>`)
+            .join('');
+
+        Modal.show(`
+            <div style="text-align:left">
+                <div style="text-align:center;font-size:42px;margin-bottom:10px" aria-hidden="true">✅</div>
+                <div class="modal-title" style="text-align:center;margin-bottom:8px">Prêt à importer</div>
+
+                <div style="background:var(--surface-alt);border-radius:10px;padding:14px 16px;margin-bottom:14px">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+                        <div>
+                            <div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px">Entrées</div>
+                            <div style="font-size:22px;font-weight:800;color:var(--primary)">${summary.count}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px">Kcal totales</div>
+                            <div style="font-size:22px;font-weight:800;color:var(--primary)">${summary.totalCalories.toLocaleString('fr-FR')}</div>
+                        </div>
+                    </div>
+                    <div style="font-size:13px;color:var(--text-secondary);margin-bottom:8px">
+                        Du <strong style="color:var(--text)">${summary.dateMin}</strong> au <strong style="color:var(--text)">${summary.dateMax}</strong>
+                    </div>
+                    <div>${breakdownHtml}</div>
+                </div>
+
+                ${errors.length ? `
+                    <div style="background:#3a2a1a;border-left:3px solid #fbbf24;border-radius:6px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#fcd34d">
+                        ⚠️ ${errors.length} ligne${errors.length > 1 ? 's' : ''} ignorée${errors.length > 1 ? 's' : ''} (données invalides — voir console pour détail)
+                    </div>
+                ` : ''}
+
+                <p style="font-size:13px;color:var(--text-secondary);line-height:1.5;margin-bottom:14px">
+                    Les entrées fusionnent avec ton journal OneFood. Les doublons (même nom + calories sur le même repas) sont automatiquement skip.
+                </p>
+
+                <div style="display:flex;gap:10px">
+                    <button class="btn btn-secondary" onclick="Modal.close()" style="flex:1">Annuler</button>
+                    <button class="btn btn-primary" onclick="SettingsPage._mfpConfirm()" style="flex:2">Importer ${summary.count} entrées</button>
+                </div>
+            </div>
+        `);
+
+        // Log the full errors list to console for debugging
+        if (errors.length > 0) console.warn('[MFP Import] Errors :', errors);
+    },
+
+    async _mfpConfirm() {
+        const entries = this._mfpPendingEntries;
+        if (!entries || entries.length === 0) { Modal.close(); return; }
+
+        // Replace modal content with progress UI (don't close, keep focus trap)
+        const modalContent = document.querySelector('.modal-content');
+        if (modalContent) {
+            modalContent.innerHTML = `
+                <div style="text-align:center;padding:14px 0">
+                    <div style="font-size:42px;margin-bottom:10px" aria-hidden="true">⏳</div>
+                    <div class="modal-title">Import en cours…</div>
+                    <p id="mfp-progress" style="color:var(--text-secondary);font-size:14px;margin:10px 0">0 / ${entries.length}</p>
+                    <div style="background:var(--surface-alt);border-radius:8px;height:8px;overflow:hidden;margin-top:8px">
+                        <div id="mfp-progress-bar" style="background:var(--primary);height:100%;width:0%;transition:width 0.2s"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        try {
+            const result = await MFPImportService.importEntries(entries, {
+                onProgress: (done, total) => {
+                    const txt = document.getElementById('mfp-progress');
+                    const bar = document.getElementById('mfp-progress-bar');
+                    if (txt) txt.textContent = `${done} / ${total}`;
+                    if (bar) bar.style.width = `${Math.round((done / total) * 100)}%`;
+                }
+            });
+
+            this._mfpPendingEntries = null;
+            Modal.close();
+            App.showToast(`✅ ${result.imported} entrées importées${result.skippedExisting ? ` (${result.skippedExisting} doublons skip)` : ''}`);
+            // Force sync to cloud after import
+            if (typeof SyncService !== 'undefined' && SyncService.isReady && SyncService.isReady()) {
+                SyncService.saveAll();
+            }
+            // Refresh dashboard if currently visible
+            if (typeof DashboardPage !== 'undefined' && DashboardPage.render && App.currentPage === 'dashboard') {
+                DashboardPage.render();
+            }
+        } catch (err) {
+            Modal.close();
+            App.showToast('Erreur d\'import : ' + (err.message || 'inconnue'));
+        }
+    },
+
+    _mfpEscape(s) {
+        const d = document.createElement('div');
+        d.textContent = String(s);
+        return d.innerHTML;
     },
 
     clearData() {
