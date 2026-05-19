@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aide & FAQ — OneFood</title>
+    <meta name="description" content="Centre d'aide OneFood : Photo IA, abonnement Premium, suppression de compte, données personnelles, support technique. Réponses aux questions fréquentes.">
+    <link rel="canonical" href="https://1food.fr/faq.html">
+    <meta property="og:title" content="Aide & FAQ — OneFood">
+    <meta property="og:description" content="Comment utiliser Photo IA, gérer ton abonnement, supprimer ton compte. Toutes les réponses.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://1food.fr/faq.html">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "Comment utiliser la Photo IA ?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Ouvre OneFood, appuie sur le bouton + en bas de l'écran et choisis Photo IA. Prends ton assiette en photo en cadrant bien tous les aliments. L'IA analyse l'image en 2-3 secondes et te propose les aliments détectés avec leur poids estimé. Tu peux ajuster les quantités avant d'ajouter au journal." } },
+        { "@type": "Question", "name": "Mes photos sont-elles stockées ?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Non. Les photos sont envoyées à l'API Google Gemini pour analyse puis immédiatement supprimées des serveurs OneFood. Google supprime également l'image après traitement (pas de conservation). Aucune photo n'est associée à ton compte." } },
+        { "@type": "Question", "name": "Quel est le prix de OneFood Premium ?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Premium annuel : 14,99 €/an (soit 1,25 €/mois). Premium mensuel : 3,99 €/mois. Tu bénéficies de 14 jours d'essai gratuit sans engagement. Plan gratuit à vie disponible pour le journal alimentaire et la recherche manuelle." } },
+        { "@type": "Question", "name": "Comment résilier mon abonnement Premium ?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Va dans Paramètres → Mon abonnement → Gérer mon abonnement. Tu seras redirigé vers le portail de paiement (Stripe sur web, App Store ou Play Store sur mobile) où tu peux annuler en 2 clics. La résiliation est immédiate et tu gardes l'accès Premium jusqu'à la fin de la période payée." } },
+        { "@type": "Question", "name": "Comment supprimer mon compte et mes données ?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Va dans Paramètres → Données → Supprimer mon compte. Tape SUPPRIMER pour confirmer. Cela efface : profil, journal alimentaire, créature, historique, abonnement actif. La suppression est définitive et conforme RGPD. Tes données sont effacées sous 30 jours maximum." } },
+        { "@type": "Question", "name": "Puis-je exporter mes données ?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Oui. Va dans Paramètres → Données → Exporter mes données. Tu reçois un fichier JSON contenant tout ton profil, ton journal, tes recettes et tes objectifs. Conforme à l'article 20 du RGPD (droit à la portabilité)." } },
+        { "@type": "Question", "name": "OneFood fonctionne-t-elle hors ligne ?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Oui pour la saisie manuelle et la consultation de ton journal. Photo IA, Chat IA et la recherche en ligne (Open Food Facts) nécessitent une connexion. Tes ajouts hors ligne sont synchronisés automatiquement dès que tu retrouves le réseau." } },
+        { "@type": "Question", "name": "Les calories des aliments sont-elles fiables ?",
+          "acceptedAnswer": { "@type": "Answer", "text": "OneFood s'appuie sur trois sources : une base curée de 500+ aliments français (vérifiés contre USDA + Open Food Facts), Open Food Facts pour les produits industriels (via scan code-barres), et l'enrichissement automatique via USDA pour la Photo IA. Les fibres sont comptées à 2 kcal/g. Marge d'erreur typique : ±5%." } },
+        { "@type": "Question", "name": "Comment Photo IA estime-t-elle les quantités ?",
+          "acceptedAnswer": { "@type": "Answer", "text": "L'IA compare la taille apparente des aliments à une assiette standard (26cm de diamètre) puis applique des portions de référence (1 œuf = 50g, 1 filet de poulet = 130g, etc.). Tu peux toujours ajuster manuellement après l'analyse avant d'ajouter au journal." } },
+        { "@type": "Question", "name": "Pourquoi un avis 'avis médical' au lancement ?",
+          "acceptedAnswer": { "@type": "Answer", "text": "OneFood est un outil informatif, pas un avis médical. Si tu as une condition médicale (diabète, grossesse, allaitement, trouble du comportement alimentaire, traitement en cours), consulte un médecin ou diététicien avant de modifier ton alimentation. C'est une mention de bonne pratique demandée par les régulateurs santé." } },
+        { "@type": "Question", "name": "L'IA peut-elle se tromper ?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Oui. Photo IA est fiable à ~90% sur des plats simples mais peut hésiter sur des plats composites, des ingrédients cachés (sauces, matières grasses ajoutées) ou des photos floues. Vérifie toujours les valeurs proposées avant d'ajouter au journal." } },
+        { "@type": "Question", "name": "Quel est l'âge minimum pour utiliser OneFood ?",
+          "acceptedAnswer": { "@type": "Answer", "text": "13 ans minimum conformément au RGPD européen. Cette restriction est appliquée à l'inscription et à la souscription Premium." } },
+        { "@type": "Question", "name": "Comment contacter le support ?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Envoie un email à contact@1food.fr. Réponse sous 48h ouvrées. Pour les bugs urgents, précise le navigateur, l'appareil et une capture d'écran si possible." } }
+      ]
+    }
+    </script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #121212; color: #e0e0e0; line-height: 1.7; }
+        .container { max-width: 720px; margin: 0 auto; padding: 24px 16px 60px; }
+        .back-link { display: inline-flex; align-items: center; gap: 6px; color: #EF4444; text-decoration: none; font-weight: 600; font-size: 14px; margin-bottom: 20px; }
+        .back-link:hover { text-decoration: underline; }
+        h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; color: #fff; }
+        .subtitle { font-size: 15px; color: #bdbdbd; margin-bottom: 28px; }
+        h2 { font-size: 20px; font-weight: 700; margin: 36px 0 14px; color: #fff; padding-bottom: 8px; border-bottom: 1px solid #2a2a2a; }
+        details { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; margin-bottom: 10px; overflow: hidden; transition: background 0.2s; }
+        details[open] { background: #1f1f1f; }
+        details summary { padding: 14px 18px; cursor: pointer; font-weight: 600; font-size: 15px; color: #fff; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        details summary::-webkit-details-marker { display: none; }
+        details summary::after { content: '+'; color: #EF4444; font-size: 22px; font-weight: 700; transition: transform 0.2s; }
+        details[open] summary::after { transform: rotate(45deg); }
+        details summary:hover { background: rgba(239, 68, 68, 0.05); }
+        details .answer { padding: 0 18px 18px; font-size: 14px; color: #cdcdcd; line-height: 1.7; }
+        details .answer p + p { margin-top: 10px; }
+        .contact-box { background: linear-gradient(135deg, #2a1515, #1f1f1f); border: 2px solid #EF4444; padding: 22px; border-radius: 14px; text-align: center; margin: 36px 0 16px; }
+        .contact-box h3 { color: #fff; font-size: 18px; margin: 0 0 8px; }
+        .contact-box p { color: #cdcdcd; font-size: 14px; margin-bottom: 12px; }
+        .contact-box a { display: inline-block; background: #EF4444; color: #fff; font-weight: 700; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-size: 15px; }
+        .contact-box a:hover { background: #DC2626; }
+        .related-links { margin-top: 24px; font-size: 14px; color: #9e9e9e; }
+        .related-links a { color: #EF4444; text-decoration: none; margin-right: 12px; }
+        .related-links a:hover { text-decoration: underline; }
+        a { color: #EF4444; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/index.html" class="back-link">&larr; Retour à OneFood</a>
+        <h1>Aide & FAQ</h1>
+        <p class="subtitle">Réponses aux questions les plus fréquentes. Pas trouvé ton problème ? <a href="mailto:contact@1food.fr">Contacte-nous</a>.</p>
+
+        <h2>🚀 Bien démarrer</h2>
+        <details>
+            <summary>Comment utiliser la Photo IA ?</summary>
+            <div class="answer">
+                <p>Ouvre OneFood, appuie sur le bouton <strong>+</strong> en bas de l'écran et choisis <strong>Photo IA</strong>. Prends ton assiette en photo en cadrant bien tous les aliments. L'IA analyse l'image en 2-3 secondes et te propose les aliments détectés avec leur poids estimé.</p>
+                <p>Tu peux ajuster les quantités avant d'ajouter au journal. <strong>Astuce</strong> : un bon éclairage et un cadrage rapproché améliorent énormément la précision.</p>
+            </div>
+        </details>
+        <details>
+            <summary>Comment fonctionne le Chat IA ?</summary>
+            <div class="answer">
+                <p>Décris ce que tu as mangé en langage naturel — par exemple <em>« un steak haché de 150g, du riz et une salade verte »</em>. L'IA décompose chaque aliment et applique les portions standards si tu n'as pas précisé.</p>
+                <p>Idéal quand tu n'as pas pris de photo ou que tu loggies a posteriori.</p>
+            </div>
+        </details>
+        <details>
+            <summary>Comment scanner un code-barres ?</summary>
+            <div class="answer">
+                <p>Appuie sur <strong>+</strong> puis <strong>Code-barres</strong>. Autorise l'accès caméra si demandé, puis scanne le code-barres du produit. OneFood interroge la base Open Food Facts et te propose le produit avec ses valeurs nutritionnelles.</p>
+                <p>Disponible gratuitement à vie chez OneFood (payant chez MyFitnessPal depuis 2022).</p>
+            </div>
+        </details>
+        <details>
+            <summary>L'IA peut-elle se tromper ?</summary>
+            <div class="answer">
+                <p>Oui. Photo IA est fiable à environ 90% sur des plats simples mais peut hésiter sur :</p>
+                <p>• Plats composites complexes (lasagnes, quiches, etc.)<br>
+                • Ingrédients cachés (sauces, matières grasses ajoutées en cuisson)<br>
+                • Photos floues, sombres ou en contre-jour</p>
+                <p>Vérifie toujours les valeurs proposées avant d'ajouter au journal et ajuste le poids si besoin.</p>
+            </div>
+        </details>
+
+        <h2>💳 Abonnement Premium</h2>
+        <details>
+            <summary>Quel est le prix de OneFood Premium ?</summary>
+            <div class="answer">
+                <p><strong>Annuel</strong> : 14,99 €/an (soit 1,25 €/mois) — meilleure offre, -69% vs mensuel.<br>
+                <strong>Mensuel</strong> : 3,99 €/mois (47,88 €/an au total).</p>
+                <p><strong>Essai gratuit</strong> : 14 jours sans engagement, toutes les fonctions Premium incluses.</p>
+                <p><strong>Plan gratuit à vie</strong> : journal alimentaire illimité, recherche dans 500+ aliments, historique et statistiques.</p>
+            </div>
+        </details>
+        <details>
+            <summary>Comment résilier mon abonnement ?</summary>
+            <div class="answer">
+                <p>Va dans <strong>Paramètres → Mon abonnement → Gérer mon abonnement</strong>. Tu seras redirigé vers :</p>
+                <p>• <strong>Stripe</strong> si tu as souscrit sur le web<br>
+                • L'<strong>App Store</strong> si tu as souscrit sur iPhone/iPad<br>
+                • Le <strong>Play Store</strong> si tu as souscrit sur Android</p>
+                <p>Annulation en 2 clics, immédiate. Tu gardes l'accès Premium jusqu'à la fin de la période déjà payée.</p>
+            </div>
+        </details>
+        <details>
+            <summary>Puis-je faire un don à OneFood ?</summary>
+            <div class="answer">
+                <p>Oui ! Va dans <strong>Paramètres → Soutenir OneFood</strong>. Tu peux donner via Stripe ou PayPal, montant libre à partir de 0,50 €. Aucun engagement, paiement unique. Merci 💝</p>
+            </div>
+        </details>
+
+        <h2>🔒 Données & vie privée</h2>
+        <details>
+            <summary>Mes photos sont-elles stockées ?</summary>
+            <div class="answer">
+                <p><strong>Non.</strong> Les photos sont envoyées à l'API Google Gemini pour analyse puis <strong>immédiatement supprimées</strong> des serveurs OneFood. Google supprime également l'image après traitement (pas de conservation côté Google non plus, selon leur policy commerciale).</p>
+                <p>Aucune photo n'est associée à ton compte ni stockée durablement.</p>
+            </div>
+        </details>
+        <details>
+            <summary>Quelles données sont stockées sur OneFood ?</summary>
+            <div class="answer">
+                <p><strong>Indispensables</strong> : email (auth Firebase), profil (poids, taille, âge, sexe, objectif), journal alimentaire, objectifs macros.</p>
+                <p><strong>Optionnelles</strong> : créature, suivi gym, suppléments, suivi poids, abonnement Stripe.</p>
+                <p>Tout est hébergé sur Cloudflare + Firestore en Europe, conforme RGPD. Voir la <a href="/privacy.html">politique de confidentialité complète</a>.</p>
+            </div>
+        </details>
+        <details>
+            <summary>Comment exporter mes données ?</summary>
+            <div class="answer">
+                <p><strong>Paramètres → Données → Exporter mes données</strong>. Tu reçois un fichier JSON contenant tout ton profil, ton journal, tes recettes et tes objectifs. Conforme à l'article 20 du RGPD (droit à la portabilité).</p>
+            </div>
+        </details>
+        <details>
+            <summary>Comment supprimer mon compte et toutes mes données ?</summary>
+            <div class="answer">
+                <p><strong>Paramètres → Données → Supprimer mon compte</strong>. Tape <strong>SUPPRIMER</strong> en majuscules pour confirmer.</p>
+                <p>Cela efface immédiatement : profil, journal alimentaire, créature, historique, abonnement actif. La suppression est définitive et irréversible. Tes données sont effacées sous 30 jours maximum (durée requise par les régulateurs pour traiter d'éventuels litiges).</p>
+            </div>
+        </details>
+        <details>
+            <summary>Quel est l'âge minimum pour utiliser OneFood ?</summary>
+            <div class="answer">
+                <p>13 ans minimum, conformément au RGPD européen. Cette restriction s'applique à la création de profil et à la souscription Premium.</p>
+                <p>Les utilisateurs entre 13 et 15 ans devraient idéalement obtenir l'accord d'un parent ou tuteur légal.</p>
+            </div>
+        </details>
+
+        <h2>🛠️ Technique</h2>
+        <details>
+            <summary>OneFood fonctionne-t-elle hors ligne ?</summary>
+            <div class="answer">
+                <p><strong>Oui</strong> pour la saisie manuelle, la recherche dans la base locale (500+ aliments) et la consultation du journal du jour.</p>
+                <p><strong>Non</strong> pour : Photo IA, Chat IA, recherche en ligne (Open Food Facts), scan code-barres (besoin de la base produit).</p>
+                <p>Tes ajouts hors ligne sont synchronisés automatiquement dès que tu retrouves le réseau.</p>
+            </div>
+        </details>
+        <details>
+            <summary>L'app rame ou ne charge pas — que faire ?</summary>
+            <div class="answer">
+                <p>1. <strong>Vide le cache</strong> : va sur <a href="/nuke.html">https://1food.fr/nuke.html</a>, ça nettoie tout et recharge.</p>
+                <p>2. <strong>Redémarre l'app</strong> : ferme complètement l'onglet/app et rouvre.</p>
+                <p>3. Si le problème persiste, envoie-nous un email avec le navigateur et l'appareil utilisés.</p>
+            </div>
+        </details>
+        <details>
+            <summary>Comment activer/désactiver les notifications ?</summary>
+            <div class="answer">
+                <p>Va dans <strong>Paramètres → Notifications</strong>. Tu peux activer ou désactiver indépendamment :</p>
+                <p>🍽️ Rappels de repas<br>
+                💊 Compléments<br>
+                🏋️ Séances salle<br>
+                ⚖️ Pesée du poids<br>
+                💧 Hydratation</p>
+                <p>Chaque catégorie a son propre horaire personnalisable.</p>
+            </div>
+        </details>
+
+        <h2>📊 Précision nutritionnelle</h2>
+        <details>
+            <summary>Les calories des aliments sont-elles fiables ?</summary>
+            <div class="answer">
+                <p>OneFood s'appuie sur trois sources de qualité :</p>
+                <p>• <strong>Base curée OneFood</strong> : 500+ aliments français vérifiés contre USDA + Open Food Facts<br>
+                • <strong>Open Food Facts</strong> pour les produits industriels (via scan code-barres)<br>
+                • <strong>USDA</strong> pour l'enrichissement automatique de la Photo IA</p>
+                <p>Les fibres sont comptées à 2 kcal/g (fermentation colique partielle). Marge d'erreur typique sur des aliments simples : ±5%. Sur des plats composites complexes : ±15%.</p>
+            </div>
+        </details>
+        <details>
+            <summary>Comment Photo IA estime-t-elle les quantités ?</summary>
+            <div class="answer">
+                <p>L'IA compare la taille apparente des aliments à une assiette standard (26cm de diamètre) puis applique des portions de référence :</p>
+                <p>• 1 œuf (dur/poché/mollet) = 50g<br>
+                • 1 filet de poulet cuit = 130g<br>
+                • 1 portion de pâtes/riz cuits = 200g<br>
+                • 1 pomme moyenne = 180g<br>
+                • 1 tranche de pain = 30g</p>
+                <p>Tu peux toujours ajuster manuellement le poids après l'analyse avant d'ajouter au journal.</p>
+            </div>
+        </details>
+        <details>
+            <summary>Pourquoi un disclaimer médical ?</summary>
+            <div class="answer">
+                <p>OneFood est un <strong>outil d'information</strong>, pas un avis médical ou diététique professionnel. Les calculs caloriques (BMR/TDEE) sont des estimations basées sur des formules standards qui peuvent ne pas refléter ton métabolisme réel.</p>
+                <p>Si tu as une condition médicale (diabète, grossesse, allaitement, trouble du comportement alimentaire, traitement en cours), consulte un médecin ou un diététicien avant de modifier ton alimentation ou ton activité physique.</p>
+            </div>
+        </details>
+
+        <div class="contact-box">
+            <h3>Tu n'as pas trouvé ta réponse ?</h3>
+            <p>Notre équipe te répond sous 48h ouvrées.</p>
+            <a href="mailto:contact@1food.fr">📧 contact@1food.fr</a>
+        </div>
+
+        <div class="related-links">
+            <a href="/privacy.html">Politique de confidentialité</a>
+            <a href="/terms.html">Conditions d'utilisation</a>
+            <a href="/changelog.html">Nouveautés</a>
+            <a href="/index.html">Retour à l'app</a>
+        </div>
+    </div>
+</body>
+</html>

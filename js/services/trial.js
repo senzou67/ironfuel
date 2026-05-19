@@ -458,6 +458,7 @@ const TrialService = {
 
     // Show upgrade prompt for a locked premium feature
     showFeatureLockedPrompt(featureName) {
+        try { AnalyticsService.logPaywallShown('feature_locked_prompt'); } catch {}
         const featureLabels = {
             creature: 'Créature & Avatar',
             custom_macros: 'Personnalisation des objectifs',
@@ -489,6 +490,7 @@ const TrialService = {
 
     // Show the paywall / subscription screen (full page version)
     showPaywall() {
+        try { AnalyticsService.logPaywallShown('paywall_overlay'); } catch {}
         const content = document.getElementById('page-content');
         content.innerHTML = `
             <div class="paywall-overlay fade-in">

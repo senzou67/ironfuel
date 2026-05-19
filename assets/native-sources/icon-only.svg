@@ -1,0 +1,8 @@
+<!-- Master icon — flat red square + white "1" digit.
+     Source for @capacitor/assets generate. Output: assets/icons/* sizes.
+     Maintain 1024×1024 viewbox so the generated raster sizes stay sharp. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" rx="225" fill="#EF4444"/>
+  <text x="512" y="725" font-family="system-ui,-apple-system,Inter,Arial,sans-serif"
+        font-size="635" font-weight="900" fill="#ffffff" text-anchor="middle">1</text>
+</svg>

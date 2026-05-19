@@ -265,12 +265,15 @@ const CameraPage = {
 
             document.getElementById('camera-loading').style.display = 'none';
             if (foods && foods.length > 0) {
+                try { AnalyticsService.logPhotoIA(true, foods.length); } catch {}
                 this.showResults(foods);
             } else {
+                try { AnalyticsService.logPhotoIA(false, 0, 'no_food_detected'); } catch {}
                 document.getElementById('camera-actions').style.display = 'block';
                 App.showToast('Aucun aliment détecté. Cadre l\'assiette de plus près avec un bon éclairage.');
             }
         } catch (err) {
+            try { AnalyticsService.logPhotoIA(false, 0, err.message?.substring(0, 50) || 'unknown'); } catch {}
             document.getElementById('camera-loading').style.display = 'none';
             document.getElementById('camera-actions').style.display = 'block';
             App.showToast(err.message || 'Erreur — réessaie');

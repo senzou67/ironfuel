@@ -70,6 +70,32 @@ const AnalyticsService = {
         });
     },
 
+    logPaywallShown(source) {
+        // Called whenever the paywall (overlay or settings card) becomes visible.
+        // source: 'paywall_overlay' | 'settings_inline' | 'feature_locked_prompt'
+        this._logEvent('paywall_shown', { source });
+    },
+
+    logPhotoIA(success, foodCount, errorCode) {
+        // Tracks Photo IA reliability — critical for monitoring Gemini quality
+        // over time and detecting regressions after model updates.
+        this._logEvent('photo_ia', {
+            success: !!success,
+            food_count: foodCount || 0,
+            error_code: errorCode || null
+        });
+    },
+
+    logFirstMealLogged() {
+        // Fires exactly once per user (first food added ever).
+        // Used to measure activation rate (signup → first meal).
+        try {
+            if (localStorage.getItem('nutritrack_first_meal_logged')) return;
+            localStorage.setItem('nutritrack_first_meal_logged', String(Date.now()));
+        } catch {}
+        this._logEvent('first_meal_logged', { timestamp: Date.now() });
+    },
+
     logDonation(amount) {
         this._logEvent('donation', { amount: amount, currency: 'EUR' });
     },

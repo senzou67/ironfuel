@@ -135,6 +135,8 @@ const Storage = {
         if (foodEntry.name && foodEntry.calories) {
             this._saveToCommunityDB(foodEntry);
         }
+        // Track activation (first meal logged ever) for analytics — silent if already fired
+        try { if (typeof AnalyticsService !== 'undefined') AnalyticsService.logFirstMealLogged(); } catch {}
         return foodEntry;
     },
 

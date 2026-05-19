@@ -1,0 +1,9 @@
+<!-- Android adaptive icon — FOREGROUND layer.
+     Must fit inside the 66% center safe-zone (i.e. occupy ~676px of the 1024px canvas).
+     The launcher applies the mask AND the background, so this layer is "what the user sees".
+     Transparent background is required. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- "1" sized to comfortably fit the adaptive safe zone (66% center) -->
+  <text x="512" y="650" font-family="system-ui,-apple-system,Inter,Arial,sans-serif"
+        font-size="460" font-weight="900" fill="#ffffff" text-anchor="middle">1</text>
+</svg>
