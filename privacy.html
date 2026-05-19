@@ -28,7 +28,7 @@
     <div class="container">
         <a href="/index.html" class="back-link">&larr; Retour à OneFood</a>
         <h1>Politique de Confidentialité</h1>
-        <p class="date">Dernière mise à jour : 6 avril 2026</p>
+        <p class="date">Dernière mise à jour : 19 mai 2026</p>
 
         <p>OneFood (« nous », « notre ») est une application web progressive (PWA) de suivi nutritionnel et de musculation. La protection de vos données personnelles est une priorité. Cette politique explique comment nous collectons, utilisons et protégeons vos informations conformément au Règlement Général sur la Protection des Données (RGPD — UE 2016/679) et à la loi Informatique et Libertés.</p>
 
@@ -48,7 +48,7 @@
             <tr><td>Journal alimentaire (repas, calories, macros)</td><td>Suivi nutritionnel personnalisé</td><td>Consentement explicite</td></tr>
             <tr><td>Données d'hydratation</td><td>Suivi hydratation quotidienne</td><td>Consentement explicite</td></tr>
             <tr><td>Photos (caméra IA)</td><td>Reconnaissance d'aliments par IA</td><td>Consentement explicite</td></tr>
-            <tr><td>Données de paiement (via Stripe / PayPal)</td><td>Gestion abonnement Premium</td><td>Exécution du contrat</td></tr>
+            <tr><td>Données de paiement (Stripe, PayPal, Apple In-App Purchase, Google Play Billing)</td><td>Gestion abonnement Premium et dons</td><td>Exécution du contrat</td></tr>
             <tr><td>Token FCM (notifications)</td><td>Envoi de notifications push</td><td>Consentement</td></tr>
             <tr><td>Adresse IP (hashée)</td><td>Prévention de fraude (essai gratuit)</td><td>Intérêt légitime</td></tr>
         </table>
@@ -62,12 +62,16 @@
 
         <h2>4. Hébergement et sous-traitants</h2>
         <ul>
-            <li><strong>Cloudflare, Inc.</strong> — Hébergement et CDN — 101 Townsend Street, San Francisco, CA 94107, USA</li>
-            <li><strong>Firebase (Google LLC)</strong> — Base de données, authentification, notifications — 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA</li>
-            <li><strong>Stripe, Inc.</strong> — Traitement des paiements</li>
-            <li><strong>PayPal (Europe) S.à r.l.</strong> — Traitement des paiements</li>
-            <li><strong>Google Gemini AI</strong> — Analyse des photos d'aliments (les images sont envoyées à l'API Google pour reconnaissance, puis supprimées)</li>
+            <li><strong>Cloudflare, Inc.</strong> — Hébergement, CDN et fonctions serverless — 101 Townsend Street, San Francisco, CA 94107, USA</li>
+            <li><strong>Firebase (Google LLC)</strong> — Base de données Firestore, authentification, notifications push (FCM) — 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA</li>
+            <li><strong>Stripe, Inc.</strong> — Traitement des paiements web (abonnements et dons) — 510 Townsend Street, San Francisco, CA 94103, USA</li>
+            <li><strong>PayPal (Europe) S.à r.l. et Cie, S.C.A.</strong> — Traitement des paiements web (dons) — 22-24 Boulevard Royal, L-2449 Luxembourg</li>
+            <li><strong>Apple Inc.</strong> — Traitement des achats in-app sur iOS via Apple In-App Purchase (abonnement Premium) — One Apple Park Way, Cupertino, CA 95014, USA</li>
+            <li><strong>Google LLC</strong> — Traitement des achats in-app sur Android via Google Play Billing (abonnement Premium) — 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA</li>
+            <li><strong>RevenueCat, Inc.</strong> — Plateforme de gestion unifiée des abonnements in-app multi-plateformes (iOS/Android) — 153 Townsend Street, San Francisco, CA 94107, USA</li>
+            <li><strong>Google Gemini AI</strong> (modèle Gemini Vision, Google LLC) — Analyse en temps réel des photos d'aliments pour la fonctionnalité Photo IA. Les images sont transmises à l'API Google uniquement pour la durée de l'analyse (quelques secondes), <strong>ne sont jamais stockées</strong> ni par OneFood ni par Google après traitement, et <strong>ne sont jamais utilisées pour entraîner des modèles d'IA</strong> (conformément aux conditions d'utilisation de l'API Gemini en mode payant)</li>
             <li><strong>OpenFoodFacts</strong> — Base de données alimentaire ouverte (aucune donnée personnelle transmise)</li>
+            <li><strong>Sentry</strong> (Functional Software, Inc.) — Monitoring des erreurs techniques (logs anonymisés, aucune donnée de santé transmise) — 132 Hawthorne Street, San Francisco, CA 94107, USA</li>
         </ul>
 
         <h2>5. Transferts hors Union Européenne</h2>
@@ -77,23 +81,28 @@
         <ul>
             <li><strong>Stockage local (localStorage)</strong> — Vos données sont stockées principalement sur votre appareil. Elles ne quittent pas votre téléphone/ordinateur sauf si vous activez la synchronisation cloud.</li>
             <li><strong>Firebase (Google Cloud)</strong> — Si vous êtes connecté, vos données sont synchronisées sur Firebase Firestore pour permettre l'accès multi-appareils. Les données sont chiffrées en transit (TLS) et au repos.</li>
-            <li><strong>Stripe / PayPal</strong> — Les données de paiement sont gérées exclusivement par Stripe et PayPal. Nous ne stockons jamais vos numéros de carte bancaire.</li>
+            <li><strong>Stripe / PayPal</strong> — Les données de paiement web sont gérées exclusivement par Stripe et PayPal. Nous ne stockons jamais vos numéros de carte bancaire.</li>
+            <li><strong>Apple App Store / Google Play / RevenueCat</strong> — Les achats in-app (abonnement Premium sur iOS et Android) sont traités par les systèmes natifs Apple In-App Purchase et Google Play Billing. RevenueCat sert d'intermédiaire technique pour unifier la gestion des abonnements multi-plateformes (statut, renouvellement, restauration d'achat). Aucune donnée bancaire n'est transmise à OneFood — seul un identifiant d'abonnement anonymisé est conservé pour valider votre statut Premium.</li>
         </ul>
 
         <h2>7. Durée de conservation</h2>
         <ul>
             <li><strong>Données de profil et journal</strong> — Conservées tant que votre compte est actif</li>
-            <li><strong>Photos IA</strong> — Non stockées après analyse (traitement en temps réel uniquement)</li>
-            <li><strong>Données de paiement</strong> — Selon les obligations légales (10 ans pour les données comptables)</li>
-            <li><strong>Données après suppression de compte</strong> — Supprimées sous <strong>30 jours</strong> suivant la demande de suppression</li>
+            <li><strong>Photos IA</strong> — Non stockées après analyse (traitement en temps réel uniquement, durée maximale de rétention chez OneFood et Google Gemini : quelques secondes)</li>
+            <li><strong>Données de paiement</strong> — Conservées par nos sous-traitants (Stripe, PayPal, Apple, Google) selon leurs propres durées et selon les obligations légales (10 ans pour les pièces comptables, article L.123-22 du Code de commerce)</li>
+            <li><strong>Données après suppression de compte</strong> — <strong>Suppression complète garantie sous 30 jours maximum</strong> suivant la demande de suppression. Le profil, le journal alimentaire et les données de santé sont effacés immédiatement de l'application ; la purge des sauvegardes Firebase est finalisée sous 30 jours, conformément aux exigences Apple App Store (§5.1.1.v) et Google Play Developer Program Policies.</li>
         </ul>
+
+        <div class="highlight">
+            <strong>Suppression de compte (SLA 30 jours) :</strong> Vous pouvez supprimer votre compte à tout moment depuis <em>Paramètres → Supprimer mon compte</em>, ou en écrivant à <strong>contact@1food.fr</strong>. Toutes vos données seront définitivement effacées de nos systèmes sous <strong>30 jours maximum</strong>. Aucune réactivation n'est possible après ce délai.
+        </div>
 
         <h2>8. Vos droits (RGPD)</h2>
         <p>Conformément au RGPD, vous disposez des droits suivants :</p>
         <ul>
             <li><strong>Droit d'accès</strong> — Consulter toutes vos données (Paramètres → Exporter)</li>
             <li><strong>Droit de rectification</strong> — Modifier vos informations à tout moment</li>
-            <li><strong>Droit à l'effacement</strong> — Supprimer votre compte et toutes vos données (Paramètres → Supprimer mon compte)</li>
+            <li><strong>Droit à l'effacement</strong> — Supprimer votre compte et toutes vos données depuis <em>Paramètres → Supprimer mon compte</em>. <strong>Effacement complet garanti sous 30 jours maximum.</strong></li>
             <li><strong>Droit à la portabilité</strong> — Exporter vos données en format JSON (Paramètres → Exporter)</li>
             <li><strong>Droit d'opposition</strong> — Désactiver les notifications, refuser le traitement analytique</li>
             <li><strong>Droit de retrait du consentement</strong> — Retirer votre consentement à tout moment sans affecter la licéité du traitement antérieur</li>
