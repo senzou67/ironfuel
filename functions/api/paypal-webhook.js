@@ -47,13 +47,38 @@ export async function onRequestPost(context) {
         const db = getDb(env);
         if (!db) return jsonResponse({ received: true });
 
+        // Idempotency — PayPal retries webhooks. body.id is the unique event
+        // id. create() is atomic and fails with code 6 if already seen.
+        if (body.id) {
+            const eventRef = db.collection('webhook_events').doc(`paypal_${body.id}`);
+            try {
+                await eventRef.create({
+                    provider: 'paypal',
+                    type: eventType,
+                    receivedAt: admin.firestore.FieldValue.serverTimestamp(),
+                    status: 'processing'
+                });
+            } catch (err) {
+                if (err.code === 6 /* ALREADY_EXISTS */) {
+                    return jsonResponse({ received: true, duplicate: true });
+                }
+                console.error('[paypal-webhook] idempotency check failed:', err.message);
+            }
+        }
+
         switch (eventType) {
             case 'BILLING.SUBSCRIPTION.ACTIVATED': {
                 const subId = resource.id;
                 const customId = resource.custom_id;
-                await db.collection('subscriptions').doc(customId || subId).set({
+                // custom_id carries our userId. Without it the doc would
+                // collide on subscriptions/unknown for every anonymous sub.
+                if (!customId) {
+                    console.error('[paypal-webhook] BILLING.SUBSCRIPTION.ACTIVATED sans custom_id — sub', subId);
+                    break;
+                }
+                await db.collection('subscriptions').doc(customId).set({
                     provider: 'paypal', subscriptionId: subId, plan: 'monthly', status: 'active',
-                    activatedAt: admin.firestore.FieldValue.serverTimestamp(), userId: customId || 'unknown'
+                    activatedAt: admin.firestore.FieldValue.serverTimestamp(), userId: customId
                 }, { merge: true });
                 break;
             }

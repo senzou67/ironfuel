@@ -683,51 +683,38 @@ const SettingsPage = {
         try {
             const user = AuthService.getCurrentUser();
 
-            // 1. Delete Firestore data if logged in (main doc + logs subcollection)
-            if (user && typeof SyncService !== 'undefined' && SyncService._projectId) {
+            // 1. Server-side complete deletion via /api/delete-account.
+            // This runs with admin privileges and removes EVERYTHING
+            // (users doc + subcollections, subscriptions, emails,
+            // error_logs, Firebase Auth account) — the client alone
+            // could only delete users/{uid}. Required for Apple §5.1.1.v.
+            if (user) {
                 try {
                     const token = await user.getIdToken();
-                    const baseUrl = `https://firestore.googleapis.com/v1/projects/${SyncService._projectId}/databases/(default)/documents`;
-                    const uid = user.uid;
-
-                    // Delete all logs in subcollection first
-                    try {
-                        const logsRes = await fetch(`${baseUrl}/users/${uid}/logs`, {
-                            headers: { 'Authorization': 'Bearer ' + token }
-                        });
-                        if (logsRes.ok) {
-                            const logsData = await logsRes.json();
-                            const docs = logsData.documents || [];
-                            await Promise.all(docs.map(doc =>
-                                fetch(`${baseUrl}/${doc.name.split('/documents/')[1]}`, {
-                                    method: 'DELETE',
-                                    headers: { 'Authorization': 'Bearer ' + token }
-                                })
-                            ));
-                        }
-                    } catch (e) {}
-
-                    // Delete main user document
-                    await fetch(`${baseUrl}/users/${uid}`, {
-                        method: 'DELETE',
+                    const res = await fetch('/api/delete-account', {
+                        method: 'POST',
                         headers: { 'Authorization': 'Bearer ' + token }
                     });
-                } catch (e) {}
+                    if (!res.ok) {
+                        const data = await res.json().catch(() => ({}));
+                        App.showToast(data.error || 'Échec de la suppression serveur');
+                        return;
+                    }
+                } catch (e) {
+                    App.showToast('Erreur réseau — réessaie ou contacte le support');
+                    return;
+                }
             }
 
             // 2. Clear all local data
             Storage.clearAll();
 
-            // 3. Delete Firebase Auth account
+            // 3. Sign out (the Auth account was deleted server-side above;
+            // signOut clears the local session cleanly)
             if (user) {
                 try {
-                    await user.delete();
-                } catch (e) {
-                    // If requires re-auth, sign out instead
-                    if (e.code === 'auth/requires-recent-login') {
-                        await firebase.auth().signOut();
-                    }
-                }
+                    await firebase.auth().signOut();
+                } catch (e) { /* already gone */ }
             }
 
             Modal.close();

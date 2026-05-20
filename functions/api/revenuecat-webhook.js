@@ -91,6 +91,25 @@ export async function onRequestPost(context) {
     const status = _statusFromEvent(event.type);
     if (!status) return jsonResponse({ ok: true, unknownEvent: event.type });
 
+    // Idempotency — RevenueCat retries some events. event.id is a stable
+    // UUID. create() is atomic and fails with code 6 if already processed.
+    if (event.id) {
+        const eventRef = db.collection('webhook_events').doc(`rc_${event.id}`);
+        try {
+            await eventRef.create({
+                provider: 'revenuecat',
+                type: event.type,
+                receivedAt: admin.firestore.FieldValue.serverTimestamp(),
+                status: 'processed'
+            });
+        } catch (err) {
+            if (err.code === 6 /* ALREADY_EXISTS */) {
+                return jsonResponse({ ok: true, duplicate: true });
+            }
+            console.error('[rc-webhook] idempotency check failed:', err.message);
+        }
+    }
+
     const plan = _planFromProduct(event.product_id);
     const expiresAtMs = event.expiration_at_ms || null;
     const expiresAt = expiresAtMs ? new Date(parseInt(expiresAtMs)) : null;

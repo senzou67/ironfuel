@@ -4,6 +4,17 @@ import { initFirebase, getDb, jsonResponse, errorResponse } from './_shared.js';
 
 const MAX_ERRORS_PER_USER_PER_HOUR = 20; // Prevent spam
 
+// One-way SHA-256 hash of the IP. The privacy policy and Data Safety form
+// both state IP is never stored in clear — so error logs must hash it too.
+async function hashIP(ip, salt) {
+    if (!ip || ip === 'unknown') return 'unknown';
+    const data = new TextEncoder().encode(ip + (salt || 'onefood'));
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return 'ip_' + hashHex.substring(0, 16);
+}
+
 export async function onRequestPost(context) {
     const { env, request } = context;
     initFirebase(env);
@@ -27,7 +38,7 @@ export async function onRequestPost(context) {
             userId: userId ? String(userId).substring(0, 100) : 'anonymous',
             page: page ? String(page).substring(0, 100) : null,
             extra: extra ? JSON.stringify(extra).substring(0, 1000) : null,
-            ip: request.headers.get('cf-connecting-ip') || 'unknown',
+            ip: await hashIP(request.headers.get('cf-connecting-ip'), env.IP_HASH_SALT),
             country: request.headers.get('cf-ipcountry') || 'unknown',
             timestamp: new Date().toISOString(),
             createdAt: new Date()
