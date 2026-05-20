@@ -115,7 +115,7 @@ const DashboardPage = {
         // Download app button if on website (not PWA)
         const downloadBanner = isOnSite ? `
             <div class="card" onclick="DashboardPage._showInstallPrompt()" style="padding:10px 16px;margin:4px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;border:1.5px solid var(--primary);background:var(--primary-light)">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 <div>
                     <div style="font-size:13px;font-weight:700;color:var(--primary)">Installer l'application</div>
                     <div style="font-size:11px;color:var(--text-secondary)">Accès rapide depuis ton écran d'accueil</div>
@@ -157,7 +157,7 @@ const DashboardPage = {
                 <!-- CALORIES & MACROS — EN PREMIER -->
                 <div class="card" style="padding:14px 16px;margin:0 16px 8px;position:relative">
                     <button onclick="DashboardPage.shareStats()" aria-label="Partager mes stats" title="Partager" style="position:absolute;top:10px;right:10px;background:var(--primary-light);border:none;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--primary);z-index:2">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="11.49"/></svg>
+                        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="11.49"/></svg>
                     </button>
                     <div class="circular-progress compact">
                         <canvas id="cal-ring" width="140" height="140"></canvas>
@@ -222,7 +222,7 @@ const DashboardPage = {
                 <div class="quick-actions compact" style="margin:0 16px 8px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
                     <button class="quick-action-btn water-action-btn" onclick="DashboardPage.addWater()" oncontextmenu="event.preventDefault();DashboardPage.addWater(2);return false" style="position:relative;overflow:hidden;display:flex;align-items:center;gap:6px;justify-content:center;z-index:1">
                         <div class="water-fill-bg" style="position:absolute;bottom:0;left:0;width:100%;height:${waterPct}%;background:linear-gradient(180deg,rgba(79,195,247,0.35) 0%,rgba(2,136,209,0.45) 100%);transition:height 0.5s cubic-bezier(0.4,0,0.2,1);z-index:-1;border-radius:0 0 12px 12px">
-                            ${waterPct > 0 ? '<svg style="position:absolute;top:-4px;left:0;width:200%;height:8px;animation:waveMove 2s linear infinite" viewBox="0 0 1200 8" preserveAspectRatio="none"><path d="M0 4C200 0 400 8 600 4C800 0 1000 8 1200 4V8H0Z" fill="rgba(79,195,247,0.4)"/></svg>' : ''}
+                            ${waterPct > 0 ? '<svg aria-hidden="true" style="position:absolute;top:-4px;left:0;width:200%;height:8px;animation:waveMove 2s linear infinite" viewBox="0 0 1200 8" preserveAspectRatio="none"><path d="M0 4C200 0 400 8 600 4C800 0 1000 8 1200 4V8H0Z" fill="rgba(79,195,247,0.4)"/></svg>' : ''}
                         </div>
                         <span class="icon">💧</span>
                         <span style="font-weight:600">${(water * 0.25).toFixed(2).replace(/\.?0+$/, '')}L</span>
@@ -527,7 +527,7 @@ const DashboardPage = {
         if (fill) {
             fill.style.height = pct + '%';
             if (pct > 0 && !fill.querySelector('svg')) {
-                fill.innerHTML = '<svg style="position:absolute;top:-4px;left:0;width:200%;height:8px;animation:waveMove 2s linear infinite" viewBox="0 0 1200 8" preserveAspectRatio="none"><path d="M0 4C200 0 400 8 600 4C800 0 1000 8 1200 4V8H0Z" fill="rgba(79,195,247,0.4)"/></svg>';
+                fill.innerHTML = '<svg aria-hidden="true" style="position:absolute;top:-4px;left:0;width:200%;height:8px;animation:waveMove 2s linear infinite" viewBox="0 0 1200 8" preserveAspectRatio="none"><path d="M0 4C200 0 400 8 600 4C800 0 1000 8 1200 4V8H0Z" fill="rgba(79,195,247,0.4)"/></svg>';
             }
         }
         const spans = btn.querySelectorAll('span');

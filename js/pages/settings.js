@@ -69,7 +69,7 @@ const SettingsPage = {
                     </button>
                     <button class="settings-item" onclick="SettingsPage._editMealDistribution()">
                         <span>📊 Répartition des calories</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                     </button>
                 </div>
 
@@ -84,7 +84,7 @@ const SettingsPage = {
                     <input type="file" id="mfp-csv-input" accept=".csv,text/csv" style="display:none" onchange="SettingsPage._mfpHandleFile(event)">
                     <button class="settings-item" onclick="SettingsPage.clearData()" style="color:var(--danger)">
                         <span>Réinitialiser toutes les données</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2">
+                        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2">
                             <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
                         </svg>
                     </button>
@@ -168,7 +168,7 @@ const SettingsPage = {
                     <div class="settings-group-title">Soutien</div>
                     <button class="settings-item" onclick="SettingsPage.showDonate()">
                         <span>❤️ Soutenir le créateur</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M9 18l6-6-6-6"/>
                         </svg>
                     </button>
@@ -179,7 +179,7 @@ const SettingsPage = {
                     <div class="settings-group-title">Abonnement</div>
                     <button class="settings-item" onclick="SettingsPage._showSubscriptionInfo()">
                         <span>📋 Gérer mon abonnement</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                     </button>
                 </div>
                 ` : ''}
@@ -192,13 +192,13 @@ const SettingsPage = {
                     </div>
                     <button class="settings-item" onclick="SettingsPage.logout()" style="color:var(--danger)">
                         <span>Se déconnecter</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2">
+                        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2">
                             <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
                         </svg>
                     </button>
                     <button class="settings-item" onclick="SettingsPage.deleteAccount()" style="color:var(--danger)">
                         <span>🗑️ Supprimer mon compte</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2">
+                        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2">
                             <circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/>
                         </svg>
                     </button>
@@ -224,11 +224,11 @@ const SettingsPage = {
                     <div class="settings-group-title">Aide</div>
                     <button class="settings-item" onclick="window.open('/faq.html','_blank')">
                         <span>❓ Aide & FAQ</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                     </button>
                     <button class="settings-item" onclick="window.location.href='mailto:contact@1food.fr'">
                         <span>📧 Contacter le support</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                     </button>
                 </div>
 
@@ -236,19 +236,19 @@ const SettingsPage = {
                     <div class="settings-group-title">Légal</div>
                     <button class="settings-item" onclick="window.open('/mentions-legales.html','_blank')">
                         <span>⚖️ Mentions légales</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                     </button>
                     <button class="settings-item" onclick="window.open('/terms.html','_blank')">
                         <span>📄 CGU</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                     </button>
                     <button class="settings-item" onclick="window.open('/privacy.html','_blank')">
                         <span>🔒 Politique de confidentialité</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                     </button>
                     <button class="settings-item" onclick="window.open('/changelog.html','_blank')">
                         <span>📝 Changelog</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                     </button>
                 </div>
             </div>

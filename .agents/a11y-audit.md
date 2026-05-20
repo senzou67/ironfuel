@@ -63,33 +63,25 @@ ciblés sur des points concrets identifiés par scan code.
 
 ## 3. Items restants (hors scope court terme)
 
-### 3.1 SVG décoratifs sans `aria-hidden` dans certains chevrons
-- **Fichiers** : `js/pages/settings.js:72, 175, 220, 244` (chevrons de
-  navigation droite). Ces SVGs sont décoratifs car le bouton parent
-  porte déjà le label.
-- **Sévérité** : 🟡 best-practice (les lecteurs d'écran ignorent souvent
-  ces SVGs inline anyway, mais c'est plus propre)
-- **Effort** : 5 min — `find . -name "*.js" -exec sed -i ...` puis
-  vérification manuelle. À batch-fixer si on touche settings.js pour
-  une autre raison.
+### 3.1 SVG décoratifs sans `aria-hidden` — ✅ FAIT
+- `aria-hidden="true"` ajouté à tous les SVG inline de `settings.js` (13),
+  `profile.js` (6), `dashboard.js` (4) — tous décoratifs (bouton parent
+  porte déjà le label texte).
+- Reste éventuellement d'autres fichiers de pages secondaires (gym,
+  supplements, etc.) — faible priorité, mêmes patterns décoratifs.
 
-### 3.2 Form inputs sans `<label>` explicite
-- **Fichiers** : `js/pages/profile.js:135-313`, `js/pages/customfood.js:19`,
-  divers inputs dans settings.
-- **État actuel** : les inputs ont des `placeholder=` mais pas tous des
-  `<label for>` associés. Certains lecteurs d'écran n'annoncent pas le
-  placeholder.
-- **Sévérité** : 🟠 WCAG 1.3.1 / 3.3.2
-- **Effort** : 1-2h (revue input par input). Compte tenu du volume, à
-  traiter dans un sprint a11y dédié.
+### 3.2 Form inputs sans `<label>` explicite — ✅ FAIT (profile.js)
+- `profile.js` : les 13 `<label class="form-label">` reçoivent un
+  `for="..."` pointant vers l'`id` de l'input (p-name, p-age, g-cal,
+  g-prot, etc.). Lecteurs d'écran annoncent désormais le label.
+- Reste : `customfood.js:19` (input file caché) — moins critique car
+  hors flux principal. À traiter si on touche le fichier.
 
-### 3.3 Annonces ARIA pour les changements de page (SPA)
-- **Issue** : changer de page (navigation client) n'annonce rien aux
-  lecteurs d'écran. Best-practice : mettre à jour le `<h1 id="page-title">`
-  et placer le focus dessus, ou utiliser une live region "Page chargée :
-  {nom}".
-- **Sévérité** : 🟡 best-practice SPA
-- **Effort** : 30 min dans `App.navigate()` (js/app.js).
+### 3.3 Annonces de changement de page (SPA) — ✅ FAIT
+- `App.navigate()` met à jour `aria-label` de `<main>` avec le titre de
+  la page et déplace le focus dessus (sauf si l'utilisateur vient
+  d'activer un élément interactif). Les lecteurs d'écran annoncent
+  désormais le nouveau contexte à chaque navigation.
 
 ### 3.4 Audit automatisé Lighthouse + axe DevTools
 - **Recommandation** : lancer Lighthouse en mode "Accessibility" et

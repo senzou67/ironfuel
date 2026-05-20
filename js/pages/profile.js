@@ -87,27 +87,27 @@ const ProfilePage = {
 
                 <button class="profile-menu-item" onclick="ProfilePage.editProfile()">
                     <span>Informations personnelles</span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
                 <button class="profile-menu-item" onclick="ProfilePage.editGoals()">
                     <span>Objectifs nutritionnels ${TrialService.isFeatureLocked('custom_macros') ? '🔒' : ''}</span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
                 <button class="profile-menu-item" onclick="App.navigate('history')">
                     <span>Historique & statistiques</span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
                 <button class="profile-menu-item" onclick="App.navigate('mealplanner')">
                     <span>📅 Planificateur de repas</span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
                 <button class="profile-menu-item" onclick="App.navigate('settings')">
                     <span>Paramètres</span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
                 <button class="profile-menu-item" onclick="ProfilePage.signOut()" style="color:var(--danger);margin-top:8px">
                     <span>Se déconnecter</span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
                 </button>
             </div>
         `;
@@ -131,17 +131,17 @@ const ProfilePage = {
         Modal.show(`
             <div class="modal-title">Informations personnelles</div>
             <div class="form-group">
-                <label class="form-label">Nom</label>
+                <label class="form-label" for="p-name">Nom</label>
                 <input type="text" class="form-input" id="p-name" value="${profile.name || ''}">
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
                 <div class="form-group">
-                    <label class="form-label">Âge</label>
+                    <label class="form-label" for="p-age">Âge</label>
                     <input type="number" class="form-input" id="p-age" value="${profile.age}" min="13" max="120">
                     <div style="font-size:10px;color:var(--text-secondary);margin-top:4px">Tu dois avoir au moins 13 ans pour utiliser OneFood (RGPD).</div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Sexe</label>
+                    <label class="form-label" for="p-sex">Sexe</label>
                     <select class="form-select" id="p-sex">
                         <option value="male" ${profile.sex === 'male' ? 'selected' : ''}>Homme</option>
                         <option value="female" ${profile.sex === 'female' ? 'selected' : ''}>Femme</option>
@@ -150,16 +150,16 @@ const ProfilePage = {
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
                 <div class="form-group">
-                    <label class="form-label">Taille (cm)</label>
+                    <label class="form-label" for="p-height">Taille (cm)</label>
                     <input type="number" class="form-input" id="p-height" value="${profile.height}" min="100" max="250">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Poids (kg)</label>
+                    <label class="form-label" for="p-weight">Poids (kg)</label>
                     <input type="number" class="form-input" id="p-weight" value="${profile.weight}" step="0.1" min="30" max="300">
                 </div>
             </div>
             <div class="form-group">
-                <label class="form-label">Niveau d'activité</label>
+                <label class="form-label" for="p-activity">Niveau d'activité</label>
                 <select class="form-select" id="p-activity">
                     ${Object.entries(activityLabels).map(([k, v]) =>
                         `<option value="${k}" ${profile.activity === k ? 'selected' : ''}>${v}</option>`
@@ -167,7 +167,7 @@ const ProfilePage = {
                 </select>
             </div>
             <div class="form-group">
-                <label class="form-label">Objectif</label>
+                <label class="form-label" for="p-goal">Objectif</label>
                 <select class="form-select" id="p-goal">
                     ${Object.entries(goalLabels).map(([k, v]) =>
                         `<option value="${k}" ${profile.goal === k ? 'selected' : ''}>${v}</option>`
@@ -287,7 +287,7 @@ const ProfilePage = {
             </div>
 
             <div class="form-group">
-                <label class="form-label">Calories quotidiennes (kcal)</label>
+                <label class="form-label" for="g-cal">Calories quotidiennes (kcal)</label>
                 <input type="number" class="form-input" id="g-cal" value="${goals.calories}" min="800" max="6000"
                     oninput="ProfilePage.onCaloriesChange()">
             </div>
@@ -309,22 +309,22 @@ const ProfilePage = {
             <!-- Macro inputs with percentages -->
             <div class="macro-pct-row">
                 <div class="form-group">
-                    <label class="form-label">Protéines (g) <span class="macro-pct-badge prot" id="pct-prot">${pctProt}%</span></label>
+                    <label class="form-label" for="g-prot">Protéines (g) <span class="macro-pct-badge prot" id="pct-prot">${pctProt}%</span></label>
                     <input type="number" class="form-input" id="g-prot" value="${goals.protein}"
                         oninput="ProfilePage.onMacroChange()">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Glucides (g) <span class="macro-pct-badge carb" id="pct-carbs">${pctCarbs}%</span></label>
+                    <label class="form-label" for="g-carbs">Glucides (g) <span class="macro-pct-badge carb" id="pct-carbs">${pctCarbs}%</span></label>
                     <input type="number" class="form-input" id="g-carbs" value="${goals.carbs}"
                         oninput="ProfilePage.onMacroChange()">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Lipides (g) <span class="macro-pct-badge fat" id="pct-fat">${pctFat}%</span></label>
+                    <label class="form-label" for="g-fat">Lipides (g) <span class="macro-pct-badge fat" id="pct-fat">${pctFat}%</span></label>
                     <input type="number" class="form-input" id="g-fat" value="${goals.fat}"
                         oninput="ProfilePage.onMacroChange()">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Fibres (g) <span class="macro-pct-badge fiber" id="pct-fiber">${pctFiber}%</span></label>
+                    <label class="form-label" for="g-fiber">Fibres (g) <span class="macro-pct-badge fiber" id="pct-fiber">${pctFiber}%</span></label>
                     <input type="number" class="form-input" id="g-fiber" value="${goals.fiber || 25}" min="10" max="100"
                         oninput="ProfilePage.onMacroChange()">
                 </div>
@@ -335,7 +335,7 @@ const ProfilePage = {
             </div>
 
             <div class="form-group">
-                <label class="form-label">Objectif eau par jour</label>
+                <label class="form-label" for="g-water">Objectif eau par jour</label>
                 <select class="form-input" id="g-water">
                     ${[1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5].map(l => {
                         const glasses = l * 4; // 4 glasses of 250ml per liter

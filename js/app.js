@@ -314,6 +314,20 @@ const App = {
         // Scroll to top
         window.scrollTo(0, 0);
 
+        // A11y — announce the page change to screen readers. SPA route
+        // changes are silent otherwise. Moving focus to <main> makes the
+        // assistive tech read the new context (aria-label below).
+        const main = document.getElementById('page-content');
+        if (main) {
+            main.setAttribute('aria-label', 'Page : ' + pageConfig.title);
+            // Only steal focus if it isn't already on an interactive element
+            // the user just activated inside the new page.
+            const active = document.activeElement;
+            if (!active || active === document.body || active.classList.contains('nav-btn')) {
+                main.focus({ preventScroll: true });
+            }
+        }
+
         // Push state
         if (pushState) {
             history.pushState({ page, params }, '', '#' + page);
