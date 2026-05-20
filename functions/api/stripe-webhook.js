@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
 import admin from 'firebase-admin';
 import { initFirebase, getDb, jsonResponse, errorResponse } from './_shared.js';
+import { sendEmail } from './_email.js';
 
 const VALID_PLANS = ['monthly', 'annual', 'lifetime'];
 
@@ -153,7 +154,27 @@ export async function onRequestPost(context) {
                 const subId = obj.subscription;
                 if (db && subId) {
                     const snap = await db.collection('subscriptions').where('stripeSubscriptionId', '==', subId).limit(1).get();
-                    if (!snap.empty) await snap.docs[0].ref.update({ status: 'payment_failed', updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+                    if (!snap.empty) {
+                        await snap.docs[0].ref.update({ status: 'payment_failed', updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+                    }
+                    // Notify the customer so they can update their card before
+                    // Stripe's 7-day retry window closes (graceful no-op if
+                    // RESEND_API_KEY is not configured).
+                    const email = obj.customer_email
+                        || (!snap.empty ? snap.docs[0].data()?.email : null);
+                    if (email) {
+                        await sendEmail(env, {
+                            to: email,
+                            template: 'payment-failed',
+                            data: {
+                                name: obj.customer_name || 'toi',
+                                // App reads ?manage=1 → opens the Stripe billing
+                                // portal fresh (a portal URL embedded directly
+                                // would expire before the email is opened).
+                                updatePaymentUrl: 'https://1food.fr/?manage=1'
+                            }
+                        });
+                    }
                 }
                 break;
             }

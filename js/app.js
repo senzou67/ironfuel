@@ -458,6 +458,24 @@ const App = {
             // Health disclaimer after 1.2s — non-blocking, runs once / re-runs after 90d
             setTimeout(() => this._showHealthDisclaimerIfNeeded(), 1200);
         }
+        // ?manage=1 — deep link from the "payment failed" email. Opens the
+        // Stripe billing portal so the user can update their card.
+        this._handleManageDeepLink();
+    },
+
+    _handleManageDeepLink() {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('manage') !== '1') return;
+            // Clean the URL so a refresh doesn't re-trigger it
+            const clean = window.location.pathname + window.location.hash;
+            window.history.replaceState({}, '', clean);
+            setTimeout(() => {
+                if (typeof SettingsPage !== 'undefined' && SettingsPage.manageSubscription) {
+                    SettingsPage.manageSubscription();
+                }
+            }, 800);
+        } catch (e) { /* no-op */ }
     },
 
     // RGPD consent modal — shown once before any data processing
