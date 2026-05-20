@@ -2,10 +2,18 @@
 
 *Audit 2026-05-19. Périmètre : `functions/api/{stripe,paypal,revenuecat}-webhook.js`.*
 
+## MISE À JOUR 2026-05-19 (commit 46ecb1b)
+
+- **PayPal** : idempotency ajoutée + reject sans `custom_id` ✅
+- **RevenueCat** : idempotency ajoutée ✅
+- **`/api/delete-account`** : créé (résout §4.2) ✅
+- **`create-checkout.js`** : auth durcie (résout §4.1) ✅ (commit a60a418)
+- Reste §2.3 PayPal (signature optionnelle si env absent) — mineur.
+
 ## TL;DR
 
 **Stripe : hardening appliqué** (idempotency, anti-spoof, audit log).
-**PayPal : 4 issues identifiées, à hardener pareil.**
+**PayPal : hardening appliqué** (idempotency + custom_id requis).
 **RevenueCat : 1 issue mineure (idempotency).**
 
 Aucune faille critique exploitable en l'état (signatures vérifiées partout),

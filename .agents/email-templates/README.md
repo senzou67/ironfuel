@@ -3,11 +3,28 @@
 *Conçues 2026-05-19. Templates HTML + plain-text pour les 4 emails
 transactionnels clés du funnel OneFood.*
 
-## TL;DR
+## ⚠️ MISE À JOUR 2026-05-19 — LE WIRING EST FAIT
 
-4 templates prêts à brancher. Aucune infra d'envoi n'existe encore dans
-le repo (`save-email.js` ne fait que stocker en Firestore). Section "Mise
-en service" ci-dessous propose 3 options pour brancher l'envoi.
+L'infra d'envoi a été codée et branchée (commit a380555) :
+- **Source de vérité runtime** : `functions/api/_email-templates.js`
+  (les fichiers `.html`/`.txt` de ce dossier sont des previews navigateur).
+- **Helper** : `functions/api/_email.js` — `sendEmail()` via Resend,
+  no-op gracieux si `RESEND_API_KEY` absent.
+- **`welcome`** : branché dans `save-email.js` (envoi au signup).
+- **`payment-failed`** : branché dans `stripe-webhook.js`.
+- **`trial-ending`** : cron `functions/api/cron-trial-ending.js`.
+- **`win-back`** : cron `functions/api/cron-win-back.js`.
+- **`/api/unsubscribe`** : endpoint RGPD créé.
+
+**Reste à faire (config externe uniquement)** : créer un compte Resend,
+vérifier le domaine `1food.fr` (DKIM/SPF/DMARC), poser `RESEND_API_KEY`
+et `CRON_SECRET` dans Cloudflare, et brancher un scheduler quotidien sur
+les 2 URLs cron. Le reste de ce README documente ces étapes.
+
+## TL;DR (état initial — conservé pour référence)
+
+4 templates prêts à brancher. Section "Mise en service" ci-dessous
+propose 3 options pour brancher l'envoi.
 
 ## Templates inclus
 

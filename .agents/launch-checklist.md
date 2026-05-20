@@ -20,21 +20,37 @@ qui reste hors-repo.*
 
 ---
 
-## 🟠 AVANT LAUNCH — pré-requis raisonnables (1-2 semaines de boulot)
+## 🟠 AVANT LAUNCH — pré-requis raisonnables
 
 ### A. Wiring serveur des features livrées
 
-| # | Action | Source | Effort |
+**✅ Le CODE de cette section est intégralement livré (commits 46ecb1b,
+a380555, 82b0830). Il ne reste que la config externe : clé API Resend,
+DNS, et un scheduler pour les crons.**
+
+| # | Action | État | Reste à ta charge |
 |---|---|---|---|
-| A1 | **Endpoint `/api/delete-account` réel** (admin SDK, complete deletion) | `.agents/webhook-security-review.md` §4.2 + `.agents/a11y-audit.md` | 1-2h |
-| A2 | **Infra envoi emails** (Resend recommandé) + DNS DKIM/SPF/DMARC sur 1food.fr | `.agents/email-templates/README.md` "Option B" | 7h total (templates prêts) |
-| A3 | **Cron quotidien `trial-ending`** — Cloudflare Worker scheduled trigger | `.agents/email-templates/README.md` | 1h |
-| A4 | **Cron quotidien `win-back`** — pareil | idem | 1h |
-| A5 | **Trigger email `welcome` depuis `save-email.js`** | idem | 30 min |
-| A6 | **Trigger email `payment-failed` depuis stripe-webhook.js** | idem | 30 min |
-| A7 | **Hardening PayPal webhook** — pattern idempotency déjà appliqué Stripe à dupliquer | `.agents/webhook-security-review.md` §2 | 30 min |
-| A8 | **Hardening RC webhook** (idempotency seulement) | idem §3 | 15 min |
-| A9 | **Code promo Stripe `RETOUR1MOIS`** — 1 mois Premium offert (sinon retirer du template win-back) | `.agents/email-templates/README.md` | 5 min Stripe Dashboard |
+| A1 | Endpoint `/api/delete-account` (admin SDK, suppression complète) | ✅ CODÉ + testé | rien |
+| A2 | Infra envoi emails (`_email.js` + `_email-templates.js`, provider Resend) | ✅ CODÉ (no-op gracieux sans clé) | créer compte Resend + `RESEND_API_KEY` + DNS DKIM/SPF/DMARC sur 1food.fr |
+| A3 | Cron `trial-ending` (`/api/cron-trial-ending`) | ✅ CODÉ | définir `CRON_SECRET` + brancher un scheduler quotidien (cron-job.org, GitHub Actions…) |
+| A4 | Cron `win-back` (`/api/cron-win-back`) | ✅ CODÉ | idem A3 (même `CRON_SECRET`) |
+| A5 | Email `welcome` au signup (save-email.js) | ✅ CODÉ + wiré | rien (s'active dès que `RESEND_API_KEY` est posée) |
+| A6 | Email `payment-failed` (stripe-webhook.js) | ✅ CODÉ + wiré | rien (idem) |
+| A7 | Hardening PayPal webhook (idempotency) | ✅ CODÉ | rien |
+| A8 | Hardening RC webhook (idempotency) | ✅ CODÉ | rien |
+| A10 | Endpoint `/api/unsubscribe` (RGPD, emails marketing) | ✅ CODÉ | rien |
+| A11 | a11y items 3.1-3.3 (SVG, labels, SPA nav) | ✅ CODÉ | rien |
+| A12 | error-log.js : IP désormais hashée (cohérence privacy) | ✅ CODÉ | rien |
+| A9 | Code promo Stripe `RETOUR1MOIS` (1 mois offert, cité dans le mail win-back) | ⏳ À TOI | créer le coupon dans Stripe Dashboard (5 min) — ou retirer le bloc promo du template |
+
+**Variables d'environnement Cloudflare à créer pour activer A2-A4 :**
+```
+RESEND_API_KEY    # clé API Resend (active welcome + payment-failed + crons)
+CRON_SECRET       # chaîne random 32+ chars (protège les 2 endpoints cron)
+IP_HASH_SALT      # optionnel — salt du hash IP (error-log + trial-check)
+```
+Sans `RESEND_API_KEY`, `sendEmail()` log et skip proprement : rien ne
+casse, les emails ne partent simplement pas.
 
 ### B. Setup natif (post-`cap add android` + `cap add ios`)
 
