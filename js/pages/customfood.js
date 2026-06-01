@@ -1,7 +1,12 @@
 const CustomFoodPage = {
     _photoData: null,
 
-    render() {
+    // Optional params.name pre-fills the name field — used when arriving from
+    // the "Créer cet aliment" CTA in the search results so the user doesn't
+    // re-type what they just searched.
+    render(params = {}) {
+        const prefillName = (params && typeof params.name === 'string') ? params.name : '';
+        const safeName = prefillName.replace(/"/g, '&quot;').replace(/</g, '&lt;');
         const content = document.getElementById('page-content');
         content.innerHTML = `
             <div class="custom-food-container fade-in">
@@ -20,8 +25,8 @@ const CustomFoodPage = {
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Nom de l'aliment *</label>
-                    <input type="text" class="form-input" id="cf-name" placeholder="Ex: Gâteau maison">
+                    <label class="form-label" for="cf-name">Nom de l'aliment *</label>
+                    <input type="text" class="form-input" id="cf-name" placeholder="Ex: Gâteau maison" value="${safeName}"${prefillName ? '' : ' autofocus'}>
                 </div>
 
                 <div class="form-group">
@@ -68,6 +73,15 @@ const CustomFoodPage = {
                 </button>
             </div>
         `;
+        // When arriving with a pre-filled name (search → "Créer cet aliment"),
+        // jump straight to the calories field so the user can start typing
+        // macros immediately. Otherwise focus the name field.
+        if (prefillName) {
+            setTimeout(() => {
+                const cal = document.getElementById('cf-calories');
+                if (cal) cal.focus();
+            }, 50);
+        }
     },
 
     onPhoto(event) {

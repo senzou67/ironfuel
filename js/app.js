@@ -124,7 +124,7 @@ const App = {
         history: { title: 'Historique', render: () => HistoryPage.render(), nav: false },
         profile: { title: 'Profil', render: () => ProfilePage.render(), nav: true },
         settings: { title: 'Paramètres', render: () => SettingsPage.render(), nav: false },
-        customfood: { title: 'Nouvel aliment', render: () => CustomFoodPage.render(), nav: false, cleanup: () => CustomFoodPage.cleanup() },
+        customfood: { title: 'Nouvel aliment', render: (params) => CustomFoodPage.render(params), nav: false, cleanup: () => CustomFoodPage.cleanup() },
         gym: { title: 'Salle', render: () => GymPage.render(), nav: false },
         shop: { title: 'Boutique', render: () => ShopPage.render(), nav: false },
         mealplanner: { title: 'Planificateur', render: () => MealPlannerPage.render(), nav: false },

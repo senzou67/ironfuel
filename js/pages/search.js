@@ -263,25 +263,41 @@ const SearchPage = {
             results = results.filter(f => f.cat === this.currentCategory);
         }
 
-        // Also search cloud community DB (async)
+        // Cloud community DB search runs async into its own dedicated div
+        // (avoids overwriting the OpenFoodFacts results that land just after).
         if (query.length >= 2) {
             this._searchCommunityCloud(query, results.map(r => r.name.toLowerCase()));
         }
+
+        const escQuery = this._escapeHtml(query);
+        // "Créer cet aliment" CTA is ALWAYS rendered (pre-filled with the query),
+        // not only when local results are empty — a near-miss local hit shouldn't
+        // hide the create path. Same for Photo IA / Chat IA fallbacks.
+        const createFooter = `
+            <div style="margin-top:14px;padding:14px;background:var(--surface-alt);border-radius:12px;text-align:center">
+                <div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px">Tu ne trouves pas «&nbsp;${escQuery}&nbsp;» ?</div>
+                <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+                    <button class="btn btn-primary" style="padding:8px 14px;font-size:13px" onclick="SearchPage._createFromQuery()">📝 Créer cet aliment</button>
+                    <button class="btn btn-outline" style="padding:8px 14px;font-size:13px" onclick="App.navigate('camera')">📷 Photo IA</button>
+                    <button class="btn btn-outline" style="padding:8px 14px;font-size:13px" onclick="App.navigate('chat')">💬 Chat IA</button>
+                </div>
+            </div>`;
 
         if (results.length === 0) {
             resultsEl.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-state-icon">😕</div>
-                    <div class="empty-state-text">Aucun aliment local trouve pour "${query}"</div>
-                    <button class="btn btn-primary" onclick="App.navigate('customfood')" style="margin-top:12px">
-                        Créer cet aliment
-                    </button>
+                    <div class="empty-state-text">Aucun aliment local trouvé pour «&nbsp;${escQuery}&nbsp;»</div>
                 </div>
+                ${createFooter}
                 <div id="online-results"></div>
+                <div id="community-results"></div>
             `;
         } else {
-            resultsEl.innerHTML = results.map(food => this.renderResultItem(food)).join('') +
-                '<div id="online-results"></div>';
+            resultsEl.innerHTML = results.map(food => this.renderResultItem(food)).join('')
+                + createFooter
+                + '<div id="online-results"></div>'
+                + '<div id="community-results"></div>';
             // Fetch real food photos in background
             if (typeof FoodImageService !== 'undefined') {
                 FoodImageService.fetchAndRender(results);
@@ -327,7 +343,12 @@ const SearchPage = {
             if (!document.getElementById('online-results')) return;
 
             if (results.length === 0) {
-                onlineEl.innerHTML = '';
+                // Show an explicit "no results" hint instead of silently emptying
+                // the div — users were thinking the online search hadn't run.
+                onlineEl.innerHTML = `
+                    <div style="margin-top:14px;padding:10px 12px;background:var(--surface-alt);border-radius:10px;font-size:12px;color:var(--text-secondary);text-align:center">
+                        Aucun résultat OpenFoodFacts pour «&nbsp;${this._escapeHtml(query)}&nbsp;». Crée l'aliment avec le bouton ci-dessus ou essaie Photo IA.
+                    </div>`;
                 return;
             }
 
@@ -487,6 +508,14 @@ const SearchPage = {
         }
     },
 
+    // Open the custom-food editor with the current search query pre-filled.
+    // Wired to the "Créer cet aliment" button shown under every search result.
+    _createFromQuery() {
+        const input = document.getElementById('search-input');
+        const name = (input && input.value || '').trim();
+        App.navigate('customfood', name ? { name } : {});
+    },
+
     selectOnlineFood(index) {
         const food = this._onlineResults[index];
         if (!food) return;
@@ -512,21 +541,27 @@ const SearchPage = {
             if (!res.ok) return;
             const data = await res.json();
             if (!data.foods || data.foods.length === 0) return;
-            const container = document.getElementById('online-results');
+            // Use the dedicated #community-results div — used to share
+            // #online-results with the OpenFoodFacts handler, which
+            // overwrote whichever finished last.
+            const container = document.getElementById('community-results');
             if (!container) return;
             const newFoods = data.foods.filter(f => !existingNames.includes(f.name.toLowerCase()));
             if (newFoods.length === 0) return;
             this._communityResults = newFoods;
-            container.innerHTML = `<div class="section-header" style="margin-top:12px">COMMUNAUTÉ</div>` +
-                newFoods.map((f, i) => `
-                    <div class="search-result-item" onclick="SearchPage._addCommunityFood(${i})" style="cursor:pointer">
-                        <div class="result-info">
-                            <div class="result-name">🌐 ${_esc(f.name)}</div>
-                            <div class="result-detail">${f.calories} kcal · P:${f.protein}g · G:${f.carbs}g · L:${f.fat}g · Fib:${f.fiber || 0}g${f.votes > 1 ? ' · 👍 ' + f.votes : ''}</div>
+            container.innerHTML = `
+                <div style="margin-top:14px">
+                    <div class="section-header">COMMUNAUTÉ <span class="online-badge" style="background:var(--primary-light);color:var(--primary)">utilisateurs</span></div>
+                    ${newFoods.map((f, i) => `
+                        <div class="search-result-item" onclick="SearchPage._addCommunityFood(${i})" style="cursor:pointer">
+                            <div class="result-info">
+                                <div class="result-name">🌐 ${_esc(f.name)}</div>
+                                <div class="result-detail">${f.calories} kcal · P:${f.protein}g · G:${f.carbs}g · L:${f.fat}g · Fib:${f.fiber || 0}g${f.votes > 1 ? ' · 👍 ' + f.votes : ''}</div>
+                            </div>
+                            <span class="result-calories">${f.calories}</span>
                         </div>
-                        <span class="result-calories">${f.calories}</span>
-                    </div>
-                `).join('') + container.innerHTML;
+                    `).join('')}
+                </div>`;
         } catch {}
     },
 

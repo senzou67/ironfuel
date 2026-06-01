@@ -173,7 +173,7 @@
     <!-- Force cache bust — fetches /version.json DIRECTLY from server bypassing SW -->
     <script>
         (function(){
-            var LOCAL_V = 144; // Must match version.json
+            var LOCAL_V = 145; // Must match version.json
             var lsWorks = true;
             try {
                 localStorage.setItem('_test', '1');
@@ -343,6 +343,12 @@
                 <button class="fab-option" onclick="SearchPage._manageRecipes();App.closeFabMenu()" type="button" aria-label="Gérer mes recettes">
                     <span class="fab-icon" aria-hidden="true">📋</span>
                     <span>Recettes</span>
+                </button>
+            </div>
+            <div style="max-width:320px;margin:0 auto;padding:0 16px 16px">
+                <button class="fab-option" style="width:100%;flex-direction:row;gap:8px;justify-content:center;padding:12px" onclick="App.navigate('customfood');App.closeFabMenu()" type="button" aria-label="Créer un nouvel aliment personnalisé">
+                    <span class="fab-icon" aria-hidden="true" style="font-size:18px">📝</span>
+                    <span>Créer un nouvel aliment</span>
                 </button>
             </div>
         </div>
