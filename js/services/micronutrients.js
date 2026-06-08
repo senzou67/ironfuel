@@ -92,7 +92,11 @@ const MicronutrientService = {
                 // Otherwise estimate from category
                 let cat = entry.category || entry.cat;
                 if (!cat && entry.foodId) {
-                    const dbFood = FoodDB.foods.find(f => f.id === entry.foodId);
+                    // getById() (not the static foods array) so we also pick up
+                    // custom foods — their cat was being lost, which is why
+                    // "Œuf dur" custom showed wildly different micros than
+                    // "Œuf entier" from the DB despite being the same food.
+                    const dbFood = FoodDB.getById(entry.foodId);
                     if (dbFood) cat = dbFood.cat;
                 }
                 // Guess category from food name if still unknown
@@ -240,7 +244,9 @@ const MicronutrientService = {
         } else {
             let cat = entry.category || entry.cat;
             if (!cat && entry.foodId) {
-                const dbFood = typeof FoodDB !== 'undefined' ? FoodDB.foods.find(f => f.id === entry.foodId) : null;
+                // Use getById() — picks up custom foods too (their id is a
+                // string like 'custom_...' that .foods.find() would miss).
+                const dbFood = typeof FoodDB !== 'undefined' ? FoodDB.getById(entry.foodId) : null;
                 if (dbFood) cat = dbFood.cat;
             }
             if (!cat) cat = 'plats';

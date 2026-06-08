@@ -15,11 +15,11 @@ const FoodItem = {
                     ${microBadges}
                 </div>
                 <span class="food-item-calories">${item.calories} kcal</span>
+                <button class="food-item-move" onclick="event.stopPropagation();FoodItem.showMoveModal('${mealType}', ${item.id}, '${dateStr || ''}')" title="Changer de repas" aria-label="Déplacer ${_esc(item.name).replace(/"/g, '&quot;')}" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;font-size:16px;padding:6px;flex-shrink:0">
+                    ↔
+                </button>
                 <button class="food-item-delete" onclick="event.stopPropagation();FoodItem.remove('${mealType}', ${item.id}, '${dateStr || ''}')" title="Supprimer" aria-label="Supprimer ${_esc(item.name).replace(/"/g, '&quot;')}">
                     ✕
-                </button>
-                <button class="food-item-move" onclick="event.stopPropagation();FoodItem.showMoveModal('${mealType}', ${item.id}, '${dateStr || ''}')" title="Changer de repas" aria-label="Déplacer ${_esc(item.name).replace(/"/g, '&quot;')}" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;font-size:14px;padding:4px;margin-right:2px">
-                    ↔
                 </button>
             </div>
         `;

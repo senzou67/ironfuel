@@ -4,9 +4,48 @@ const CustomFoodPage = {
     // Optional params.name pre-fills the name field — used when arriving from
     // the "Créer cet aliment" CTA in the search results so the user doesn't
     // re-type what they just searched.
+    // Re-run the category guess when the user finishes typing the name.
+    // We only override the dropdown if the user hasn't manually changed it
+    // (data-auto="1" → still on the auto-suggested value).
+    _onNameBlur() {
+        const name = (document.getElementById('cf-name')?.value || '').trim();
+        const sel = document.getElementById('cf-category');
+        if (!sel || sel.dataset.auto !== '1') return;
+        const guess = this._guessCategory(name);
+        if (guess && sel.value !== guess) sel.value = guess;
+    },
+
+    // Guess the most likely food category from the food name. The dropdown
+    // used to default to "Fruits" (first option), so a user creating "Œuf dur"
+    // who forgot to change it got fruit-category micronutrients — totally
+    // unrelated to the actual food. This heuristic suggests a sensible
+    // default that the user can still override.
+    _guessCategory(name) {
+        if (!name) return 'plats';
+        const n = String(name).toLowerCase();
+        const rules = [
+            { kw: ['oeuf', 'œuf', 'poulet', 'dinde', 'boeuf', 'bœuf', 'porc', 'jambon', 'lardon', 'viande', 'saucisse', 'steak', 'magret', 'agneau', 'veau'], cat: 'viandes' },
+            { kw: ['saumon', 'thon', 'cabillaud', 'sardine', 'poisson', 'crevette', 'truite', 'maquereau', 'lieu', 'merlu', 'colin'], cat: 'poissons' },
+            { kw: ['yaourt', 'fromage', 'skyr', 'mozzarella', 'lait ', 'crème', 'creme', 'beurre', 'kefir', 'ricotta'], cat: 'laitiers' },
+            { kw: ['pain', 'pâte', 'pates', 'pâtes', 'riz', 'quinoa', 'avoine', 'flocon', 'farine', 'semoule', 'tartine', 'biscotte', 'couscous', 'boulghour', 'sarrasin'], cat: 'feculents' },
+            { kw: ['pomme', 'banane', 'orange', 'fraise', 'raisin', 'mangue', 'kiwi', 'poire', 'abricot', 'cerise', 'pêche', 'peche', 'fruit', 'ananas', 'mûre', 'mure', 'myrtille', 'framboise', 'pastèque', 'pasteque'], cat: 'fruits' },
+            { kw: ['salade', 'carotte', 'tomate', 'courgette', 'haricot vert', 'épinard', 'épinards', 'brocoli', 'poivron', 'oignon', 'concombre', 'légume', 'legume', 'aubergine', 'champignon', 'chou'], cat: 'legumes' },
+            { kw: ['lentille', 'pois chiche', 'haricot rouge', 'haricot blanc', 'soja', 'tofu', 'fève', 'feve'], cat: 'legumineuses' },
+            { kw: ['amande', 'noix', 'noisette', 'cacahuète', 'cacahuete', 'cajou', 'pistache', 'graine'], cat: 'noix' },
+            { kw: ['huile', 'margarine', 'avocat'], cat: 'matieres_grasses' },
+            { kw: ['eau ', 'jus', 'thé', ' the ', 'café', 'cafe', 'bière', 'biere', 'vin', 'boisson', 'coca', 'limonade', 'soda'], cat: 'boissons' },
+            { kw: ['gâteau', 'gateau', 'biscuit', 'chocolat', 'bonbon', 'chips', 'barre'], cat: 'snacks' }
+        ];
+        for (const r of rules) {
+            if (r.kw.some(k => n.includes(k))) return r.cat;
+        }
+        return 'plats';
+    },
+
     render(params = {}) {
         const prefillName = (params && typeof params.name === 'string') ? params.name : '';
         const safeName = prefillName.replace(/"/g, '&quot;').replace(/</g, '&lt;');
+        const guessedCat = this._guessCategory(prefillName);
         const content = document.getElementById('page-content');
         content.innerHTML = `
             <div class="custom-food-container fade-in">
@@ -26,16 +65,17 @@ const CustomFoodPage = {
 
                 <div class="form-group">
                     <label class="form-label" for="cf-name">Nom de l'aliment *</label>
-                    <input type="text" class="form-input" id="cf-name" placeholder="Ex: Gâteau maison" value="${safeName}"${prefillName ? '' : ' autofocus'}>
+                    <input type="text" class="form-input" id="cf-name" placeholder="Ex: Gâteau maison" value="${safeName}"${prefillName ? '' : ' autofocus'} onblur="CustomFoodPage._onNameBlur()">
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Catégorie</label>
-                    <select class="form-select" id="cf-category">
+                    <label class="form-label" for="cf-category">Catégorie</label>
+                    <select class="form-select" id="cf-category" data-auto="1" onchange="this.dataset.auto='0'">
                         ${FoodDB.categories.map(c =>
-                            `<option value="${c.id}">${c.icon} ${c.name}</option>`
+                            `<option value="${c.id}"${c.id === guessedCat ? ' selected' : ''}>${c.icon} ${c.name}</option>`
                         ).join('')}
                     </select>
+                    <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">La catégorie détermine les micro-nutriments estimés (vitamines, minéraux).</div>
                 </div>
 
                 <div class="card" style="margin:16px 0">
