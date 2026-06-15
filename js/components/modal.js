@@ -83,7 +83,9 @@ const Modal = {
     _onDirectInput(pickerId, val) {
         const grams = parseInt(val) || 1;
         const slider = document.getElementById(pickerId);
-        if (slider) slider.value = Math.min(grams, 500);
+        // Honour the slider's real max (dynamic per recipe weight) instead
+        // of the old hardcoded 500.
+        if (slider) slider.value = Math.min(grams, parseInt(slider.max) || 500);
         const input = document.getElementById('modal-grams');
         if (input) input.value = grams;
         const qtyEl = document.getElementById('modal-qty');
@@ -102,7 +104,9 @@ const Modal = {
         const direct = document.getElementById('gram-wheel-direct');
         if (direct) direct.value = grams;
         const slider = document.getElementById('gram-wheel');
-        if (slider) slider.value = Math.min(grams, 500);
+        // Honour the slider's real max (dynamic per recipe weight) instead
+        // of the old hardcoded 500.
+        if (slider) slider.value = Math.min(grams, parseInt(slider.max) || 500);
         const qtyInput = document.getElementById('modal-qty');
         if (qtyInput && this._currentUnitWeight) {
             qtyInput.value = Math.round((grams / this._currentUnitWeight) * 100) / 100;
@@ -296,10 +300,16 @@ const Modal = {
 
     // === WHEEL PICKER HELPER ===
     _renderWheelPicker(currentValue, id) {
+        // Max is dynamic — for recipes the natural weight can exceed 500g
+        // (meal-prep batches), and the user typically wants to scale DOWN
+        // by dividing. We make the natural weight ~75% of slider range so
+        // there's room on both sides to adjust without hitting the rail.
+        const cv = Math.max(1, parseInt(currentValue) || 100);
+        const sliderMax = Math.max(500, Math.ceil(cv * 1.5));
         return `
             <div style="display:flex;align-items:center;gap:10px;padding:8px 0">
-                <input type="range" id="${id}" min="1" max="500" value="${currentValue}" style="flex:1;accent-color:var(--primary)" oninput="Modal._onSliderChange('${id}',this.value)">
-                <input type="number" id="${id}-direct" value="${currentValue}" min="1" max="2000" style="width:65px;padding:8px;text-align:center;font-size:16px;font-weight:700;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text)" oninput="Modal._onDirectInput('${id}',this.value)">
+                <input type="range" id="${id}" min="1" max="${sliderMax}" value="${cv}" style="flex:1;accent-color:var(--primary)" oninput="Modal._onSliderChange('${id}',this.value)">
+                <input type="number" id="${id}-direct" value="${cv}" min="1" max="9999" style="width:65px;padding:8px;text-align:center;font-size:16px;font-weight:700;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text)" oninput="Modal._onDirectInput('${id}',this.value)">
                 <span style="font-size:11px;color:var(--text-secondary)">g</span>
             </div>
         `;
@@ -459,6 +469,10 @@ const Modal = {
         `;
 
         this._currentFoodId = food.id;
+        // Clear the custom-food state so a stale ratio from a previous
+        // showCustomFoodModal call can't bleed into this DB-food modal.
+        this._customFood = null;
+        this._customBaseWeight = null;
         this.show(content);
 
         // Init slider sync
@@ -535,6 +549,13 @@ const Modal = {
 
         this._customFood = foodData;
         this._customBaseWeight = baseWeight;
+        // CRITICAL : reset _currentFoodId. If the user previously viewed
+        // a DB food (which set _currentFoodId = food.id) and now opens a
+        // custom food / recipe, the slider's onChange would route through
+        // updatePreview(_currentFoodId) and recompute macros using the
+        // OLD food at the NEW grams — producing wildly wrong values
+        // (e.g. a 491g recipe showing whey-powder protein numbers).
+        this._currentFoodId = null;
         this.show(content);
 
     },
@@ -559,7 +580,9 @@ const Modal = {
         const directEl = document.getElementById('gram-wheel-direct');
         if (directEl) directEl.value = grams;
         const slider = document.getElementById('gram-wheel');
-        if (slider) slider.value = Math.min(grams, 500);
+        // Honour the slider's real max (dynamic per recipe weight) instead
+        // of the old hardcoded 500.
+        if (slider) slider.value = Math.min(grams, parseInt(slider.max) || 500);
         this.updatePreview(foodId);
     },
 
