@@ -315,6 +315,27 @@ const Modal = {
         `;
     },
 
+    // Recipe portion shortcut : set the gram input + slider so that one
+    // part out of N is selected (e.g. baseWeight=491, n=9 → 54g).
+    // Triggered from the recipe portion buttons / parts input.
+    _setRecipeParts(baseWeight, n) {
+        const parts = Math.max(1, Math.min(100, parseInt(n) || 1));
+        const grams = Math.max(1, Math.round((baseWeight || 100) / parts));
+        const slider = document.getElementById('gram-wheel');
+        const direct = document.getElementById('gram-wheel-direct');
+        const mg = document.getElementById('modal-grams');
+        if (slider) {
+            const max = parseInt(slider.max) || baseWeight || 500;
+            slider.value = Math.min(grams, max);
+        }
+        if (direct) direct.value = grams;
+        if (mg) mg.value = grams;
+        const totalEl = document.getElementById('qty-total');
+        if (totalEl) totalEl.textContent = grams + 'g';
+        if (this._currentFoodId) this.updatePreview(this._currentFoodId);
+        else this.updateCustomPreview();
+    },
+
     _onSliderChange(id, val) {
         const grams = parseInt(val) || 1;
         const direct = document.getElementById(id + '-direct');
@@ -500,9 +521,10 @@ const Modal = {
         const btnText = editMode ? 'Modifier' : isRecipeMode ? `Ajouter à "${recipeName}"` : 'Ajouter au journal';
         const btnAction = editMode ? 'Modal.updateCustomFood()' : 'Modal.addCustomFood()';
 
+        const isFromRecipe = !!foodData.isRecipe;
         const content = `
             <div class="modal-title">${foodData.name}</div>
-            ${foodData.weight_g && !editMode ? `<p style="color:var(--text-secondary);margin-bottom:12px">Poids estim\u00e9 : ${foodData.weight_g}g</p>` : ''}
+            ${foodData.weight_g && !editMode ? `<p style="color:var(--text-secondary);margin-bottom:12px">Poids total recette : ${foodData.weight_g}g</p>` : ''}
             ${!editMode && !isRecipeMode ? `
             <div class="form-group">
                 <label class="form-label">Repas</label>
@@ -513,6 +535,24 @@ const Modal = {
                 </select>
             </div>
             ` : '<input type="hidden" id="modal-meal" value="' + mealType + '">'}
+            ${isFromRecipe ? `
+            <div style="background:var(--surface-alt);border-radius:10px;padding:10px 14px;margin-bottom:8px">
+                <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">Combien de parts veux-tu ajouter ?</div>
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                    <button class="btn btn-outline" style="padding:6px 12px;font-size:13px" onclick="Modal._setRecipeParts(${baseWeight},1)">Recette enti\u00e8re</button>
+                    <button class="btn btn-outline" style="padding:6px 10px;font-size:13px" onclick="Modal._setRecipeParts(${baseWeight},2)">\u00bd</button>
+                    <button class="btn btn-outline" style="padding:6px 10px;font-size:13px" onclick="Modal._setRecipeParts(${baseWeight},3)">\u2153</button>
+                    <button class="btn btn-outline" style="padding:6px 10px;font-size:13px" onclick="Modal._setRecipeParts(${baseWeight},4)">\u00bc</button>
+                    <button class="btn btn-outline" style="padding:6px 10px;font-size:13px" onclick="Modal._setRecipeParts(${baseWeight},6)">\u2159</button>
+                    <button class="btn btn-outline" style="padding:6px 10px;font-size:13px" onclick="Modal._setRecipeParts(${baseWeight},8)">\u215b</button>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:8px">
+                    <span style="font-size:12px;color:var(--text-secondary)">Diviser la recette en</span>
+                    <input type="number" id="recipe-parts" min="1" max="100" placeholder="9" style="width:55px;padding:5px 8px;text-align:center;font-size:14px;font-weight:600;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text)" onchange="Modal._setRecipeParts(${baseWeight},this.value)">
+                    <span style="font-size:12px;color:var(--text-secondary)">parts \u2192 prendre 1 part</span>
+                </div>
+            </div>
+            ` : ''}
             <label class="form-label">Portion</label>
             ${this._renderPortionButtons(foodData.name, baseWeight)}
             <details style="margin-bottom:4px">
@@ -802,6 +842,11 @@ const Modal = {
             fiber: Math.round((this._customFood.fiber || 0) * ratio * 10) / 10,
             barcode: this._customFood.barcode || null,
             source: this._customFood.source || 'custom',
+            // Forward recipe markers so the diary shows the "📋 N aliments"
+            // badge and edits route back to the recipe.
+            isRecipe: this._customFood.isRecipe || false,
+            recipeId: this._customFood.recipeId || null,
+            recipeItems: this._customFood.recipeItems || null,
             micros: this._customFood.micros ? Object.fromEntries(
                 Object.entries(this._customFood.micros).map(([k, v]) => [k, Math.round((v || 0) * ratio * 10) / 10])
             ) : null

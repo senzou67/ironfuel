@@ -575,11 +575,54 @@ const SearchPage = {
     },
 
     _addRecipe(recipeId) {
-        const mealType = this.currentMeal || Storage.getCurrentMealType();
-        Storage.addRecipeToMeal(recipeId, mealType);
         const recipe = Storage.getRecipes().find(r => r.id === recipeId);
-        App.showToast(`📋 ${recipe?.name || 'Recette'} ajoutée !`);
-        App.haptic('success');
+        if (!recipe || !recipe.items.length) {
+            App.showToast('Recette vide');
+            return;
+        }
+        // Aggregate totals (same logic as Storage.addRecipeToMeal, kept here
+        // so we can route through the standard custom-food modal instead).
+        // This gives the user a portion picker + grammage slider + meal +
+        // date controls BEFORE adding, instead of inserting blindly.
+        const totals = recipe.items.reduce((acc, item) => {
+            let fiber = item.fiber || 0;
+            if (!fiber && item.foodId && typeof FoodDB !== 'undefined') {
+                const dbFood = FoodDB.getById(item.foodId);
+                if (dbFood) {
+                    const n = FoodDB.getNutrition(dbFood, item.grams || 100);
+                    fiber = n.fiber || 0;
+                }
+            }
+            acc.calories += item.calories || 0;
+            acc.protein += item.protein || 0;
+            acc.carbs += item.carbs || 0;
+            acc.fat += item.fat || 0;
+            acc.fiber += fiber;
+            acc.grams += item.grams || 0;
+            return acc;
+        }, { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, grams: 0 });
+
+        Modal.showCustomFoodModal({
+            name: '📋 ' + recipe.name,
+            weight_g: Math.max(1, Math.round(totals.grams)) || 100,
+            calories: Math.round(totals.calories),
+            protein: Math.round(totals.protein * 10) / 10,
+            carbs: Math.round(totals.carbs * 10) / 10,
+            fat: Math.round(totals.fat * 10) / 10,
+            fiber: Math.round(totals.fiber * 10) / 10,
+            // Carried through to the journal entry so the diary keeps the
+            // "📋 Recette" badge and the recipe link.
+            isRecipe: true,
+            recipeId: recipe.id,
+            recipeItems: recipe.items.length,
+            source: 'recipe'
+        }, {
+            mealType: this.currentMeal || Storage.getCurrentMealType(),
+            // Use the date the user is currently viewing (yesterday's tab
+            // etc.). Without this, the recipe landed on TODAY no matter
+            // which day was active.
+            dateStr: App._localDateKey(App.getSelectedDate())
+        });
     },
 
     _manageRecipes() {
