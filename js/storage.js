@@ -696,6 +696,15 @@ const Storage = {
     addRecipeToMeal(recipeId, mealType, date) {
         const recipe = this.getRecipes().find(r => r.id === recipeId);
         if (!recipe || !recipe.items.length) return;
+        // Safety net : if no explicit date is given, fall back to the date
+        // the user is currently viewing (yesterday's tab, etc.). Without
+        // this, every recipe landed on today regardless of context — and
+        // a stale client cache that still calls this method directly would
+        // hit the same bug. The proper path is now SearchPage._addRecipe
+        // which routes through Modal.showCustomFoodModal.
+        if (!date && typeof App !== 'undefined' && App.getSelectedDate) {
+            date = App.getSelectedDate();
+        }
         // Aggregate totals (backfill fiber from FoodDB for legacy items missing it)
         const totals = recipe.items.reduce((acc, item) => {
             let fiber = item.fiber || 0;
