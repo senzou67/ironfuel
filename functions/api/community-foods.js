@@ -20,6 +20,27 @@ export async function onRequestGet(context) {
     if (!db) return errorResponse('DB not configured');
 
     const url = new URL(context.request.url);
+
+    // Barcode lookup \u2014 used by the barcode scanner BEFORE hitting Open Food
+    // Facts. If a user previously scanned this product and filled it in,
+    // we serve it from the community DB directly (instant + offline-able)
+    // and avoid the OFF round-trip + their patchy non-FR coverage.
+    const barcode = (url.searchParams.get('barcode') || '').trim();
+    if (barcode) {
+        const snap = await db.collection('community_foods').where('barcode', '==', barcode).limit(1).get();
+        if (snap.empty) return jsonResponse({ food: null });
+        const d = snap.docs[0].data();
+        return jsonResponse({
+            food: {
+                id: snap.docs[0].id,
+                name: d.name, calories: d.calories, protein: d.protein,
+                carbs: d.carbs, fat: d.fat, fiber: d.fiber || 0,
+                grams: d.grams || 100, barcode: d.barcode || null,
+                source: d.source || 'community', votes: d.votes || 0
+            }
+        });
+    }
+
     const query = (url.searchParams.get('q') || '').toLowerCase().trim();
     if (!query || query.length < 2) return jsonResponse({ foods: [] });
 

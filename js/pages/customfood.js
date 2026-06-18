@@ -44,6 +44,8 @@ const CustomFoodPage = {
 
     render(params = {}) {
         const prefillName = (params && typeof params.name === 'string') ? params.name : '';
+        const prefillBarcode = (params && typeof params.barcode === 'string') ? params.barcode.replace(/[^0-9]/g, '') : '';
+        this._pendingBarcode = prefillBarcode || null;
         const safeName = prefillName.replace(/"/g, '&quot;').replace(/</g, '&lt;');
         const guessedCat = this._guessCategory(prefillName);
         const content = document.getElementById('page-content');
@@ -53,6 +55,12 @@ const CustomFoodPage = {
                 <p style="color:var(--text-secondary);font-size:14px;margin-bottom:16px">
                     Ajoutez un aliment personnalisé avec ses macronutriments
                 </p>
+                ${prefillBarcode ? `
+                <div style="background:var(--primary-light);border:1px solid var(--primary);color:var(--primary);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13px;display:flex;align-items:center;gap:8px">
+                    <span aria-hidden="true">📊</span>
+                    <span>Code-barres : <strong>${prefillBarcode}</strong> — ton entrée sera partagée avec la communauté</span>
+                </div>
+                ` : ''}
 
                 <div class="custom-food-photo" id="custom-photo-area">
                     <div class="photo-placeholder" id="photo-placeholder" onclick="document.getElementById('custom-photo-input').click()">
@@ -189,9 +197,34 @@ const CustomFoodPage = {
         if (this._photoData) {
             food.photo = this._photoData;
         }
+        // Persist the barcode (if we arrived from a failed barcode scan)
+        // so the custom food is retrievable by future barcode lookups.
+        if (this._pendingBarcode) food.barcode = this._pendingBarcode;
 
         Storage.addCustomFood(food);
+
+        // Push to the community DB immediately so the next user who scans
+        // this barcode finds it. Without this, the food only goes to the
+        // community DB when the user logs it via addFoodToMeal — which they
+        // might not do straight away.
+        if (this._pendingBarcode) {
+            fetch('/api/community-foods?action=add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name, barcode: this._pendingBarcode,
+                    calories: Math.round(calories),
+                    protein: Math.round(protein * 10) / 10,
+                    carbs: Math.round(carbs * 10) / 10,
+                    fat: Math.round(fat * 10) / 10,
+                    fiber: Math.round(fiber * 10) / 10,
+                    grams: 100, source: 'barcode-manual'
+                })
+            }).catch(() => {});
+        }
+
         this._photoData = null;
+        this._pendingBarcode = null;
 
         App.showSuccessCheck();
         App.showToast(`${name} créé !`);

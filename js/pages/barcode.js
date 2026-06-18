@@ -204,12 +204,48 @@ const BarcodePage = {
         await this.fetchProduct(code);
     },
 
+    // Try the community DB first (instant + bypasses OFF's gaps especially
+    // for non-French products), fall back to Open Food Facts.
+    async _lookupBarcode(code) {
+        // 1) Community DB (cloud)
+        try {
+            const res = await fetch('/api/community-foods?barcode=' + encodeURIComponent(code));
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.food) {
+                    const f = data.food;
+                    return {
+                        name: f.name,
+                        brand: '',
+                        image: '',
+                        serving: (f.grams || 100) + 'g',
+                        nutrition: {
+                            calories: f.calories || 0,
+                            protein: f.protein || 0,
+                            carbs: f.carbs || 0,
+                            fat: f.fat || 0,
+                            fiber: f.fiber || 0,
+                            sugar: 0, salt: 0
+                        },
+                        nutriscore: null,
+                        categories: '',
+                        barcode: code,
+                        _fromCommunity: true
+                    };
+                }
+            }
+        } catch { /* network fail → try OFF */ }
+        // 2) Open Food Facts (existing path)
+        return OpenFoodFactsService.getProduct(code);
+    },
+
     async fetchProduct(code) {
         const loading = document.getElementById('barcode-loading');
         const resultEl = document.getElementById('barcode-result');
 
         try {
-            const product = await OpenFoodFactsService.getProduct(code);
+            const product = await this._lookupBarcode(code);
+            product.barcode = code;
 
             loading.style.display = 'none';
             resultEl.style.display = 'block';
@@ -263,13 +299,20 @@ const BarcodePage = {
         } catch (err) {
             loading.style.display = 'none';
             resultEl.style.display = 'block';
+            const safeCode = String(code).replace(/[^0-9]/g, '');
             resultEl.innerHTML = `
                 <div class="card" style="text-align:center">
-                    <p style="color:var(--danger);margin-bottom:12px">
-                        ${err.message || 'Produit non trouvé'}
+                    <p style="color:var(--danger);margin-bottom:6px;font-weight:600">
+                        Produit ${safeCode} introuvable
                     </p>
-                    <button class="btn btn-primary" onclick="BarcodePage.rescan()">
-                        Réessayer
+                    <p style="color:var(--text-secondary);font-size:13px;margin-bottom:14px">
+                        Ni dans Open Food Facts, ni dans la base communauté. Crée-le manuellement — ton entrée sera partagée avec les autres utilisateurs pour le prochain scan.
+                    </p>
+                    <button class="btn btn-primary" onclick="App.navigate('customfood',{barcode:'${safeCode}'})" style="width:100%;margin-bottom:8px">
+                        📝 Créer cet aliment manuellement
+                    </button>
+                    <button class="btn btn-secondary" onclick="BarcodePage.rescan()" style="width:100%">
+                        Réessayer le scan
                     </button>
                 </div>
             `;
