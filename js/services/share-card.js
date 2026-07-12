@@ -60,8 +60,15 @@ const ShareCard = {
             calories = 0, calorieGoal = 0,
             protein = 0, carbs = 0, fat = 0, fiber = 0,
             streak = 0,
-            dateStr = ''
+            dateStr = '',
+            // Meal mode (optional) — when set, the card is scoped to one
+            // meal instead of the full day: streak badge → meal chip,
+            // subtitle → meal name, progress ring is hidden (no per-meal
+            // goal).
+            mealLabel = '',
+            mealIcon = ''
         } = opts;
+        const isMeal = !!mealLabel;
 
         // Background — vertical red gradient
         const bg = ctx.createLinearGradient(0, 0, 0, H);
@@ -101,7 +108,7 @@ const ShareCard = {
         ctx.fillText('OneFood', 170, 118);
         ctx.fillStyle = 'rgba(255,255,255,0.75)';
         ctx.font = `500 22px ${FSans}`;
-        ctx.fillText('Suivi nutrition & muscu', 170, 146);
+        ctx.fillText(isMeal ? `${mealIcon} ${mealLabel}` : 'Suivi nutrition & muscu', 170, 146);
 
         // User & date row
         ctx.fillStyle = 'rgba(255,255,255,0.92)';
@@ -113,17 +120,23 @@ const ShareCard = {
             ctx.fillText(dateStr, 60, 278);
         }
 
-        // Streak badge (top-right)
-        if (streak > 0) {
-            const bx = W - 60 - 240, by = 210, bw = 240, bh = 74;
+        // Top-right badge — streak on day cards, meal name on meal cards.
+        // Auto-sized to fit the label.
+        if (isMeal || streak > 0) {
+            const label = isMeal
+                ? `${mealIcon} ${mealLabel}`.trim()
+                : `🔥 ${streak} j`;
+            ctx.font = `700 38px ${FSans}`;
+            const textWidth = ctx.measureText(label).width;
+            const bw = Math.max(180, Math.min(360, textWidth + 60));
+            const bx = W - 60 - bw, by = 210, bh = 74;
             this._roundRect(ctx, bx, by, bw, bh, 22);
             ctx.fillStyle = 'rgba(0,0,0,0.28)';
             ctx.fill();
             ctx.fillStyle = '#ffffff';
-            ctx.font = `700 38px ${FSans}`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(`🔥 ${streak} j`, bx + bw / 2, by + bh / 2 + 2);
+            ctx.fillText(label, bx + bw / 2, by + bh / 2 + 2);
         }
 
         // Central calorie ring

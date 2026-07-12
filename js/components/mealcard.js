@@ -28,6 +28,11 @@ const MealCard = {
         const isCollapsed = this._getCollapsed()[mealType];
 
         const headerClick = `MealCard.toggleMeal('${mealType}')`;
+        const hasContent = items.length > 0;
+        const P = Math.round(totals.protein || 0);
+        const G = Math.round(totals.carbs || 0);
+        const L = Math.round(totals.fat || 0);
+        const F = Math.round(totals.fiber || 0);
 
         return `
             <div class="meal-section fade-in${isCollapsed ? ' collapsed' : ''}" id="meal-section-${mealType}">
@@ -35,16 +40,27 @@ const MealCard = {
                     <div class="meal-header-left">
                         <span class="meal-icon" aria-hidden="true">${config.icon}</span>
                         <span class="meal-name">${config.name}</span>
-                        ${items.length > 0 ? `<span class="meal-item-count" style="min-width:16px;text-align:center">${items.length}</span>` : ''}
+                        ${hasContent ? `<span class="meal-item-count" style="min-width:16px;text-align:center">${items.length}</span>` : ''}
                     </div>
                     <div style="display:flex;align-items:center;gap:6px;flex-shrink:1;min-width:0">
+                        ${hasContent ? `<button class="meal-share-btn" onclick="event.stopPropagation();MealCard.shareMeal('${mealType}','${dateStr}')" aria-label="Partager ${config.name}" title="Partager ce repas" style="background:var(--primary-light);border:none;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--primary);flex-shrink:0" type="button">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="11.49"/></svg>
+                        </button>` : ''}
                         ${showAdd ? `<button class="meal-add-btn" onclick="event.stopPropagation();App.navigate('search',{meal:'${mealType}'})" aria-label="Ajouter un aliment au ${config.name}">+</button>` : ''}
                         <span class="meal-calories">${totals.calories} kcal</span>
                         <span class="meal-chevron">›</span>
                     </div>
                 </div>
+                ${hasContent ? `
+                    <div class="meal-macros" style="display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 8px;font-size:11px;color:var(--text-secondary)">
+                        <span class="meal-macro-chip"><strong style="color:var(--protein-color,#3B82F6)">P·${P}g</strong></span>
+                        <span class="meal-macro-chip"><strong style="color:var(--carbs-color,#F59E0B)">G·${G}g</strong></span>
+                        <span class="meal-macro-chip"><strong style="color:var(--fat-color,#EF4444)">L·${L}g</strong></span>
+                        ${F > 0 ? `<span class="meal-macro-chip"><strong style="color:var(--fiber-color,#34D399)">Fib·${F}g</strong></span>` : ''}
+                    </div>
+                ` : ''}
                 <div class="meal-items" id="meal-${mealType}">
-                    ${items.length === 0 ? `
+                    ${!hasContent ? `
                         <div class="food-item" style="justify-content:center;color:var(--text-secondary);font-size:13px;padding:16px">
                             Aucun aliment ajouté
                         </div>
@@ -52,6 +68,46 @@ const MealCard = {
                 </div>
             </div>
         `;
+    },
+
+    async shareMeal(mealType, dateStr) {
+        try {
+            const config = this.getMealConfig(mealType);
+            const date = dateStr ? (() => { const p = dateStr.split('-'); return new Date(p[0], p[1] - 1, p[2]); })() : new Date();
+            const totals = Storage.getMealTotals(mealType, date);
+            const profile = Storage.getProfile() || {};
+            const authUser = (typeof AuthService !== 'undefined') ? AuthService.getCurrentUser() : null;
+            const name = profile.name
+                || (authUser && (authUser.displayName || (authUser.email || '').split('@')[0]))
+                || 'Ton profil';
+            const dateLabel = date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+            if (typeof App !== 'undefined' && App.haptic) App.haptic('light');
+
+            if (typeof ShareCard === 'undefined') {
+                App.showToast('Chargement du partage… réessaie dans 1 s');
+                return;
+            }
+
+            const result = await ShareCard.share({
+                name,
+                dateStr: dateLabel,
+                calories: Math.round(totals.calories || 0),
+                calorieGoal: 0,             // no goal per-meal
+                protein: totals.protein || 0,
+                carbs: totals.carbs || 0,
+                fat: totals.fat || 0,
+                fiber: totals.fiber || 0,
+                streak: 0,                  // hides streak badge
+                mealLabel: config.name,
+                mealIcon: config.icon,
+                text: `${config.icon} ${config.name} : ${Math.round(totals.calories || 0)} kcal sur OneFood`
+            });
+            if (result && result.downloaded) App.showToast('📸 Image téléchargée — partage-la où tu veux');
+        } catch (err) {
+            console.error('shareMeal error', err);
+            App.showToast('Erreur lors du partage');
+        }
     },
 
     toggleMeal(mealType) {
