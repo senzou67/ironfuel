@@ -313,6 +313,53 @@ const DashboardPage = {
             const goals = Storage.getGoals();
             const totals = Storage.getDayTotals();
             const streak = Storage.getStreak() || 0;
+            const profile = Storage.getProfile() || {};
+            const authUser = (typeof AuthService !== 'undefined') ? AuthService.getCurrentUser() : null;
+            const name = profile.name
+                || (authUser && (authUser.displayName || (authUser.email || '').split('@')[0]))
+                || '';
+
+            App.haptic && App.haptic('light');
+
+            // Preferred path : render a Strava/Duolingo-style share card and
+            // share it as an image. Fallback (below) is used if ShareCard is
+            // not loaded yet OR if Canvas image generation fails.
+            if (typeof ShareCard !== 'undefined') {
+                try {
+                    const dateStr = new Date().toLocaleDateString('fr-FR', {
+                        weekday: 'long', day: 'numeric', month: 'long'
+                    });
+                    const cal = Math.round(totals.calories || 0);
+                    const goal = Math.round(goals.calories || 0);
+                    const text = streak > 0
+                        ? `🔥 ${cal} kcal aujourd'hui — ${streak} j de streak sur OneFood`
+                        : `🔥 ${cal} kcal aujourd'hui sur OneFood`;
+                    const result = await ShareCard.share({
+                        name: name || 'Ton profil',
+                        dateStr,
+                        calories: cal,
+                        calorieGoal: goal,
+                        protein: totals.protein || 0,
+                        carbs: totals.carbs || 0,
+                        fat: totals.fat || 0,
+                        fiber: totals.fiber || 0,
+                        streak,
+                        text
+                    });
+                    if (result && result.shared) return;
+                    if (result && result.downloaded) {
+                        App.showToast('📸 Image téléchargée — partage-la où tu veux');
+                        return;
+                    }
+                    if (result && result.cancelled) return;
+                } catch (e) {
+                    console.error('[shareStats] card render failed:', e);
+                    // Fall through to legacy text-share
+                }
+            }
+
+            // Legacy fallback : plain text + URL (used when Web Share can't
+            // handle files and the download fallback also failed).
             const cal = Math.round(totals.calories || 0);
             const goal = Math.round(goals.calories || 0);
             const streakText = streak > 0
@@ -320,20 +367,13 @@ const DashboardPage = {
                 : ' 💪';
             const text = `🔥 Mon suivi OneFood aujourd'hui: ${cal} kcal / ${goal} objectif${streakText}`;
             const url = 'https://1food.fr';
-            const shareData = {
-                title: 'OneFood',
-                text: text,
-                url: url
-            };
-
-            App.haptic && App.haptic('light');
+            const shareData = { title: 'OneFood', text, url };
 
             if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
                 try {
                     await navigator.share(shareData);
                     return;
                 } catch (err) {
-                    // User cancelled or share failed — fall through to clipboard
                     if (err && err.name === 'AbortError') return;
                 }
             } else if (navigator.share) {
@@ -345,13 +385,12 @@ const DashboardPage = {
                 }
             }
 
-            // Fallback: copy to clipboard
+            // Last-resort : copy to clipboard
             const fullText = `${text} ${url}`;
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 await navigator.clipboard.writeText(fullText);
                 App.showToast('📋 Copié dans le presse-papier !');
             } else {
-                // Last-resort fallback using a hidden textarea
                 const ta = document.createElement('textarea');
                 ta.value = fullText;
                 ta.style.position = 'fixed';
