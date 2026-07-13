@@ -112,7 +112,7 @@ const MealCard = {
                 items,
                 text: `${config.icon} ${config.name} : ${Math.round(totals.calories || 0)} kcal sur OneFood`
             });
-            if (result && result.downloaded) App.showToast('📸 Image téléchargée — partage-la où tu veux');
+            // Post-share toast is handled inside ShareCard (see _pendingDownload).
         } catch (err) {
             console.error('shareMeal error', err);
             App.showToast('Erreur lors du partage');

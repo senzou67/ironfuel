@@ -346,12 +346,9 @@ const DashboardPage = {
                         streak,
                         text
                     });
-                    if (result && result.shared) return;
-                    if (result && result.downloaded) {
-                        App.showToast('📸 Image téléchargée — partage-la où tu veux');
-                        return;
-                    }
-                    if (result && result.cancelled) return;
+                    // ShareCard handles all UX (preview modal + toasts).
+                    // We just short-circuit the legacy text fallback.
+                    if (result && (result.shared || result.downloaded || result.cancelled)) return;
                 } catch (e) {
                     console.error('[shareStats] card render failed:', e);
                     // Fall through to legacy text-share

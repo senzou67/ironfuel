@@ -22,30 +22,87 @@ const ShareCard = {
         const blob = await this._renderBlob(opts);
         if (!blob) throw new Error('Impossible de générer l\'image');
         const filename = `onefood-${new Date().toISOString().slice(0, 10)}.jpg`;
-        const file = new File([blob], filename, { type: 'image/jpeg' });
-        const shareData = {
-            title: 'OneFood',
-            text: opts.text || 'Mon suivi nutrition sur OneFood 🔥',
-            files: [file]
-        };
-        if (navigator.canShare && navigator.canShare(shareData) && navigator.share) {
-            try {
-                await navigator.share(shareData);
-                return { shared: true };
-            } catch (err) {
-                if (err && err.name === 'AbortError') return { shared: false, cancelled: true };
+        // Show a preview modal with two explicit paths :
+        //  1. Partager → navigator.share (works for iMessage, WhatsApp,
+        //     Insta, Twitter…). Snapchat is buggy on iOS Web Share and
+        //     often returns a blank screen — so we ALSO expose…
+        //  2. Enregistrer l'image → download to camera roll. User then
+        //     opens Snap directly and picks from photos. Universally
+        //     works for any target app.
+        return this._showPreviewModal(blob, filename, opts);
+    },
+
+    _showPreviewModal(blob, filename, opts) {
+        return new Promise((resolve) => {
+            const url = URL.createObjectURL(blob);
+            const cleanup = () => {
+                setTimeout(() => URL.revokeObjectURL(url), 500);
+                if (typeof Modal !== 'undefined') Modal.close();
+            };
+            const file = new File([blob], filename, { type: 'image/jpeg' });
+            const shareData = {
+                title: 'OneFood',
+                text: opts.text || 'Mon suivi nutrition sur OneFood 🔥',
+                files: [file]
+            };
+            const canFileShare = !!(navigator.canShare && navigator.canShare(shareData) && navigator.share);
+
+            // Store share handlers on the service for the modal's onclick
+            // attributes (Modal.show renders raw HTML — inline handlers
+            // must reach a global).
+            this._pendingShare = async () => {
+                try {
+                    await navigator.share(shareData);
+                    cleanup(); resolve({ shared: true });
+                } catch (err) {
+                    if (err && err.name === 'AbortError') return; // stay in modal
+                    // fallthrough — offer download as backup
+                    this._pendingDownload();
+                }
+            };
+            this._pendingDownload = () => {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                if (typeof App !== 'undefined' && App.showToast) {
+                    App.showToast('📸 Image enregistrée — ouvre l\'app pour la partager');
+                }
+                cleanup(); resolve({ shared: false, downloaded: true });
+            };
+            this._pendingCancel = () => { cleanup(); resolve({ shared: false, cancelled: true }); };
+
+            if (typeof Modal === 'undefined') {
+                // No modal system loaded — just download directly.
+                this._pendingDownload();
+                return;
             }
-        }
-        // Fallback : download for manual share
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 5000);
-        return { shared: false, downloaded: true };
+
+            Modal.show(`
+                <div style="text-align:center">
+                    <div style="font-size:14px;color:var(--text-secondary);margin-bottom:12px">Ton image est prête à partager</div>
+                    <img src="${url}" alt="Preview" style="width:100%;max-width:280px;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,0.5);margin-bottom:16px" />
+                    <div style="display:flex;flex-direction:column;gap:10px">
+                        ${canFileShare ? `
+                            <button class="btn btn-primary" onclick="ShareCard._pendingShare()" style="width:100%;padding:14px;font-size:15px">
+                                📤 Partager (SMS · WhatsApp · Insta · …)
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-outline" onclick="ShareCard._pendingDownload()" style="width:100%;padding:14px;font-size:15px">
+                            📸 Enregistrer dans mes photos
+                        </button>
+                        <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;line-height:1.4">
+                            Pour Snap : enregistre l'image, puis ouvre Snap et sélectionne-la depuis ta galerie.
+                        </div>
+                        <button class="btn btn-secondary" onclick="ShareCard._pendingCancel()" style="width:100%;padding:10px;font-size:13px;margin-top:4px">
+                            Annuler
+                        </button>
+                    </div>
+                </div>
+            `);
+        });
     },
 
     _renderBlob(opts) {
