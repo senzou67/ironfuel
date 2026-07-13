@@ -75,6 +75,14 @@ const MealCard = {
             const config = this.getMealConfig(mealType);
             const date = dateStr ? (() => { const p = dateStr.split('-'); return new Date(p[0], p[1] - 1, p[2]); })() : new Date();
             const totals = Storage.getMealTotals(mealType, date);
+            const log = Storage.getDayLog(date);
+            // Actual food entries logged in this meal — passed to the share
+            // card so the recipient sees the breakdown, not just the total.
+            const items = (log.meals[mealType] || []).map(e => ({
+                name: e.name,
+                grams: e.grams || e.qty || 0,
+                calories: e.calories || 0
+            }));
             const profile = Storage.getProfile() || {};
             const authUser = (typeof AuthService !== 'undefined') ? AuthService.getCurrentUser() : null;
             const name = profile.name
@@ -93,14 +101,15 @@ const MealCard = {
                 name,
                 dateStr: dateLabel,
                 calories: Math.round(totals.calories || 0),
-                calorieGoal: 0,             // no goal per-meal
+                calorieGoal: 0,
                 protein: totals.protein || 0,
                 carbs: totals.carbs || 0,
                 fat: totals.fat || 0,
                 fiber: totals.fiber || 0,
-                streak: 0,                  // hides streak badge
+                streak: 0,
                 mealLabel: config.name,
                 mealIcon: config.icon,
+                items,
                 text: `${config.icon} ${config.name} : ${Math.round(totals.calories || 0)} kcal sur OneFood`
             });
             if (result && result.downloaded) App.showToast('📸 Image téléchargée — partage-la où tu veux');

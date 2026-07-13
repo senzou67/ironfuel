@@ -1,36 +1,42 @@
 // ===== SHARE CARD RENDERER =====
-// Generates a portrait Instagram-story sized card (1080x1350) with the
-// user's daily stats, ready to be shared as an image. Web Share API
-// Level 2 (files) is used when available (iOS 15+, Android modern) —
-// otherwise the image is downloaded and the user can share manually.
+// Generates a portrait 1080x1350 (Instagram feed 4:5) share card.
 //
-// The card is composed in Canvas 2D so no external image assets are
-// required and no network round-trip is needed to generate it.
+// v152 : split red header + dark body so the brand-coloured macros
+// pop against neutral space instead of clashing with a red background.
+// v152 : output JPEG (was PNG) — Snapchat's iOS share sheet renders
+// PNGs from Web Share as a white screen on some product versions;
+// JPEG at q=0.9 also cuts file size ~3-4x which helps every target.
+// v152 : emoji font stack ordered so "Apple Color Emoji" wins for
+// symbols like ☀️ that were dropping to tofu boxes on iOS Canvas.
+// v152 : meal mode can render a foods list (up to 6 items + "+N autres").
 const ShareCard = {
     W: 1080,
     H: 1350,
 
+    // Emoji-first font stack — Canvas 2D on iOS falls back correctly
+    // only if the colour emoji font is listed first for glyphs like ☀️.
+    EMOJI_STACK: "\"Apple Color Emoji\", \"Segoe UI Emoji\", \"Noto Color Emoji\", -apple-system, sans-serif",
+    SANS_STACK:  "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Apple Color Emoji\", \"Segoe UI Emoji\", sans-serif",
+
     async share(opts = {}) {
         const blob = await this._renderBlob(opts);
         if (!blob) throw new Error('Impossible de générer l\'image');
-        const filename = `onefood-${new Date().toISOString().slice(0, 10)}.png`;
-        const file = new File([blob], filename, { type: 'image/png' });
+        const filename = `onefood-${new Date().toISOString().slice(0, 10)}.jpg`;
+        const file = new File([blob], filename, { type: 'image/jpeg' });
         const shareData = {
             title: 'OneFood',
             text: opts.text || 'Mon suivi nutrition sur OneFood 🔥',
             files: [file]
         };
-        // Web Share Level 2 — files
         if (navigator.canShare && navigator.canShare(shareData) && navigator.share) {
             try {
                 await navigator.share(shareData);
                 return { shared: true };
             } catch (err) {
                 if (err && err.name === 'AbortError') return { shared: false, cancelled: true };
-                // fall through to download
             }
         }
-        // Fallback : download the file, user shares manually
+        // Fallback : download for manual share
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -49,7 +55,9 @@ const ShareCard = {
             canvas.height = this.H;
             const ctx = canvas.getContext('2d');
             this._paint(ctx, opts);
-            canvas.toBlob((blob) => resolve(blob), 'image/png', 0.92);
+            // JPEG q=0.9 — universally decoded by every share target,
+            // smaller than PNG, fixes Snapchat's white-screen quirk.
+            canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.9);
         });
     },
 
@@ -61,75 +69,66 @@ const ShareCard = {
             protein = 0, carbs = 0, fat = 0, fiber = 0,
             streak = 0,
             dateStr = '',
-            // Meal mode (optional) — when set, the card is scoped to one
-            // meal instead of the full day: streak badge → meal chip,
-            // subtitle → meal name, progress ring is hidden (no per-meal
-            // goal).
             mealLabel = '',
-            mealIcon = ''
+            mealIcon = '',
+            items = []           // meal mode : array of {name, grams, calories}
         } = opts;
         const isMeal = !!mealLabel;
+        const SANS = this.SANS_STACK;
+        const EMO = this.EMOJI_STACK;
 
-        // Background — vertical red gradient
-        const bg = ctx.createLinearGradient(0, 0, 0, H);
+        // ============ TOP RED HEADER (0 → 340) ============
+        const headerH = 340;
+        const bg = ctx.createLinearGradient(0, 0, 0, headerH);
         bg.addColorStop(0, '#EF4444');
-        bg.addColorStop(1, '#B91C1C');
+        bg.addColorStop(1, '#DC2626');
         ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, W, H);
-
-        // Subtle diagonal shine
-        const shine = ctx.createLinearGradient(0, 0, W, H);
+        ctx.fillRect(0, 0, W, headerH);
+        // Subtle diagonal shine on the header
+        const shine = ctx.createLinearGradient(0, 0, W, headerH);
         shine.addColorStop(0, 'rgba(255,255,255,0.10)');
-        shine.addColorStop(0.5, 'rgba(255,255,255,0)');
-        shine.addColorStop(1, 'rgba(0,0,0,0.15)');
+        shine.addColorStop(1, 'rgba(0,0,0,0.10)');
         ctx.fillStyle = shine;
-        ctx.fillRect(0, 0, W, H);
+        ctx.fillRect(0, 0, W, headerH);
 
-        // Font stack — system default with emoji fallback
-        const F = "800 96px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-        const FSans = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-
-        // Logo "1" tile (rounded white square, red "1")
-        const logoSize = 88;
-        this._roundRect(ctx, 60, 60, logoSize, logoSize, 22);
+        // Logo "1" tile
+        this._roundRect(ctx, 60, 60, 88, 88, 22);
         ctx.fillStyle = '#ffffff';
         ctx.fill();
         ctx.fillStyle = '#EF4444';
-        ctx.font = `800 62px ${FSans}`;
+        ctx.font = `800 62px ${SANS}`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('1', 60 + logoSize / 2, 60 + logoSize / 2 + 3);
+        ctx.fillText('1', 104, 107);
 
         // "OneFood" wordmark
         ctx.textAlign = 'left';
         ctx.textBaseline = 'alphabetic';
         ctx.fillStyle = '#ffffff';
-        ctx.font = `800 46px ${FSans}`;
+        ctx.font = `800 46px ${SANS}`;
         ctx.fillText('OneFood', 170, 118);
-        ctx.fillStyle = 'rgba(255,255,255,0.75)';
-        ctx.font = `500 22px ${FSans}`;
-        ctx.fillText(isMeal ? `${mealIcon} ${mealLabel}` : 'Suivi nutrition & muscu', 170, 146);
 
-        // User & date row
-        ctx.fillStyle = 'rgba(255,255,255,0.92)';
-        ctx.font = `600 30px ${FSans}`;
-        ctx.fillText(name, 60, 240);
-        if (dateStr) {
-            ctx.fillStyle = 'rgba(255,255,255,0.65)';
-            ctx.font = `500 24px ${FSans}`;
-            ctx.fillText(dateStr, 60, 278);
+        // Subtitle
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.font = `500 22px ${SANS}`;
+        if (isMeal) {
+            // Draw emoji separately with emoji-first font so ☀️ etc.
+            // render as colour glyphs, not outline tofu.
+            ctx.font = `500 26px ${EMO}`;
+            ctx.fillText(mealIcon || '🍽️', 170, 148);
+            ctx.font = `600 24px ${SANS}`;
+            ctx.fillText(mealLabel, 210, 148);
+        } else {
+            ctx.fillText('Suivi nutrition & muscu', 170, 146);
         }
 
-        // Top-right badge — streak on day cards, meal name on meal cards.
-        // Auto-sized to fit the label.
-        if (isMeal || streak > 0) {
-            const label = isMeal
-                ? `${mealIcon} ${mealLabel}`.trim()
-                : `🔥 ${streak} j`;
-            ctx.font = `700 38px ${FSans}`;
-            const textWidth = ctx.measureText(label).width;
-            const bw = Math.max(180, Math.min(360, textWidth + 60));
-            const bx = W - 60 - bw, by = 210, bh = 74;
+        // Top-right badge — streak on day cards
+        if (!isMeal && streak > 0) {
+            const label = `🔥 ${streak} j`;
+            ctx.font = `700 38px ${SANS}`;
+            const tw = ctx.measureText(label).width;
+            const bw = Math.max(180, Math.min(360, tw + 60));
+            const bx = W - 60 - bw, by = 90, bh = 74;
             this._roundRect(ctx, bx, by, bw, bh, 22);
             ctx.fillStyle = 'rgba(0,0,0,0.28)';
             ctx.fill();
@@ -137,81 +136,155 @@ const ShareCard = {
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(label, bx + bw / 2, by + bh / 2 + 2);
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'alphabetic';
         }
 
-        // Central calorie ring
-        const cx = W / 2;
-        const cy = 620;
-        const R = 220;
-        const pct = calorieGoal > 0 ? Math.min(1, calories / calorieGoal) : 0;
+        // User & date (bottom of header)
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `700 34px ${SANS}`;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillText(name, 60, 240);
+        if (dateStr) {
+            ctx.fillStyle = 'rgba(255,255,255,0.75)';
+            ctx.font = `500 24px ${SANS}`;
+            ctx.fillText(dateStr, 60, 280);
+        }
 
-        // Track
-        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-        ctx.lineWidth = 28;
-        ctx.beginPath();
-        ctx.arc(cx, cy, R, 0, Math.PI * 2);
+        // ============ DARK BODY (340 → 1350) ============
+        const bodyGrad = ctx.createLinearGradient(0, headerH, 0, H);
+        bodyGrad.addColorStop(0, '#141419');
+        bodyGrad.addColorStop(1, '#0a0a0f');
+        ctx.fillStyle = bodyGrad;
+        ctx.fillRect(0, headerH, W, H - headerH);
+
+        // Calories block — cleaner rectangular card instead of ring
+        // (rings feel arbitrary without a per-meal goal, and the rectangle
+        // leaves more room for the food list below).
+        const kcalY = headerH + 40;
+        const kcalH = 200;
+        this._roundRect(ctx, 60, kcalY, W - 120, kcalH, 24);
+        ctx.fillStyle = 'rgba(255,255,255,0.05)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+        ctx.lineWidth = 1;
         ctx.stroke();
 
-        // Progress
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 28;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.arc(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * pct);
-        ctx.stroke();
-        ctx.lineCap = 'butt';
-
-        // Big calorie number
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#ffffff';
-        ctx.font = `800 140px ${FSans}`;
-        ctx.fillText(String(Math.round(calories)), cx, cy - 20);
-        ctx.font = `600 32px ${FSans}`;
-        ctx.fillStyle = 'rgba(255,255,255,0.85)';
-        ctx.fillText('kcal', cx, cy + 70);
-        if (calorieGoal > 0) {
-            ctx.font = `500 26px ${FSans}`;
-            ctx.fillStyle = 'rgba(255,255,255,0.65)';
-            ctx.fillText(`/ ${Math.round(calorieGoal)} obj.`, cx, cy + 108);
+        ctx.font = `800 120px ${SANS}`;
+        ctx.fillText(String(Math.round(calories)), W / 2, kcalY + kcalH / 2 - 10);
+        ctx.fillStyle = 'rgba(255,255,255,0.65)';
+        ctx.font = `600 26px ${SANS}`;
+        const kcalLabel = calorieGoal > 0
+            ? `kcal · ${Math.round((calories / calorieGoal) * 100)}% de l'objectif`
+            : 'kcal';
+        ctx.fillText(kcalLabel, W / 2, kcalY + kcalH / 2 + 65);
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+
+        // Foods list (meal mode only, up to 6 shown)
+        let macrosY = kcalY + kcalH + 40;
+        if (isMeal && items && items.length > 0) {
+            const listY = kcalY + kcalH + 30;
+            ctx.fillStyle = 'rgba(255,255,255,0.55)';
+            ctx.font = `700 20px ${SANS}`;
+            ctx.fillText('DÉTAIL DU REPAS', 60, listY);
+
+            const maxRows = 6;
+            const rows = items.slice(0, maxRows);
+            const rowH = 62;
+            const y0 = listY + 20;
+            rows.forEach((it, i) => {
+                const y = y0 + i * rowH;
+                // Row separator
+                if (i > 0) {
+                    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(60, y);
+                    ctx.lineTo(W - 60, y);
+                    ctx.stroke();
+                }
+                // Truncate long names — leave ~380px for the right column
+                let nm = (it.name || '').replace(/^📋\s*/, '');
+                ctx.fillStyle = '#ffffff';
+                ctx.font = `600 26px ${SANS}`;
+                const maxNameW = W - 60 - 60 - 340;
+                while (ctx.measureText(nm).width > maxNameW && nm.length > 4) {
+                    nm = nm.slice(0, -1);
+                }
+                if (nm.length < (it.name || '').length) nm = nm.trim() + '…';
+                ctx.fillText(nm, 60, y + 42);
+
+                // Right column : grams · kcal
+                const g = it.grams ? `${Math.round(it.grams)}g` : '';
+                const c = `${Math.round(it.calories || 0)} kcal`;
+                ctx.textAlign = 'right';
+                ctx.fillStyle = 'rgba(255,255,255,0.55)';
+                ctx.font = `500 22px ${SANS}`;
+                ctx.fillText(g, W - 60 - 160, y + 42);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = `700 26px ${SANS}`;
+                ctx.fillText(c, W - 60, y + 42);
+                ctx.textAlign = 'left';
+            });
+            if (items.length > maxRows) {
+                const y = y0 + rows.length * rowH + 8;
+                ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                ctx.font = `500 22px ${SANS}`;
+                ctx.textAlign = 'center';
+                ctx.fillText(`+ ${items.length - maxRows} autre${items.length - maxRows > 1 ? 's' : ''}`, W / 2, y + 20);
+                ctx.textAlign = 'left';
+            }
+            macrosY = y0 + Math.min(rows.length, maxRows) * rowH + (items.length > maxRows ? 44 : 20);
         }
 
-        // Macros row
+        // Macros row — brand colours pop against dark body
         const macros = [
-            { label: 'Prot.', val: protein, unit: 'g' },
-            { label: 'Gluc.', val: carbs,   unit: 'g' },
-            { label: 'Lip.',  val: fat,     unit: 'g' },
-            { label: 'Fib.',  val: fiber,   unit: 'g' }
+            { label: 'Prot.', val: protein, unit: 'g', color: '#60A5FA' },
+            { label: 'Gluc.', val: carbs,   unit: 'g', color: '#F59E0B' },
+            { label: 'Lip.',  val: fat,     unit: 'g', color: '#F87171' },
+            { label: 'Fib.',  val: fiber,   unit: 'g', color: '#34D399' }
         ];
-        const rowY = 990;
-        const rowH = 180;
-        const gap = 20;
+        // Clamp macrosY so we always leave room for the footer (~90px)
+        macrosY = Math.min(macrosY, H - 250);
+        const gap = 16;
         const cellW = (W - 120 - gap * 3) / 4;
+        const rowH = 160;
         macros.forEach((m, i) => {
             const x = 60 + i * (cellW + gap);
-            this._roundRect(ctx, x, rowY, cellW, rowH, 22);
-            ctx.fillStyle = 'rgba(255,255,255,0.14)';
+            this._roundRect(ctx, x, macrosY, cellW, rowH, 20);
+            ctx.fillStyle = 'rgba(255,255,255,0.04)';
+            ctx.fill();
+            // Coloured left accent bar
+            this._roundRect(ctx, x, macrosY, 5, rowH, 3);
+            ctx.fillStyle = m.color;
             ctx.fill();
 
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillStyle = '#ffffff';
-            ctx.font = `800 56px ${FSans}`;
-            ctx.fillText(Math.round(m.val) + m.unit, x + cellW / 2, rowY + 66);
-            ctx.fillStyle = 'rgba(255,255,255,0.75)';
-            ctx.font = `600 26px ${FSans}`;
-            ctx.fillText(m.label, x + cellW / 2, rowY + 130);
+            ctx.fillStyle = m.color;
+            ctx.font = `800 52px ${SANS}`;
+            ctx.fillText(Math.round(m.val) + m.unit, x + cellW / 2, macrosY + 58);
+            ctx.fillStyle = 'rgba(255,255,255,0.62)';
+            ctx.font = `600 24px ${SANS}`;
+            ctx.fillText(m.label, x + cellW / 2, macrosY + 118);
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'alphabetic';
         });
 
         // Footer
         ctx.textAlign = 'center';
         ctx.textBaseline = 'alphabetic';
         ctx.fillStyle = 'rgba(255,255,255,0.85)';
-        ctx.font = `600 30px ${FSans}`;
-        ctx.fillText('1food.fr', W / 2, H - 100);
-        ctx.fillStyle = 'rgba(255,255,255,0.55)';
-        ctx.font = `500 22px ${FSans}`;
-        ctx.fillText('Photo IA · Journal · Recettes · Muscu', W / 2, H - 65);
+        ctx.font = `700 30px ${SANS}`;
+        ctx.fillText('1food.fr', W / 2, H - 80);
+        ctx.fillStyle = 'rgba(255,255,255,0.45)';
+        ctx.font = `500 20px ${SANS}`;
+        ctx.fillText('Photo IA · Journal · Recettes · Muscu', W / 2, H - 48);
     },
 
     _roundRect(ctx, x, y, w, h, r) {
