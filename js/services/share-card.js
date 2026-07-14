@@ -40,62 +40,102 @@ const ShareCard = {
                 if (typeof Modal !== 'undefined') Modal.close();
             };
             const file = new File([blob], filename, { type: 'image/jpeg' });
-            const shareData = {
+            const fileOnly = { files: [file] };
+            // Include the app URL in the text share so recipients see a
+            // tappable link next to the image ("Rejoins-moi sur 1food.fr").
+            // Web Share API supports {text, url, files} — messaging apps
+            // (iMessage, WhatsApp, Insta DM…) render text + URL as a
+            // clickable preview along with the image. If url= isn't
+            // supported (rare), we also embed it in the text as fallback.
+            const APP_URL = 'https://1food.fr';
+            const baseText = opts.text || 'Mon suivi nutrition sur OneFood 🔥';
+            const textWithUrl = `${baseText}\n\nDécouvre l'app : ${APP_URL}`;
+            const withText = {
                 title: 'OneFood',
-                text: opts.text || 'Mon suivi nutrition sur OneFood 🔥',
+                text: textWithUrl,
+                url: APP_URL,
                 files: [file]
             };
-            const canFileShare = !!(navigator.canShare && navigator.canShare(shareData) && navigator.share);
+            const canFileShare = !!(navigator.canShare && navigator.canShare(fileOnly) && navigator.share);
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent || '') && !window.MSStream;
 
-            // Store share handlers on the service for the modal's onclick
-            // attributes (Modal.show renders raw HTML — inline handlers
-            // must reach a global).
+            // Full text share — includes description + app URL so the
+            // recipient sees a tappable "1food.fr" link along with the
+            // image. iOS surfaces app targets (Messages, WhatsApp, Insta,
+            // Twitter…) which all render the URL as a clickable preview.
             this._pendingShare = async () => {
-                try {
-                    await navigator.share(shareData);
-                    cleanup(); resolve({ shared: true });
-                } catch (err) {
-                    if (err && err.name === 'AbortError') return; // stay in modal
-                    // fallthrough — offer download as backup
-                    this._pendingDownload();
+                // Some browsers reject a {text, url, files} triple even
+                // when they support each individually. Try full payload,
+                // then fall back to {text, files} (URL embedded in text).
+                const attempts = [];
+                if (navigator.canShare(withText)) attempts.push(withText);
+                const fallback = { title: 'OneFood', text: textWithUrl, files: [file] };
+                if (navigator.canShare(fallback)) attempts.push(fallback);
+                for (const payload of attempts) {
+                    try {
+                        await navigator.share(payload);
+                        cleanup(); resolve({ shared: true });
+                        return;
+                    } catch (err) {
+                        if (err && err.name === 'AbortError') { return; }
+                        // try next fallback
+                    }
                 }
+                this._pendingSaveToPhotos();
             };
-            this._pendingDownload = () => {
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                if (typeof App !== 'undefined' && App.showToast) {
-                    App.showToast('📸 Image enregistrée — ouvre l\'app pour la partager');
+            // Save-to-Photos flow : on iOS the OS "Save Image" action shows
+            // when the share payload has ONLY the file (no text). This
+            // saves directly to the Photos gallery — from where Snap can
+            // pick the image via its own "+" → Camera Roll. <a download>
+            // was going to Files/Downloads which Snap can't access.
+            this._pendingSaveToPhotos = async () => {
+                if (canFileShare) {
+                    try {
+                        await navigator.share(fileOnly);
+                        if (typeof App !== 'undefined' && App.showToast) {
+                            App.showToast('👉 Choisis « Enregistrer l\'image » dans la feuille');
+                        }
+                        cleanup(); resolve({ shared: false, saved: true });
+                        return;
+                    } catch (err) {
+                        if (err && err.name === 'AbortError') return;
+                    }
                 }
-                cleanup(); resolve({ shared: false, downloaded: true });
+                // Non-iOS or share unavailable — open the image in a new
+                // tab. The browser's native image viewer offers a proper
+                // save action (long-press on iOS, right-click on desktop).
+                window.open(url, '_blank');
+                cleanup(); resolve({ shared: false, opened: true });
             };
             this._pendingCancel = () => { cleanup(); resolve({ shared: false, cancelled: true }); };
 
             if (typeof Modal === 'undefined') {
-                // No modal system loaded — just download directly.
-                this._pendingDownload();
+                // No modal system loaded — best-effort share directly.
+                if (canFileShare) navigator.share(withText).catch(() => window.open(url, '_blank'));
+                else window.open(url, '_blank');
+                resolve({ shared: false });
                 return;
             }
 
             Modal.show(`
                 <div style="text-align:center">
-                    <div style="font-size:14px;color:var(--text-secondary);margin-bottom:12px">Ton image est prête à partager</div>
-                    <img src="${url}" alt="Preview" style="width:100%;max-width:280px;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,0.5);margin-bottom:16px" />
+                    <div style="font-size:14px;color:var(--text-secondary);margin-bottom:8px">Ton image est prête</div>
+                    <img src="${url}" alt="Preview de ta carte OneFood" style="width:100%;max-width:280px;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,0.5);margin-bottom:6px" />
+                    <div style="font-size:11px;color:var(--text-secondary);margin:2px 0 14px;font-style:italic">Astuce iOS : appuie longuement sur l'image ↑</div>
                     <div style="display:flex;flex-direction:column;gap:10px">
                         ${canFileShare ? `
                             <button class="btn btn-primary" onclick="ShareCard._pendingShare()" style="width:100%;padding:14px;font-size:15px">
                                 📤 Partager (SMS · WhatsApp · Insta · …)
                             </button>
                         ` : ''}
-                        <button class="btn btn-outline" onclick="ShareCard._pendingDownload()" style="width:100%;padding:14px;font-size:15px">
-                            📸 Enregistrer dans mes photos
+                        <button class="btn btn-outline" onclick="ShareCard._pendingSaveToPhotos()" style="width:100%;padding:14px;font-size:15px">
+                            📸 Enregistrer dans mes photos${isIOS ? '' : ' / ouvrir en grand'}
                         </button>
-                        <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;line-height:1.4">
-                            Pour Snap : enregistre l'image, puis ouvre Snap et sélectionne-la depuis ta galerie.
-                        </div>
+                        ${isIOS ? `
+                            <div style="font-size:11px;color:var(--text-secondary);line-height:1.5;background:var(--surface-alt);padding:10px 12px;border-radius:10px;text-align:left">
+                                <strong style="color:var(--text)">Pour Snap :</strong> tape « Enregistrer dans mes photos » → dans la feuille iOS qui s'ouvre, choisis <strong>« Enregistrer l'image »</strong>. Puis ouvre Snap et sélectionne l'image depuis ta pellicule.
+                            </div>
+                        ` : ''}
                         <button class="btn btn-secondary" onclick="ShareCard._pendingCancel()" style="width:100%;padding:10px;font-size:13px;margin-top:4px">
                             Annuler
                         </button>
