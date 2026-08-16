@@ -5,6 +5,14 @@ const SyncService = {
     _syncing: false,
     _lastSyncTime: 0,
     _debugLogs: [],
+    // Number of Storage writes not yet confirmed pushed to cloud. Incremented
+    // by _triggerSync (via markDirty) — decremented only after a successful
+    // saveAll. Guards against loadAll() overwriting fresh local writes with
+    // a stale cloud snapshot. Must reach 0 before we accept a remote pull.
+    _pendingWrites: 0,
+    _dirtySnapshot: 0,           // snapshot of _pendingWrites when saveAll starts
+    _debouncedTimer: null,       // deferred autoSync fire when hit during debounce
+    markDirty() { this._pendingWrites++; },
 
     _log(msg, isError) {
         const line = (isError ? '❌ ' : '✅ ') + msg;
@@ -211,6 +219,16 @@ const SyncService = {
 
             this._log('saveAll COMPLETE (' + Object.keys(dataFields).length + ' keys + ' + Object.keys(logs).length + ' logs)');
             this._failCount = 0;
+            // Clear only the writes we captured before pushing — any new
+            // Storage.set() that landed during the network round-trip stays
+            // queued so a subsequent poll can't clobber them.
+            this._pendingWrites = Math.max(0, this._pendingWrites - this._dirtySnapshot);
+            this._dirtySnapshot = 0;
+            // If new writes accumulated during the push, schedule another
+            // sync to flush them.
+            if (this._pendingWrites > 0 && this.autoSync) {
+                setTimeout(() => this.autoSync(), 100);
+            }
         } catch (e) {
             this._log('saveAll FAILED: ' + e.message, true);
             this._failCount = (this._failCount || 0) + 1;
@@ -231,6 +249,18 @@ const SyncService = {
 
         if (!this.isReady()) {
             this._log('loadAll ABORTED — not ready', true);
+            return false;
+        }
+
+        // Refuse to pull while local has unsynced writes — otherwise the
+        // cloud snapshot (which is by definition older than the pending
+        // local writes) would overwrite them. This is the root cause of
+        // "j'ai ajouté un aliment, je change d'écran, il a disparu".
+        if (this._pendingWrites > 0) {
+            this._log('loadAll ABORTED — ' + this._pendingWrites + ' local writes not yet pushed', true);
+            // Flush pending writes first, so the caller can retry the pull
+            // (or the pull becomes moot because the cloud now matches).
+            if (this.autoSync) setTimeout(() => this.autoSync(), 0);
             return false;
         }
 
@@ -328,9 +358,24 @@ const SyncService = {
     // === AUTO-SYNC on key changes ===
     async autoSync() {
         if (!this.isReady()) return;
-        if (Date.now() - this._lastSyncTime < 3000) return; // 3s debounce for instant sync
+        const elapsed = Date.now() - this._lastSyncTime;
+        if (elapsed < 3000) {
+            // In the debounce window — schedule a FOLLOWUP fire so writes
+            // aren't silently swallowed. Previously "return; // 3s debounce"
+            // meant that adding food 2 within 3s of food 1 left food 2
+            // local-only until the next unrelated action nudged autoSync.
+            if (this._debouncedTimer) return;
+            this._debouncedTimer = setTimeout(() => {
+                this._debouncedTimer = null;
+                this.autoSync();
+            }, 3000 - elapsed + 100);
+            return;
+        }
         this._log('autoSync triggered');
-        // Update local sync timestamp
+        // Snapshot pending writes BEFORE we push — saveAll only clears the
+        // dirty flag for the writes it observed. Any Storage.set() that
+        // lands during the network round-trip stays queued.
+        this._dirtySnapshot = this._pendingWrites;
         localStorage.setItem('nutritrack_last_sync_ts', new Date().toISOString());
         await this.saveAll();
     },
@@ -344,12 +389,23 @@ const SyncService = {
         this._pollingInterval = setInterval(() => this._pollForChanges(), 120000); // 120s for multi-device sync
         this._log('Polling started (every 120s)');
 
-        // Also sync when tab becomes visible (instant sync when switching devices/tabs)
+        // Also sync when tab becomes visible (instant sync when switching devices/tabs).
+        // If we backgrounded mid-write, flush pending local changes BEFORE
+        // pulling — otherwise the pull would clobber writes iOS killed
+        // in-flight when it suspended the PWA.
         if (!this._visibilityHandler) {
             this._visibilityHandler = () => {
                 if (!document.hidden && this.isReady()) {
-                    this._log('Tab visible — polling now');
-                    this._pollForChanges();
+                    if (this._pendingWrites > 0) {
+                        this._log('Tab visible — flushing ' + this._pendingWrites + ' pending writes first');
+                        // Reset last-sync-time so autoSync fires immediately
+                        // (skips the 3s debounce that could delay recovery).
+                        this._lastSyncTime = 0;
+                        this.autoSync().then(() => this._pollForChanges());
+                    } else {
+                        this._log('Tab visible — polling now');
+                        this._pollForChanges();
+                    }
                 }
             };
             document.addEventListener('visibilitychange', this._visibilityHandler);

@@ -740,8 +740,12 @@ const Storage = {
     },
 
     _triggerSync() {
-        if (typeof SyncService !== 'undefined' && SyncService.autoSync) {
-            SyncService.autoSync();
+        if (typeof SyncService !== 'undefined') {
+            // Mark the write as pending BEFORE debouncing autoSync — this
+            // guards against a poll pull clobbering it during the debounce
+            // window (loadAll refuses to run while _pendingWrites > 0).
+            if (SyncService.markDirty) SyncService.markDirty();
+            if (SyncService.autoSync) SyncService.autoSync();
         }
     }
 };
