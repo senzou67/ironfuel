@@ -5,6 +5,9 @@ Disallow: /.netlify/
 Disallow: /assets/creatures/
 Disallow: /admin.html
 Disallow: /nuke.html
+Disallow: /audit-report.html
+Disallow: /preview-avatars.html
+Disallow: /preview-creatures.html
 Disallow: /.agents/
 
 Sitemap: https://1food.fr/sitemap.xml
